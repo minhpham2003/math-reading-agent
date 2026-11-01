@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mathematical Reading Agent — Hatcher</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;color:#19283b;background:#f5f7fb}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}header{background:#13243c;color:white;padding:18px max(24px,calc((100vw - 1080px)/2));display:flex;align-items:center;justify-content:space-between}.brand{font-size:15px;font-weight:800;letter-spacing:.02em}.label{font-size:12px;color:#6d7d90;text-transform:uppercase;letter-spacing:.12em;font-weight:700}.wrap{max-width:1080px;margin:40px auto;padding:0 24px}.back{color:#51647c;font-size:14px}.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:22px 0 30px}h1{font-size:36px;letter-spacing:-.05em;margin:7px 0 6px}p{color:#66758a;margin:8px 0;line-height:1.55}.btn{border:0;border-radius:10px;background:#2663c4;color:white;padding:13px 18px;font-weight:700}.btn:hover{background:#174fa8}.ghost{background:#eaf0fa;color:#244b85}.grid{display:grid;grid-template-columns:1.45fr 1fr;gap:20px}.card{background:white;border:1px solid #e2e7ef;border-radius:15px;padding:24px;box-shadow:0 4px 20px #163d6a08}.card h2{margin:0 0 15px;font-size:18px}.session{padding:16px 0;border-top:1px solid #eef1f6;display:flex;justify-content:space-between;gap:12px}.session strong{display:block;margin-bottom:4px}.meta{font-size:13px;color:#728198}.badge{align-self:flex-start;background:#edf5fc;color:#245b8e;border-radius:30px;padding:5px 9px;font-size:12px}.bar{height:9px;background:#e6edf7;border-radius:20px;overflow:hidden;margin:15px 0}.fill{height:100%;background:#4678cf;width:0}.stat{font-size:28px;font-weight:800}.source{padding:14px;background:#f5f8fd;border-radius:10px}.source strong{display:block}.muted{font-size:13px;color:#728198}.notice{margin:18px 0;padding:12px 15px;border-radius:9px;background:#fff8e7;color:#75601b;font-size:13px}.overlay{position:fixed;inset:0;background:#0c1a2d88;display:flex;align-items:center;justify-content:center;padding:18px}.dialog{background:white;border-radius:15px;padding:27px;width:min(100%,490px);box-shadow:0 22px 60px #0004}.dialog h2{margin-top:0}.field{margin-top:17px}.field label{display:block;font-size:13px;font-weight:750;margin-bottom:7px}.field input,.field select{width:100%;border:1px solid #cad5e3;border-radius:8px;padding:11px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}.empty{padding:18px 0;color:#728198}footer{margin:30px 0;color:#8b97a7;font-size:12px}@media(max-width:720px){.grid{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}h1{font-size:30px}}
+</style>
+</head>
+<body>
+<header><span class="brand">∑ &nbsp; Mathematical Reading Agent</span><span style="font-size:13px;opacity:.8">Prototype · S02</span></header>
+<main class="wrap"><div class="back">← Library / Projects / Hatcher</div>
+<div class="hero"><div><div class="label">Book project</div><h1>Algebraic Topology</h1><p>Allen Hatcher · Your reading workspace</p></div><button class="btn" id="newSession">+ New Session</button></div>
+<div class="grid"><section class="card"><h2>Reading sessions</h2><div id="sessions"></div></section>
+<div><section class="card"><div class="label">Your progress</div><div class="stat" id="count">0</div><p>sessions created in this prototype</p><div class="bar"><div class="fill" id="progress"></div></div><div class="muted">Prototype activity · not book completion</div></section>
+<section class="card" style="margin-top:20px"><h2>Project sources</h2><div class="source"><strong>Algebraic Topology — Hatcher</strong><span class="muted">Primary text · PDF not yet connected</span></div><p class="muted">Source management and exact PDF ranges will be implemented later.</p></section></div></div>
+<div class="notice">Design prototype: sessions are saved only in this browser (localStorage). No PDF, AI agent, or cloud database is connected yet.</div>
+<footer>S02 interaction prototype · Dashboard-first project opening</footer></main>
+<div class="overlay" id="overlay" hidden><form class="dialog" id="sessionForm"><h2>New reading session</h2><p>Choose your scope and time. We'll refine planning with S07.</p>
+<div class="field"><label for="title">Session title</label><input id="title" required maxlength="120" placeholder="e.g. Homotopy equivalence"></div>
+<div class="field"><label for="section">Section or reading target</label><input id="section" required placeholder="e.g. Chapter 0, §0.17"></div>
+<div class="row"><div class="field"><label for="first">First printed page</label><input id="first" type="number" min="1" required></div><div class="field"><label for="last">Last printed page</label><input id="last" type="number" min="1" required></div></div>
+<div class="field"><label for="duration">Available time</label><select id="duration"><option value="30">30 minutes</option><option value="60" selected>60 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></div>
+<div class="actions"><button class="btn ghost" type="button" id="cancel">Cancel</button><button class="btn" type="submit">Create session</button></div></form></div>
+<script>
+(function(){
+const key='math-reading-agent:s02:sessions';
+let sessions=[];
+try { const parsed=JSON.parse(localStorage.getItem(key)||'[]'); if(Array.isArray(parsed)) sessions=parsed; } catch(e) { /* ignore invalid local data */ }
+const el=id=>document.getElementById(id), overlay=el('overlay'), form=el('sessionForm');
+function render(){
+el('count').textContent=sessions.length;
+el('progress').style.width=(sessions.length?Math.min(sessions.length*12,100):0)+'%';
+const root=el('sessions');root.replaceChildren();
+if(!sessions.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No reading sessions yet. Create your first one to get started.';root.append(empty);return;}
+sessions.slice().reverse().forEach(s=>{
+const row=document.createElement('div');row.className='session';
+const info=document.createElement('div'), title=document.createElement('strong'), meta=document.createElement('div'), badge=document.createElement('span');
+title.textContent=s.title;meta.className='meta';meta.textContent=s.section+' · pp. '+s.first+'–'+s.last+' · '+s.duration+' min';
+badge.className='badge';badge.textContent='Not started';info.append(title,meta);row.append(info,badge);root.append(row);
+});
+}
+function close(){overlay.hidden=true;form.reset();el('newSession').focus();}
+el('newSession').onclick=()=>{overlay.hidden=false;el('title').focus();};
+el('cancel').onclick=close;overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!overlay.hidden)close();});
+form.addEventListener('submit',e=>{
+e.preventDefault();const first=Number(el('first').value),last=Number(el('last').value);
+if(!Number.isInteger(first)||!Number.isInteger(last)||first<1||last<first){el('last').setCustomValidity('The ending page must be at least the starting page.');el('last').reportValidity();return;}
+el('last').setCustomValidity('');
+sessions.push({id:crypto.randomUUID?.()||String(Date.now()),title:el('title').value.trim(),section:el('section').value.trim(),first,last,duration:Number(el('duration').value),createdAt:new Date().toISOString()});
+try{localStorage.setItem(key,JSON.stringify(sessions));}catch(err){alert('Unable to save locally. Check browser storage permissions.');}
+close();render();
+});
+el('last').addEventListener('input',()=>el('last').setCustomValidity(''));
+render();
+})();
+</script></body></html>
