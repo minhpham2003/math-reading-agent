@@ -32,6 +32,9 @@ Maintain an auditable connection between scenario design, implementation, deploy
 
 Unobserved or unavailable steps must be labelled **Not verified**. No assumed successes.
 
+## Commit-linked revision histories
+Every revision-history entry should provide the date, a concise description of **what actually changed and why**, and a Markdown link to the precise GitHub commit that introduced the change (short SHA as link text). Link decisions to specific code or documentation commits, not just the branch or file. For a change whose current commit SHA is not yet known at write time, add the commit link in a follow-up documentation commit, and retain a link to the file history meanwhile. Distinguish documentation-only changes from feature implementation. Do not invent or guess SHAs. For multi-commit implementations, link each material commit or a reviewable pull request and describe its scope.
+
 ## Decision revisions
 Do not overwrite a past decision without trace. Mark old decision **Superseded**, append a dated revision with reason and replacement ID, and retain its historical text. New decisions receive new IDs.
 
