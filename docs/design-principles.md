@@ -166,3 +166,10 @@ If the answer to several of these questions is no, the feature likely needs to b
 - [References and citations](references-and-citations.md)
 - [Sources and instructions](sources-and-instructions.md)
 
+
+
+## Supplemental principle — Expression before selection
+
+**Natural language is the primary interface for intellectual direction.** Predefined suggested prompts can shape what the reader thinks they should ask; prefer allowing the reader to articulate questions, investigations, and intentions freely. Permanent unobtrusive icons should expose operations, not suggest intellectual goals. An explicit natural-language instruction to perform an operation should invoke the same underlying operation as its UI icon, without requiring the reader to click.
+
+Remove mechanical friction such as manual history copying and recovering reading position, but preserve meaningful cognitive friction: framing mathematical questions, judging explanations, deciding what to pursue, and reviewing summaries. Avoid mandatory rituals or redundant confirmations. Agent suggestions may be useful, but must not seize the direction of inquiry. Distinguish suggestions needing acceptance from explicit reader commands authorizing execution.
