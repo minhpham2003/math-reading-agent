@@ -20,3 +20,5 @@ Updated: 2026-11-01
 - **2026-11-01 — [f92dc8c](https://github.com/minhpham2003/math-reading-agent/commit/f92dc8ca2c520b7b7bdfa677d0d99e9d275fbf11)** — Added explicitly labeled simulated agent message based on the Hatcher Chapter 3 example PDF to the S02 prototype branch. No AI integration or actual PDF viewer was added.
 
 - **2026-11-01 — [2cac0ec](https://github.com/minhpham2003/math-reading-agent/commit/2cac0ecb5c65e64dc9519b01474be893ef1017cd)** — Added minimal per-session actions (⋯) menu with Delete session, confirmation prompt, localStorage removal and re-render to the S02 prototype branch. Source readback passed; browser interaction still unverified.
+
+- **2026-11-01 — [776c8b0](https://github.com/minhpham2003/math-reading-agent/commit/776c8b03c322e1ccf8901591fcdbb98b13d68c35)** — Replaced browser-native session deletion confirmation with an in-page dialog after suppressed native prompts prevented deletion. Prototype branch; browser verification pending.
