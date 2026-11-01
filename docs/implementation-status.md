@@ -7,7 +7,7 @@ Updated: 2026-11-01
 | Scenario | Design | Implementation | Commit | Preview deployment | Browser test | Verified | Next action |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | S02 — Normal new session | Six constraints established | Prototype complete (reader-reported; source location unknown) | Unknown | Unknown | Not independently tested | Not independently verified | Locate prototype implementation and preview; inspect against S02 constraints |
-| S07 — Reasonable reading range | D01 approved; D02 pending | Not started | None for feature | None for feature | Not tested | Not verified | Agree on D02 and remaining decisions, then implement |
+| S07 — Reasonable reading range | D01 and D02 approved; remaining details pending | Not started | None for feature | None for feature | Not tested | Not verified | Agree on remaining design decisions, then implement |
 
 ## Documentation system
 - Workflow: [development-workflow.md](development-workflow.md)
