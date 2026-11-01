@@ -33,3 +33,10 @@ Record concrete execution evidence here, including negative results and limitati
 - **Observed:** GitHub source readback confirms the new label and prompt.
 - **Result:** Source check passed; browser interaction and visual verification not performed.
 - **Deployment:** PR preview workflow [41259445569](https://github.com/minhpham2003/math-reading-agent/actions/runs/41259445569) succeeded for f92dc8c; deployed gh-pages HTML includes simulated prompt. Browser behavior remains unverified.
+
+## V-003 — Per-session deletion (2026-11-01)
+- **Build:** [2cac0ec](https://github.com/minhpham2003/math-reading-agent/commit/2cac0ecb5c65e64dc9519b01474be893ef1017cd), branch `prototype/s02-dashboard`.
+- **Test plan:** Dashboard → open ⋯ for a session → Cancel deletion (session remains) → repeat → Confirm deletion (only selected session disappears) → reload (session stays deleted) → create and open other sessions (regression).
+- **Observed:** GitHub source readback contains action menu, confirmation and localStorage deletion logic.
+- **Result:** Source check passed; browser execution and visual tests not performed.
+- **Deployment:** Preview workflow pending at initial check; verify deployed commit separately.
