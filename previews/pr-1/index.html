@@ -132,7 +132,7 @@ el('acceptPlan').onclick=()=>{
  if(first)first.click();
  const title=first?.querySelector('strong')?.textContent||'the first conceptual unit';
  const intro=el('agentIntro');
- intro.textContent='Your plan is accepted. We’ll begin with '+title+'. As you read, notice how the diagonal map enters the discussion. Explore the passage first; let me know when you are ready to discuss it.';
+ intro.textContent='Your plan is accepted. We’ll begin with '+title+'. Read the highlighted passage, paying attention to the mathematical question motivating this unit. Explore it first; let me know when you are ready to discuss it.';
 };
 el('backToProject').onclick=showDashboard;
 el('togglePlan').onclick=()=>{let v=el('planBody').hidden;el('planBody').hidden=!v;el('togglePlan').setAttribute('aria-expanded',String(v));el('togglePlan').textContent=v?'Collapse ▴':'Expand ▾';};
