@@ -22,6 +22,19 @@ Maintain an auditable connection between scenario design, implementation, deploy
 8. Record evidence, pass/fail results, regressions and limitations.
 9. Update implementation status; never treat a commit or successful deployment as browser verification.
 
+## Requirement classification and implementation traceability
+
+Every scenario decision must identify its requirement type:
+- **Interface (UI):** visible controls, layout, navigation, and presentation.
+- **Agent behavior:** interpretation of reader language, mathematical dialogue policy, proactive suggestions, memory and context use, and agent-initiated actions.
+- **Both:** coordinated UI and agent behavior. Document the UI contract and agent-behavior contract separately.
+
+For each approved decision, include concrete, testable **agent obligations** and/or **interface obligations** as appropriate. Identify what triggers the behavior, what the system must do, what needs reader approval, and what must not happen. Natural-language operation requests and equivalent icon/button actions should have explicit parity requirements when approved.
+
+At implementation time, translate every approved obligation into an implementation checklist and verification case. Track UI and agent behavior **separately** in implementation notes and verification evidence, including whether agent behavior is actually integrated or merely scripted/simulated. A visually working interface does not establish that the agent follows its approved behavioral contract. Mark unimplemented or untested obligations explicitly.
+
+This classification applies to future scenario documents and to S23–S25 decisions when those scenario records are consolidated at closure. Do not mistake a requirement documented in a design record for implemented functionality.
+
 ## Verification vocabulary
 - **Designed**: decision recorded and approved.
 - **Implemented**: code written.
