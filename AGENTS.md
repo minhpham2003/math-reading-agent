@@ -30,6 +30,7 @@ Unless the reader explicitly approves a replacement:
 
 ## Always document work
 - Record scenario decisions in `decisions/Sxx.md` with IDs like `S07-D01`.
+- Format approved choices as **Decision: Option B — Workspace-first analysis**: always include the option letter **and a short descriptive keyword**. Use separate readable paragraphs for decision, alternatives, rationale, approval evidence, and implementation/verification.
 - Update `docs/implementation-status.md` when code or deployment state changes.
 - Update `docs/verification-log.md` with exact tests, actual observations and remaining uncertainty.
 - Include a **clickable link to the exact GitHub commit**, date, and meaningful description in every significant revision-history entry. If the SHA is unknown while creating the change, backfill the link in a subsequent commit; never fabricate a SHA.
