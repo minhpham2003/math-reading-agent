@@ -26,3 +26,10 @@ Record concrete execution evidence here, including negative results and limitati
 ## Pending application verification
 - **S02:** Source implementation and preview not located in the connected documentation repository; cannot claim UI verification.
 - **S07:** No feature code has been implemented; no browser testing has been conducted.
+
+## V-002 — S07 scripted agent preview (2026-11-01)
+- **Code:** [f92dc8c](https://github.com/minhpham2003/math-reading-agent/commit/f92dc8ca2c520b7b7bdfa677d0d99e9d275fbf11) on `prototype/s02-dashboard`.
+- **Expected:** Agent panel contains a clearly labeled scripted cohomology reading prompt, without claiming the uploaded PDF has been analyzed in the browser.
+- **Observed:** GitHub source readback confirms the new label and prompt.
+- **Result:** Source check passed; browser interaction and visual verification not performed.
+- **Deployment:** Check PR preview workflow status before claiming deployed.
