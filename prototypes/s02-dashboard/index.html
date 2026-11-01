@@ -59,6 +59,35 @@ h1,h2,.session strong{color:#eef4ff}
 .scope-assessment{display:grid;grid-template-columns:minmax(130px,36%) 1fr;gap:11px 14px;margin:16px 0}.scope-assessment dt{font-weight:750;color:#e6f0ff}.scope-assessment dd{margin:0;color:#adbed4;line-height:1.5}@media(max-width:600px){.scope-assessment{grid-template-columns:1fr;gap:3px}.scope-assessment dd{margin-bottom:12px}}
 .assumption-chat{margin-top:14px;border-top:1px solid #435a73;padding-top:12px}.assumption-chat textarea{display:block;width:100%;background:#16283d;color:#e7edf7;padding:8px;border:1px solid #55708e;border-radius:8px}.assumption-chat button{margin-top:8px;background:#315f98;color:white;border:0;border-radius:8px;padding:9px}.assumption-chat #correctionReply{margin-top:10px;line-height:1.5;color:#c8dcf6}
 .stage-confirm{margin-top:14px;padding:11px 16px;border:0;border-radius:9px;background:#376aa4;color:#fff;font-weight:700;cursor:pointer}#planStage[hidden]{display:none!important}#agentAssessment[hidden]{display:none!important}
+
+/* S23-S25 tangent interactive prototype */
+.tangent-demo{margin-top:22px;border-top:1px solid #40536c;padding-top:16px}
+.tangent-demo button{border:1px solid #49617f;background:#20344d;color:#e8f2ff;border-radius:8px;padding:7px 10px}
+.tangent-demo button:hover{background:#345376}
+.tangent-demo .primary-t{background:#3268b0;border-color:#477cc4}
+.tangent-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.tangent-note{font-size:12px;color:#a9bad0}
+.tangent-demo .tangent-tree{border:1px solid #364a62;padding:9px;border-radius:10px;margin:8px 0}
+.tangent-tree button{border:0;background:transparent;text-align:left;display:block;width:100%;padding:5px 7px}
+.tangent-tree .selected-t{background:#2d4765}
+.tangent-chat{max-height:320px;overflow:auto;border:1px solid #344a62;padding:10px;border-radius:10px;background:#111d2d}
+.tangent-message{border-bottom:1px solid #293d56;padding:9px 4px}
+.tangent-message strong{color:#bbd4ff}
+.tangent-message p{margin:5px 0;font-size:13px;white-space:pre-wrap}
+.tangent-message .message-actions{display:flex;gap:6px;justify-content:flex-end}
+.tangent-message .message-actions button{font-size:12px;padding:3px 7px}
+.tangent-summary{background:#172b41;border:1px solid #4b698b;border-radius:10px;padding:12px;margin:9px 0}
+.tangent-summary p{font-size:13px}
+.tangent-summary .historical{margin-top:9px;border-top:1px solid #415571;padding-top:5px}
+.tangent-summary .historical .tangent-message{opacity:.86}
+.tangent-compose{display:flex;gap:7px;margin-top:9px}
+.tangent-compose input,.tangent-compose textarea,.tangent-demo input[type=text]{min-width:0;flex:1;background:#111d2d;color:#eaf3ff;border:1px solid #526780;padding:9px;border-radius:7px}
+.tangent-compose button{white-space:nowrap}
+.tangent-demo .edit-t{border:1px solid #536b87;padding:10px;margin-top:8px;border-radius:9px}
+.tangent-demo .edit-t label{display:block;padding:4px}
+.tangent-demo .edit-t textarea{width:100%;min-height:90px}
+.tangent-demo .tag-t{border-radius:20px;background:#263e59;padding:3px 7px;font-size:11px}
+
 </style>
 </head>
 <body>
@@ -76,7 +105,20 @@ h1,h2,.session strong{color:#eef4ff}
 <div class="row"><div class="field"><label for="first">First printed page</label><input id="first" type="number" min="1" required></div><div class="field"><label for="last">Last printed page</label><input id="last" type="number" min="1" required></div></div>
 <div class="field"><label for="duration">Available time</label><select id="duration"><option value="30">30 minutes</option><option value="60" selected>60 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></div>
 <div class="actions"><button class="btn ghost" type="button" id="cancel">Cancel</button><button class="btn" type="submit">Create session</button></div></form></div>
-<section id="workspace" class="workspace" hidden><div class="workspace-top"><div><button class="back-button" id="backToProject">← Back to Hatcher dashboard</button><h1 id="workTitle" style="font-size:27px;margin:2px 0"></h1><p id="workMeta"></p></div><span class="badge">Session setup</span></div><div class="work-grid"><article class="work-panel"><div class="label">Reading agent · left panel</div><h2 style="margin-top:10px">Your session</h2><div class="chat-placeholder" role="status" aria-label="Simulated reading agent"><div class="label" style="margin-bottom:10px">Simulated agent · scripted preview (not AI)</div><strong>Let’s plan your reading session</strong><p id="agentIntro"></p><div id="agentAssessment"><p>I’ve reviewed the example selection from <strong>Hatcher Chapter 3</strong>, printed pages <strong>186–189</strong>.</p><dl class="scope-assessment"><dt>Scope</dt><dd>Reasonable as a proposed 60-minute session.</dd><dt>Conceptual structure</dt><dd>Three related units: motivation for cup products, cochains on graphs, and local versus global obstructions.</dd><dt>Difficulty</dt><dd>Moderate, depending on familiarity with homology.</dd><dt>Dependencies</dt><dd>Boundary maps and chain complexes; some familiarity with homology is helpful.</dd><dt>Estimated reading time</dt><dd>Roughly 45–60 minutes, with substantial variation depending on proof work and prior knowledge.</dd><dt>Recommendation</dt><dd>Review the proposed plan below before beginning.</dd></dl><div class="assumption-chat"><label for="assumptionCorrection">Correct the assessment</label><textarea id="assumptionCorrection" rows="2" placeholder="What did the agent get wrong?"></textarea><button type="button" id="sendCorrection">Send correction</button><div id="correctionReply" role="status" hidden></div></div><button type="button" id="confirmAssessment" class="stage-confirm">Agree with assessment · Continue to plan →</button></div><div class="info-note">Example response grounded in our reference PDF; this page has not analyzed your chosen range. An actual AI agent is not connected.</div></div><div id="planStage" hidden><div class="plan-summary"><strong>Reading plan (draft)</strong><button id="togglePlan" type="button" aria-expanded="true">Collapse ▴</button></div><div class="plan-body" id="planBody"><div class="info-note" style="margin-bottom:12px">Scripted example · Hatcher, Chapter 3 · PDF pages 2–5 (printed 186–189). Not generated from your selected range.</div><ol class="concept-units"><li><button type="button" class="concept-link" data-unit="0"><strong>Why cohomology has a product</strong><div class="info-note">PDF p. 2 · printed p. 186</div><p>See how contravariance makes the diagonal map available for defining the cup product.</p></button></li><li><button type="button" class="concept-link" data-unit="1"><strong>Cochains on graphs</strong><div class="info-note">PDF pp. 2–3 · printed pp. 186–187</div><p>Interpret coboundaries as differences of vertex values along oriented edges.</p></button></li><li><button type="button" class="concept-link" data-unit="2"><strong>Local conditions and global obstructions</strong><div class="info-note">PDF pp. 3–5 · printed pp. 187–189</div><p>Compare local cocycle conditions with obstructions to finding a global potential.</p></button></li></ol><div class="info-note">Prototype plan · direct edits and scripted agent revision; no real AI connected.</div><div class="plan-controls"><button type="button" id="editPlan">Edit plan</button><button type="button" id="agentRevise">Ask simulated agent to revise</button><button type="button" id="acceptPlan">Accept plan</button></div><div id="planFeedback" class="info-note" role="status" aria-live="polite">Review or revise this draft before accepting it.</div><div id="revisionPrompt" hidden><label for="revisionRequest">What would you like to change?</label><textarea id="revisionRequest" rows="2" placeholder="e.g. Focus more on cochains on graphs"></textarea><div class="plan-controls"><button type="button" id="simulateRevision">Propose revision</button><button type="button" id="cancelRevision">Cancel</button></div></div></div><p class="info-note" style="margin-top:22px">You can review or revise the plan before beginning. Agent chat is not yet implemented.</p></div></article><article class="work-panel"><div class="label">Primary source · right panel</div><h2 style="margin-top:10px">Hatcher — Algebraic Topology</h2><div class="info-note" id="pdfRange"></div><div class="pdf-page pdf-excerpt" id="pdfExcerpt"><div class="info-note">Source excerpt preview · Hatcher, Chapter 3 · PDF p. 2 / printed p. 186</div><div class="pdf-book-header"><span>186</span><span>Chapter 3 &nbsp; Cohomology</span></div><p>With cohomology, however, the situation is better. One still has a cross product constructed in much the same way as in homology, so one can again take X = Y and get the first half of a product.</p><div class="math-line">H<sup>i</sup>(X) × H<sup>j</sup>(X) → H<sup>i+j</sup>(X × X) → H<sup>i+j</sup>(X)</div><p>But now by contravariance the second map would be induced by a map X → X × X, and there is an obvious candidate for this map, the diagonal map Δ(x) = (x, x). This turns out to work very nicely, giving a well-behaved product in cohomology, the cup product.</p><h3>The Idea of Cohomology</h3><p>Let us look at a few low-dimensional examples to get an idea of how one might be led naturally to consider cohomology groups, and to see what properties of a space they might be measuring.</p><p>For a fixed abelian group G, the set of all functions from vertices of X to G also forms an abelian group, which we denote by Δ<sup>0</sup>(X; G). Similarly the set of all functions assigning an element of G to each edge of X forms an abelian group Δ<sup>1</sup>(X; G).</p><div class="info-note">Static excerpt simulation · click a conceptual unit to view its passage. Full PDF rendering is not connected.</div></div></article></div></section>
+<section id="workspace" class="workspace" hidden><div class="workspace-top"><div><button class="back-button" id="backToProject">← Back to Hatcher dashboard</button><h1 id="workTitle" style="font-size:27px;margin:2px 0"></h1><p id="workMeta"></p></div><span class="badge">Session setup</span></div><div class="work-grid"><article class="work-panel"><div class="label">Reading agent · left panel</div><h2 style="margin-top:10px">Your session</h2><div class="chat-placeholder" role="status" aria-label="Simulated reading agent"><div class="label" style="margin-bottom:10px">Simulated agent · scripted preview (not AI)</div><strong>Let’s plan your reading session</strong><p id="agentIntro"></p><div id="agentAssessment"><p>I’ve reviewed the example selection from <strong>Hatcher Chapter 3</strong>, printed pages <strong>186–189</strong>.</p><dl class="scope-assessment"><dt>Scope</dt><dd>Reasonable as a proposed 60-minute session.</dd><dt>Conceptual structure</dt><dd>Three related units: motivation for cup products, cochains on graphs, and local versus global obstructions.</dd><dt>Difficulty</dt><dd>Moderate, depending on familiarity with homology.</dd><dt>Dependencies</dt><dd>Boundary maps and chain complexes; some familiarity with homology is helpful.</dd><dt>Estimated reading time</dt><dd>Roughly 45–60 minutes, with substantial variation depending on proof work and prior knowledge.</dd><dt>Recommendation</dt><dd>Review the proposed plan below before beginning.</dd></dl><div class="assumption-chat"><label for="assumptionCorrection">Correct the assessment</label><textarea id="assumptionCorrection" rows="2" placeholder="What did the agent get wrong?"></textarea><button type="button" id="sendCorrection">Send correction</button><div id="correctionReply" role="status" hidden></div></div><button type="button" id="confirmAssessment" class="stage-confirm">Agree with assessment · Continue to plan →</button></div><div class="info-note">Example response grounded in our reference PDF; this page has not analyzed your chosen range. An actual AI agent is not connected.</div></div>
+<section class="tangent-demo" id="tangentDemo">
+<div class="label">S23–S25 · interactive tangent prototype · no AI connected</div>
+<p class="tangent-note">Explore branches, collapse history, edit a finish summary, and return. Chat commands use a few scripted patterns, not a language model.</p>
+<div class="tangent-toolbar"><span id="tangentCrumbs"></span><button id="tangentTreeToggle" type="button">Branches ▾</button><button id="tangentNew" type="button" title="Create a tangent here">↗ Tangent</button></div>
+<div class="tangent-tree" id="tangentTree" hidden></div>
+<div id="tangentTitle" style="font-size:14px;font-weight:bold;margin:8px 0"></div>
+<div class="tangent-toolbar"><button id="tangentRename">Rename</button><button id="tangentEditSelection">Edit message selection</button><button id="tangentFinish" class="primary-t">Finish tangent &amp; return</button><button id="tangentArchive">Archive</button><button id="tangentDelete">Delete</button></div>
+<div class="tangent-chat" id="tangentChat" aria-label="Tangent conversation prototype"></div>
+<form class="tangent-compose" id="tangentForm"><input id="tangentInput" aria-label="Message or tangent command" placeholder="Ask, or type: make this a tangent…" autocomplete="off"><button type="submit">Send</button></form>
+<div class="edit-t" id="tangentEditor" hidden></div>
+<div class="tangent-note" id="tangentFeedback" role="status" style="margin-top:7px"></div>
+<button id="tangentReset" type="button" style="margin-top:10px">Reset tangent demo</button>
+</section><div id="planStage" hidden><div class="plan-summary"><strong>Reading plan (draft)</strong><button id="togglePlan" type="button" aria-expanded="true">Collapse ▴</button></div><div class="plan-body" id="planBody"><div class="info-note" style="margin-bottom:12px">Scripted example · Hatcher, Chapter 3 · PDF pages 2–5 (printed 186–189). Not generated from your selected range.</div><ol class="concept-units"><li><button type="button" class="concept-link" data-unit="0"><strong>Why cohomology has a product</strong><div class="info-note">PDF p. 2 · printed p. 186</div><p>See how contravariance makes the diagonal map available for defining the cup product.</p></button></li><li><button type="button" class="concept-link" data-unit="1"><strong>Cochains on graphs</strong><div class="info-note">PDF pp. 2–3 · printed pp. 186–187</div><p>Interpret coboundaries as differences of vertex values along oriented edges.</p></button></li><li><button type="button" class="concept-link" data-unit="2"><strong>Local conditions and global obstructions</strong><div class="info-note">PDF pp. 3–5 · printed pp. 187–189</div><p>Compare local cocycle conditions with obstructions to finding a global potential.</p></button></li></ol><div class="info-note">Prototype plan · direct edits and scripted agent revision; no real AI connected.</div><div class="plan-controls"><button type="button" id="editPlan">Edit plan</button><button type="button" id="agentRevise">Ask simulated agent to revise</button><button type="button" id="acceptPlan">Accept plan</button></div><div id="planFeedback" class="info-note" role="status" aria-live="polite">Review or revise this draft before accepting it.</div><div id="revisionPrompt" hidden><label for="revisionRequest">What would you like to change?</label><textarea id="revisionRequest" rows="2" placeholder="e.g. Focus more on cochains on graphs"></textarea><div class="plan-controls"><button type="button" id="simulateRevision">Propose revision</button><button type="button" id="cancelRevision">Cancel</button></div></div></div><p class="info-note" style="margin-top:22px">You can review or revise the plan before beginning. Agent chat is not yet implemented.</p></div></article><article class="work-panel"><div class="label">Primary source · right panel</div><h2 style="margin-top:10px">Hatcher — Algebraic Topology</h2><div class="info-note" id="pdfRange"></div><div class="pdf-page pdf-excerpt" id="pdfExcerpt"><div class="info-note">Source excerpt preview · Hatcher, Chapter 3 · PDF p. 2 / printed p. 186</div><div class="pdf-book-header"><span>186</span><span>Chapter 3 &nbsp; Cohomology</span></div><p>With cohomology, however, the situation is better. One still has a cross product constructed in much the same way as in homology, so one can again take X = Y and get the first half of a product.</p><div class="math-line">H<sup>i</sup>(X) × H<sup>j</sup>(X) → H<sup>i+j</sup>(X × X) → H<sup>i+j</sup>(X)</div><p>But now by contravariance the second map would be induced by a map X → X × X, and there is an obvious candidate for this map, the diagonal map Δ(x) = (x, x). This turns out to work very nicely, giving a well-behaved product in cohomology, the cup product.</p><h3>The Idea of Cohomology</h3><p>Let us look at a few low-dimensional examples to get an idea of how one might be led naturally to consider cohomology groups, and to see what properties of a space they might be measuring.</p><p>For a fixed abelian group G, the set of all functions from vertices of X to G also forms an abelian group, which we denote by Δ<sup>0</sup>(X; G). Similarly the set of all functions assigning an element of G to each edge of X forms an abelian group Δ<sup>1</sup>(X; G).</p><div class="info-note">Static excerpt simulation · click a conceptual unit to view its passage. Full PDF rendering is not connected.</div></div></article></div></section>
 <div id="deleteConfirm" class="delete-confirm" hidden role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><div class="delete-card"><h2 id="deleteTitle">Delete session?</h2><p id="deleteMessage"></p><p class="info-note">This removes the session from this browser and cannot be undone.</p><div class="actions"><button class="btn ghost" type="button" id="deleteCancel">Cancel</button><button class="btn danger-btn" type="button" id="deleteApprove">Delete session</button></div></div></div>
 <script>
 (function(){
@@ -181,5 +223,94 @@ close();render();showSession(session);
 });
 el('last').addEventListener('input',()=>el('last').setCustomValidity(''));
 render();if(location.hash.startsWith('#session-')){const id=decodeURIComponent(location.hash.slice(9));const match=sessions.find(s=>s.id===id);if(match)showSession(match);}
+})();
+</script><script>
+(function(){
+const root=document.getElementById('tangentDemo'),chat=document.getElementById('tangentChat'),editor=document.getElementById('tangentEditor'),feedback=document.getElementById('tangentFeedback');
+const $=id=>document.getElementById(id),storage='math-reading-agent:tangent-demo:v1';
+const seed=()=>({current:'main',next:7,branches:{main:{id:'main',title:'Main reading',parent:null,status:'In progress',messages:[
+{id:1,who:'Reader',text:'I am reading Hatcher on cohomology.'},
+{id:2,who:'Agent · scripted',text:'We are looking at how cohomology yields a cup product.'},
+{id:3,who:'Reader',text:'Wait, I forgot the definition of the coboundary operator.'},
+{id:4,who:'Agent · scripted',text:'For a cochain φ, the coboundary is δφ = φ ∘ ∂, with the conventional degree shift.'},
+{id:5,who:'Reader',text:'Can we examine why δ² = 0?'},
+{id:6,who:'Agent · scripted',text:'That follows from ∂² = 0; a detailed investigation may deserve a tangent.'}
+],extracts:[]}}});
+let state;try{state=JSON.parse(localStorage.getItem(storage))||seed()}catch(e){state=seed()}
+const save=()=>{try{localStorage.setItem(storage,JSON.stringify(state))}catch(e){}};
+const branch=()=>state.branches[state.current],esc=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const visible=b=>b.messages.filter(m=>!b.extracts.some(t=>t.ids.includes(m.id)));
+const msgHtml=(m,readonly=false)=>'<div class="tangent-message"><strong>'+esc(m.who)+'</strong><p>'+esc(m.text)+'</p>'+(readonly?'':'<div class="message-actions"><button type="button" data-from="'+m.id+'" title="Create tangent from message">↗ Tangent</button></div>')+'</div>';
+function allAncestors(id){let a=[];while(id&&state.branches[id]){a.unshift(state.branches[id]);id=state.branches[id].parent}return a}
+function navigate(id){if(!state.branches[id])return;state.current=id;editor.hidden=true;feedback.textContent='';save();render()}
+function render(){
+const b=branch();$('tangentTitle').textContent=b.title+' · '+(b.status||'In progress');$('tangentCrumbs').replaceChildren();
+allAncestors(b.id).forEach((part,i)=>{if(i)$('tangentCrumbs').append(' › ');let x=document.createElement('button');x.textContent=part.title;x.onclick=()=>navigate(part.id);$('tangentCrumbs').append(x)});
+$('tangentTree').replaceChildren();
+function tree(id,depth){const x=state.branches[id];if(!x||x.status==='Archived')return;const button=document.createElement('button');button.textContent='　'.repeat(depth)+(id===b.id?'● ':'○ ')+x.title+' · '+(x.status||'In progress');button.className=id===b.id?'selected-t':'';button.onclick=()=>navigate(id);$('tangentTree').append(button);Object.values(state.branches).filter(c=>c.parent===id).forEach(c=>tree(c.id,depth+1))}
+tree('main',0);
+chat.replaceChildren();
+const hiddenIds=new Set(b.extracts.flatMap(x=>x.ids));
+for(const m of b.messages){
+ const extraction=b.extracts.find(x=>x.ids[0]===m.id);
+ if(extraction){const child=state.branches[extraction.child];if(child){let box=document.createElement('div');box.className='tangent-summary';
+const details=document.createElement('details');details.open=!!extraction.expanded;
+const title=document.createElement('summary');title.textContent='↗ '+child.title+' · '+child.status;details.append(title);
+const summary=document.createElement('p');summary.textContent=extraction.summary;box.append(details);
+const link=document.createElement('button');link.textContent='Open tangent ↗';link.onclick=()=>navigate(child.id);
+details.append(summary,link);
+const history=document.createElement('div');history.className='historical';history.innerHTML=b.messages.filter(x=>extraction.ids.includes(x.id)).map(x=>msgHtml(x,true)).join('');details.append(history);
+details.addEventListener('toggle',()=>{extraction.expanded=details.open;save()});
+chat.append(box)}}
+ if(!hiddenIds.has(m.id)){let item=document.createElement('div');item.innerHTML=msgHtml(m);chat.append(item.firstElementChild)}
+}
+chat.querySelectorAll('[data-from]').forEach(btn=>btn.onclick=()=>createTangent(Number(btn.dataset.from)));
+$('tangentFinish').hidden=b.id==='main';$('tangentArchive').hidden=b.id==='main';$('tangentDelete').hidden=b.id==='main';$('tangentEditSelection').hidden=b.id==='main';
+save();
+}
+function createTangent(start,title){
+const parent=branch(),candidates=parent.messages.filter(m=>!parent.extracts.some(e=>e.ids.includes(m.id)));
+if(!candidates.length){feedback.textContent='No unassigned messages available.';return}
+const ix=start?candidates.findIndex(m=>m.id===start):Math.max(0,candidates.length-4);
+const selected=candidates.slice(ix<0?0:ix);if(!selected.length)return;
+const id='t'+state.next++;
+const t={id,title:title||'Coboundary review',parent:parent.id,status:'In progress',messages:selected.map(m=>({...m})),extracts:[]};
+state.branches[id]=t;parent.extracts.push({child:id,ids:selected.map(x=>x.id),summary:'Discussed '+t.title+'. Open the tangent for further exploration.',expanded:false});
+navigate(id);feedback.textContent='Tangent created (scripted selection). Use Edit message selection to revise.';
+}
+function findExtraction(b){return state.branches[b.parent]?.extracts.find(e=>e.child===b.id)}
+function showFinish(){
+const b=branch(),e=findExtraction(b);if(!e)return;
+editor.hidden=false;editor.replaceChildren();
+let title=document.createElement('strong');title.textContent='Review and edit summary';let area=document.createElement('textarea');area.value='Reviewed '+b.title+'. Main points discussed: '+b.messages.filter(m=>m.who==='Reader').map(m=>m.text).slice(-3).join(' ');
+let saveBtn=document.createElement('button');saveBtn.textContent='Save summary & return';saveBtn.className='primary-t';saveBtn.onclick=()=>{e.summary=area.value;b.status='Completed';navigate(b.parent)};
+let cancel=document.createElement('button');cancel.textContent='Cancel';cancel.onclick=()=>editor.hidden=true;editor.append(title,area,saveBtn,cancel);
+}
+function editSelection(){
+const b=branch(),parent=state.branches[b.parent],e=findExtraction(b);if(!e)return;
+editor.hidden=false;editor.replaceChildren();let h=document.createElement('strong');h.textContent='Choose parent messages · preview then Apply';editor.append(h);
+let selected=new Set(e.ids);
+parent.messages.forEach(m=>{let l=document.createElement('label'),cb=document.createElement('input');cb.type='checkbox';cb.checked=selected.has(m.id);cb.disabled=parent.extracts.some(x=>x!==e&&x.ids.includes(m.id));cb.onchange=()=>cb.checked?selected.add(m.id):selected.delete(m.id);l.append(cb,document.createTextNode(' '+m.who+': '+m.text.slice(0,65)));editor.append(l)});
+let apply=document.createElement('button');apply.textContent='Apply changes';apply.onclick=()=>{
+const others=b.messages.filter(m=>!e.ids.includes(m.id));const items=parent.messages.filter(m=>selected.has(m.id));
+e.ids=items.map(x=>x.id);b.messages=[...items.map(x=>({...x})),...others];editor.hidden=true;feedback.textContent='Selection applied.';render();
+};
+editor.append(apply);
+}
+$('tangentForm').addEventListener('submit',ev=>{
+ev.preventDefault();let input=$('tangentInput'),value=input.value.trim();if(!value)return;input.value='';
+if(/(?:make|create|start).*(?:tangent|branch)|(?:tangent|branch).*(?:make|create)/i.test(value)){let named=value.match(/(?:called|named)\s+["“]?([^"”]+)$/i);createTangent(null,named?named[1]:'Prerequisite review');return}
+if(/(?:finish|done|return).*(?:tangent|main|parent)|(?:summari[sz]e.*return)/i.test(value)&&branch().id!=='main'){showFinish();return}
+const b=branch();b.messages.push({id:state.next++,who:'Reader',text:value});b.status='In progress';
+b.messages.push({id:state.next++,who:'Agent · scripted',text:'This preview stores your message but does not produce an AI answer. You can create a tangent, switch branches, or finish with an editable summary.'});
+render();chat.scrollTop=chat.scrollHeight;
+});
+$('tangentNew').onclick=()=>createTangent();$('tangentTreeToggle').onclick=()=>{$('tangentTree').hidden=!$('tangentTree').hidden};$('tangentFinish').onclick=showFinish;$('tangentEditSelection').onclick=editSelection;
+$('tangentRename').onclick=()=>{let title=prompt('Tangent name',branch().title);if(title?.trim()){branch().title=title.trim();render()}};
+$('tangentArchive').onclick=()=>{let b=branch();if(b.id==='main')return;b.status='Archived';navigate(b.parent)};
+$('tangentDelete').onclick=()=>{let b=branch();if(b.id==='main'||!confirm('Delete this tangent? Tangent-only discussion will be lost, and child tangents will be preserved.'))return;
+const parent=state.branches[b.parent];parent.extracts=parent.extracts.filter(x=>x.child!==b.id);Object.values(state.branches).filter(x=>x.parent===b.id).forEach(x=>{x.parent=parent.id});delete state.branches[b.id];navigate(parent.id)};
+$('tangentReset').onclick=()=>{if(!confirm('Reset only the tangent demonstration?'))return;state=seed();navigate('main')};
+render();
 })();
 </script></body></html>
