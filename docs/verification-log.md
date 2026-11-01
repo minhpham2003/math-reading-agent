@@ -52,3 +52,9 @@ Record concrete execution evidence here, including negative results and limitati
 - **Expected:** Plan uses title, PDF location and concise description for each scripted unit; original collapsible panel remains.
 - **Source inspection:** Changes committed to prototype branch; real analysis and PDF linking not implemented.
 - **Browser verification:** Not performed. Confirm rendering, expansion/collapse, scrolling and no S02 regressions in browser.
+
+## V-006 — PDF pane source excerpt preview (2026-11-01)
+- **Implementation:** [26f1882](https://github.com/minhpham2003/math-reading-agent/commit/26f1882a890c9f1cfe514335d68515fcbe6960d8), `prototype/s02-dashboard`.
+- **Change:** Replace empty right-panel PDF placeholder with a styled excerpt from supplied Hatcher Chapter 3, PDF page 2 / printed page 186, including cross-product formula and 'The Idea of Cohomology' heading.
+- **Scope:** Static excerpt preview only; no PDF renderer, text selection linked to pages, or adaptive navigation.
+- **Verification:** Source readback confirmed, deployment and browser interaction pending.
