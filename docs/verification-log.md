@@ -39,4 +39,4 @@ Record concrete execution evidence here, including negative results and limitati
 - **Test plan:** Dashboard → open ⋯ for a session → Cancel deletion (session remains) → repeat → Confirm deletion (only selected session disappears) → reload (session stays deleted) → create and open other sessions (regression).
 - **Observed:** GitHub source readback contains action menu, confirmation and localStorage deletion logic.
 - **Result:** Source check passed; browser execution and visual tests not performed.
-- **Deployment:** Preview workflow pending at initial check; verify deployed commit separately.
+- **Deployment:** [Preview workflow 41259600359](https://github.com/minhpham2003/math-reading-agent/actions/runs/41259600359) succeeded for commit 2cac0ec. Published gh-pages HTML readback contains the delete menu and confirmation/storage logic. Browser click-through and visual verification remain unperformed.
