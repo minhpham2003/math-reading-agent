@@ -65,3 +65,11 @@ Record concrete execution evidence here, including negative results and limitati
 - **Source check:** Three clickable unit controls render separate source-based summaries in the right pane, with a temporary highlight that disappears after 3.5 seconds.
 - **Limitation:** This is a navigation simulation, not actual PDF page rendering or passage highlighting.
 - **Browser testing:** Not performed; test clicks, highlight timeout, scroll and accessibility in preview.
+
+## V-008 — S23–S25 interactive tangent prototype (2026-11-01)
+- **Code:** [73bcc74](https://github.com/minhpham2003/math-reading-agent/commit/73bcc744f1be52c5cb55608043583bfc9e743db9) on prototype branch.
+- **Source readback:** Retrieved `prototypes/s02-dashboard/index.html` after write; new tangent section present; both original and new inline JavaScript scripts passed syntax compilation. S02 new-session and S07 plan markup still present.
+- **Deployment:** [GitHub Actions 41308652609](https://github.com/minhpham2003/math-reading-agent/actions/runs/41308652609) succeeded, publishing PR #1 to [preview](https://minhpham2003.github.io/math-reading-agent/previews/pr-1/). Logs identify preview merge `57bac8a` incorporating `73bcc74`.
+- **Not executed:** Actual browser interactions, clicks, edit flows, nested deletion, localStorage reload and visual regressions.
+- **Result:** Code readback and JavaScript parse **pass**; deployment **succeeded**; browser functionality **not verified**.
+- **Agent:** Only scripted pattern-based responses and static text; no AI integration or tested agent behavior.
