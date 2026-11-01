@@ -14,7 +14,7 @@ Maintain an auditable connection between scenario design, implementation, deploy
 ## Standard workflow
 1. Inspect current documentation and the affected implementation before editing.
 2. Discuss one design decision at a time. Record only decisions the reader explicitly approves; mark pending questions separately.
-3. Update the relevant scenario decision record with rationale and preserved constraints.
+3. **Batch documentation writes:** during text-only discussion, track approvals and open questions conversationally rather than committing after each choice. Update the relevant `decisions/Sxx.md` once at scenario closure, or earlier when changing the application/site. If implementation begins before closure, include all previously approved unrecorded decisions in the accompanying documentation update. Direct requests to update documentation are exceptions.
 4. Make the smallest implementation change that satisfies the agreed decision.
 5. Run available checks and inspect the rendered interface for UI changes.
 6. Deploy a preview; record its exact URL and commit ID.
