@@ -24,3 +24,5 @@ Updated: 2026-11-01
 - **2026-11-01 — [776c8b0](https://github.com/minhpham2003/math-reading-agent/commit/776c8b03c322e1ccf8901591fcdbb98b13d68c35)** — Replaced browser-native session deletion confirmation with an in-page dialog after suppressed native prompts prevented deletion. Prototype branch; browser verification pending.
 
 - **2026-11-01 — [5dc95eb](https://github.com/minhpham2003/math-reading-agent/commit/5dc95eb5b6231f438e7334b11a750588f2ee4862)** — Implemented S07-D03 scripted informative conceptual-unit entries (title, PDF location and concise description) based on the fixed Hatcher cohomology excerpt. Real agent analysis remains unimplemented.
+
+- **2026-11-01 — [abcb89c](https://github.com/minhpham2003/math-reading-agent/commit/abcb89c23fe3c3e98a0f7a38754e7ea893a56cb2)** — S07-D05 Option C hybrid plan-editing preview: rename/reorder/remove units; request scripted agent revision; explicit acceptance. Demo only, not AI-generated or persisted. Browser verification pending.
