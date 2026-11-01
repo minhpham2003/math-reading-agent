@@ -46,3 +46,9 @@ Record concrete execution evidence here, including negative results and limitati
 - **Fix:** [776c8b0](https://github.com/minhpham2003/math-reading-agent/commit/776c8b03c322e1ccf8901591fcdbb98b13d68c35). Added custom in-app confirmation with Cancel, Delete session, overlay and Escape dismissal; storage update on approval only.
 - **Code inspection:** Passed; fetched branch source contains custom dialog and no `window.confirm`.
 - **End-to-end browser verification:** Not performed. Test both cancel and confirm paths, refresh persistence, and other session controls.
+
+## V-005 — S07-D03 informative plan (2026-11-01)
+- **Commit:** [5dc95eb](https://github.com/minhpham2003/math-reading-agent/commit/5dc95eb5b6231f438e7334b11a750588f2ee4862).
+- **Expected:** Plan uses title, PDF location and concise description for each scripted unit; original collapsible panel remains.
+- **Source inspection:** Changes committed to prototype branch; real analysis and PDF linking not implemented.
+- **Browser verification:** Not performed. Confirm rendering, expansion/collapse, scrolling and no S02 regressions in browser.
