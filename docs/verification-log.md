@@ -32,4 +32,4 @@ Record concrete execution evidence here, including negative results and limitati
 - **Expected:** Agent panel contains a clearly labeled scripted cohomology reading prompt, without claiming the uploaded PDF has been analyzed in the browser.
 - **Observed:** GitHub source readback confirms the new label and prompt.
 - **Result:** Source check passed; browser interaction and visual verification not performed.
-- **Deployment:** Check PR preview workflow status before claiming deployed.
+- **Deployment:** PR preview workflow [41259445569](https://github.com/minhpham2003/math-reading-agent/actions/runs/41259445569) succeeded for f92dc8c; deployed gh-pages HTML includes simulated prompt. Browser behavior remains unverified.
