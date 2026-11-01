@@ -58,3 +58,10 @@ Record concrete execution evidence here, including negative results and limitati
 - **Change:** Replace empty right-panel PDF placeholder with a styled excerpt from supplied Hatcher Chapter 3, PDF page 2 / printed page 186, including cross-product formula and 'The Idea of Cohomology' heading.
 - **Scope:** Static excerpt preview only; no PDF renderer, text selection linked to pages, or adaptive navigation.
 - **Verification:** Source readback confirmed, deployment and browser interaction pending.
+
+## V-007 — S07-D04 simulated navigation and highlight (2026-11-01)
+- **Decision:** Option B — Navigate and highlight, with no automatic agent response.
+- **Implementation:** [2186cd5](https://github.com/minhpham2003/math-reading-agent/commit/2186cd5b1b44442b526af2e97ca387fe36c67faf).
+- **Source check:** Three clickable unit controls render separate source-based summaries in the right pane, with a temporary highlight that disappears after 3.5 seconds.
+- **Limitation:** This is a navigation simulation, not actual PDF page rendering or passage highlighting.
+- **Browser testing:** Not performed; test clicks, highlight timeout, scroll and accessibility in preview.
