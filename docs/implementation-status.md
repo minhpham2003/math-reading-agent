@@ -7,7 +7,7 @@ Updated: 2026-11-01
 | Scenario | Design | Implementation | Commit | Preview deployment | Browser test | Verified | Next action |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | S02 — Normal new session | Six constraints established | Prototype complete (reader-reported; source location unknown) | Unknown | Unknown | Not independently tested | Not independently verified | Locate prototype implementation and preview; inspect against S02 constraints |
-| S07 — Reasonable reading range | D01 and D02 approved; remaining details pending | Simulated agent prompt committed to prototype branch; plan behavior not implemented | [f92dc8c](https://github.com/minhpham2003/math-reading-agent/commit/f92dc8ca2c520b7b7bdfa677d0d99e9d275fbf11) | Preview workflow pending at check | Not tested in browser | Not verified | Complete design; verify S07 simulation in deployed preview |
+| S07 — Reasonable reading range | D01 and D02 approved; remaining details pending | Simulated agent prompt committed to prototype branch; plan behavior not implemented | [f92dc8c](https://github.com/minhpham2003/math-reading-agent/commit/f92dc8ca2c520b7b7bdfa677d0d99e9d275fbf11) | Preview workflow succeeded; deployed file confirmed on gh-pages | Not tested in browser | Not verified | Complete design; verify S07 simulation in deployed preview |
 
 ## Documentation system
 - Workflow: [development-workflow.md](development-workflow.md)
