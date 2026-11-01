@@ -26,3 +26,16 @@ Updated: 2026-11-01
 - **2026-11-01 — [5dc95eb](https://github.com/minhpham2003/math-reading-agent/commit/5dc95eb5b6231f438e7334b11a750588f2ee4862)** — Implemented S07-D03 scripted informative conceptual-unit entries (title, PDF location and concise description) based on the fixed Hatcher cohomology excerpt. Real agent analysis remains unimplemented.
 
 - **2026-11-01 — [abcb89c](https://github.com/minhpham2003/math-reading-agent/commit/abcb89c23fe3c3e98a0f7a38754e7ea893a56cb2)** — S07-D05 Option C hybrid plan-editing preview: rename/reorder/remove units; request scripted agent revision; explicit acceptance. Demo only, not AI-generated or persisted. Browser verification pending.
+
+
+## Classified design requirements (not verification evidence)
+
+| Scenario | Interface obligations | Agent-behavior obligations | Implementation evidence |
+| --- | --- | --- | --- |
+| S02 | Six established UI constraints | None established by S02 baseline | Reader-reported prototype; not independently verified |
+| S07 | Assessment/plan display, acceptance, editing, source navigation | Analyze scope, produce/revise plan, respond to corrections, orient reader | UI demonstrations scripted; real agent behavior unverified |
+| S23 | Inline clarification / unobtrusive suggestion | Distinguish brief reminder from substantial prerequisite review; suggest tangent appropriately | Design only; not implemented |
+| S24 | Tangent history presentation, linked summaries, tree/breadcrumbs, status, selection editor | Infer tangent spans, act on natural-language instructions, summarize and manage nested context | Design only; not implemented |
+| S25 | Preserve state; exact return; editable summary review | Retrieve full tangent history, remember/remention relevant unresolved questions, avoid unsolicited recap | Design only; not implemented |
+
+See [S23](../decisions/S23.md), [S24](../decisions/S24.md), [S25](../decisions/S25.md). Those scenario designs remain open. Agent behavior and UI must each be separately tested before claiming verification.
