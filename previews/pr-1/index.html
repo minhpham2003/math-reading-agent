@@ -40,6 +40,13 @@ h1,h2,.session strong{color:#eef4ff}
 .work-panel .pdf-page{max-width:620px;min-height:70%;margin:16px auto}
 @media(max-width:760px){.workspace{padding:10px}.work-grid{grid-template-columns:1fr;height:auto;min-height:0}.work-panel{min-height:360px}}
 
+
+.session-actions{position:relative;display:flex;align-items:flex-start;gap:10px}
+.session-menu-button{border:1px solid #40536c;background:#1b2a3d;color:#d7e6fd;border-radius:9px;width:35px;height:35px;font-size:23px;line-height:1}
+.session-menu{position:absolute;right:0;top:41px;z-index:5;background:#1b2a3d;border:1px solid #40536c;border-radius:9px;padding:5px;min-width:140px;box-shadow:0 12px 28px #0007}
+.session-menu button{width:100%;border:0;background:transparent;color:#ffb5b5;text-align:left;padding:10px;border-radius:6px}
+.session-menu button:hover,.session-menu button:focus-visible{background:#503038}
+.session-menu-button:focus-visible,.session-menu button:focus-visible{outline:2px solid #9fb8e5;outline-offset:2px}
 </style>
 </head>
 <body>
@@ -77,9 +84,21 @@ sessions.slice().reverse().forEach(s=>{
 const row=document.createElement('div');row.className='session';
 const info=document.createElement('div'), title=document.createElement('strong'), meta=document.createElement('div'), badge=document.createElement('span');
 title.textContent=s.title;meta.className='meta';meta.textContent=s.section+' · pp. '+s.first+'–'+s.last+' · '+s.duration+' min';
-badge.className='badge';badge.textContent='Not started';const open=document.createElement('button');open.className='back-button';open.textContent='Open →';open.onclick=()=>showSession(s);info.append(title,meta,open);row.append(info,badge);root.append(row);
+badge.className='badge';badge.textContent='Not started';const open=document.createElement('button');open.className='back-button';open.textContent='Open →';open.onclick=()=>showSession(s);info.append(title,meta,open);
+const actions=document.createElement('div');actions.className='session-actions';
+const more=document.createElement('button');more.type='button';more.className='session-menu-button';more.textContent='⋯';more.setAttribute('aria-label','Actions for '+s.title);more.setAttribute('aria-expanded','false');
+const menu=document.createElement('div');menu.className='session-menu';menu.hidden=true;
+const remove=document.createElement('button');remove.type='button';remove.textContent='Delete session';
+remove.onclick=()=>{if(!window.confirm('Delete session "'+s.title+'"? This cannot be undone.'))return;
+const updated=sessions.filter(item=>item.id!==s.id);
+try{localStorage.setItem(key,JSON.stringify(updated));}catch(err){alert('Unable to delete session. Check browser storage permissions.');return;}
+sessions=updated;render();};
+menu.append(remove);
+more.onclick=()=>{const willOpen=menu.hidden;document.querySelectorAll('.session-menu').forEach(m=>m.hidden=true);document.querySelectorAll('.session-menu-button').forEach(b=>b.setAttribute('aria-expanded','false'));menu.hidden=!willOpen;more.setAttribute('aria-expanded',String(willOpen));};
+actions.append(badge,more,menu);row.append(info,actions);root.append(row);
 });
 }
+document.addEventListener('click',e=>{if(!e.target.closest('.session-actions')){document.querySelectorAll('.session-menu').forEach(m=>m.hidden=true);document.querySelectorAll('.session-menu-button').forEach(b=>b.setAttribute('aria-expanded','false'));}});
 function close(){overlay.hidden=true;overlay.style.setProperty('display','none','important');form.reset();el('newSession').focus();}
 el('newSession').onclick=()=>{overlay.style.removeProperty('display');overlay.hidden=false;el('title').focus();};
 el('cancel').addEventListener('click',close);overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
