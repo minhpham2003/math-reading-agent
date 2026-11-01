@@ -55,6 +55,7 @@ h1,h2,.session strong{color:#eef4ff}
 .pdf-excerpt{text-align:left;background:#192538;color:#e7edf7;font-family:Georgia,'Times New Roman',serif;max-width:640px;min-height:0;padding:34px 38px}.pdf-excerpt p{color:#dce5f3;font-size:16px;line-height:1.6;text-align:justify;margin:18px 0}.pdf-excerpt .info-note{color:#a8b9cf;font:12px system-ui,sans-serif;text-align:left}.pdf-book-header{display:flex;justify-content:space-between;border-top:2px solid #61758f;padding:8px 0 14px;margin-top:12px;font-size:13px}.pdf-excerpt h3{color:#edf4ff;border-bottom:1px solid #62758c;font-size:22px;padding-bottom:6px}.math-line{text-align:center;white-space:normal;margin:16px 0;font-size:17px}
 .concept-link{border:1px solid transparent;background:transparent;color:inherit;text-align:left;padding:10px;border-radius:9px;width:100%;font:inherit;cursor:pointer}.concept-link:hover,.concept-link:focus-visible{background:#253952;border-color:#56729b}.concept-link.active{background:#223c59;border-color:#5a90bd}.concept-link p{pointer-events:none}.excerpt-focus{background:#3d493d;border-left:4px solid #d6c77b;padding:12px;margin:12px -12px;border-radius:5px;animation:focusIn .4s ease}.pdf-excerpt .excerpt-focus p{margin:6px 0}@keyframes focusIn{from{background:#6a5e2c}to{background:#3d493d}}
 .plan-controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.plan-controls button,.unit-editor button{border:1px solid #49617f;background:#243a55;color:#e3eeff;border-radius:8px;padding:8px 10px;font:13px system-ui;cursor:pointer}.plan-controls button:hover,.unit-editor button:hover{background:#325273}.plan-controls #acceptPlan{background:#3265ad}.unit-editor{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}.unit-editor input{min-width:150px;flex:1;background:#15283d;color:#ecf3ff;border:1px solid #55708e;border-radius:6px;padding:7px}.unit-editor button{padding:6px 8px}#revisionPrompt label{display:block;margin-top:12px;font-size:13px}#revisionRequest{width:100%;background:#16283d;color:#ecf3ff;border:1px solid #55708e;border-radius:8px;padding:10px;margin-top:7px}
+.concept-units li[draggable="true"]{cursor:grab;transition:transform .18s ease,background .18s ease,opacity .18s ease;border-radius:10px}.concept-units li.dragging{opacity:.55;background:#304a68;cursor:grabbing;box-shadow:0 6px 18px #0005}.drag-handle{color:#aac3e7;font:13px system-ui;white-space:nowrap;cursor:grab;user-select:none}.concept-units li[draggable="true"] .concept-link{cursor:grab}
 </style>
 </head>
 <body>
@@ -98,17 +99,20 @@ document.querySelectorAll('.concept-link').forEach(button=>button.addEventListen
   clearTimeout(focusTimer);
   focusTimer=setTimeout(()=>{const p=el('activePassage');if(p)p.classList.remove('excerpt-focus');},3500);
 }));
-let editingPlan=false;
+let editingPlan=false,draggedUnit=null;
 const planItems=el('planBody').querySelector('.concept-units');
+planItems.addEventListener('dragstart',e=>{const li=e.target.closest('li');if(!editingPlan||!li)return;draggedUnit=li;li.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','reorder');});
+planItems.addEventListener('dragover',e=>{if(!draggedUnit)return;e.preventDefault();const target=e.target.closest('li');if(!target||target===draggedUnit)return;const bounds=target.getBoundingClientRect();const before=e.clientY<bounds.top+bounds.height/2;planItems.insertBefore(draggedUnit,before?target:target.nextSibling);});
+planItems.addEventListener('drop',e=>{if(draggedUnit){e.preventDefault();el('planFeedback').textContent='Order updated. Review before accepting.';}});
+planItems.addEventListener('dragend',()=>{if(draggedUnit)draggedUnit.classList.remove('dragging');draggedUnit=null;});
 el('editPlan').onclick=()=>{
  editingPlan=!editingPlan;el('editPlan').textContent=editingPlan?'Finish editing':'Edit plan';
- planItems.querySelectorAll('li').forEach(li=>{const previous=li.querySelector('.unit-editor');if(previous)previous.remove();if(!editingPlan)return;
- const editor=document.createElement('div');editor.className='unit-editor';const input=document.createElement('input');input.setAttribute('aria-label','Edit unit title');input.value=li.querySelector('strong').textContent;
+ planItems.querySelectorAll('li').forEach(li=>{li.draggable=editingPlan;const previous=li.querySelector('.unit-editor');if(previous)previous.remove();if(!editingPlan)return;
+ const editor=document.createElement('div');editor.className='unit-editor';const handle=document.createElement('span');handle.textContent='⠿ Drag to reorder';handle.className='drag-handle';handle.title='Drag this unit to reorder';
+ const input=document.createElement('input');input.setAttribute('aria-label','Edit unit title');input.value=li.querySelector('strong').textContent;
  input.addEventListener('input',()=>{li.querySelector('strong').textContent=input.value;el('planFeedback').textContent='Draft edited. Review before accepting.';});
- const up=document.createElement('button');up.textContent='↑';up.setAttribute('aria-label','Move unit up');up.onclick=()=>{if(li.previousElementSibling)planItems.insertBefore(li,li.previousElementSibling);};
- const down=document.createElement('button');down.textContent='↓';down.setAttribute('aria-label','Move unit down');down.onclick=()=>{if(li.nextElementSibling)planItems.insertBefore(li.nextElementSibling,li);};
  const del=document.createElement('button');del.textContent='Remove';del.onclick=()=>li.remove();
- editor.append(input,up,down,del);li.append(editor);
+ editor.append(handle,input,del);li.append(editor);
  });
 };
 el('agentRevise').onclick=()=>{el('revisionPrompt').hidden=false;el('revisionRequest').focus();};
