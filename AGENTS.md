@@ -19,6 +19,13 @@ Inspect the **actual implementation** before changing it. Do not assume an appli
 - Before implementing, preserve previously approved decisions; document any deliberate revision with a reason and a superseding ID.
 - Keep the reader in control of learning and protect productive mathematical struggle.
 
+## Scenario boundaries and completion summaries
+- Before beginning any design decision, re-read the **original scenario statement** in the scenario inventory and the relevant `decisions/Sxx.md`. State the scenario's specific goal and keep design questions within that boundary.
+- Do **not** keep adding D-numbers to a scenario merely because the conversation flows naturally there. If a question concerns a later scenario (for example, in-reading checkpoints versus S07's range selection), record it as a deferred question under the correct scenario instead of discussing or implementing it immediately.
+- When the scenario's intended reader interaction and necessary edge cases have been designed and approved, **explicitly close the scenario**, even if adjacent product decisions remain. Ask to move to the next scenario; do not invent extra decisions to fill time.
+- At each scenario's end, give the reader a **short retrospective summary**: scenario goal; approved decisions and user-facing flow; prototype/documentation status and remaining limitations; deferred topics and which scenario they belong to. Record this same concise closure in `decisions/Sxx.md` (with a commit-linked revision-history entry).
+- If the user points out scope drift, stop, acknowledge it, and reclassify the question before continuing.
+
 ## S02 invariants
 Unless the reader explicitly approves a replacement:
 1. Dashboard-first navigation.
