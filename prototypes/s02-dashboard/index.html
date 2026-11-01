@@ -8,6 +8,38 @@
 .workspace{max-width:1280px;margin:22px auto;padding:0 24px}.workspace-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.work-grid{display:grid;grid-template-columns:minmax(300px,1fr) minmax(350px,1.22fr);gap:18px;height:calc(100vh - 180px);min-height:510px}.work-panel{background:#fff;border:1px solid #dfe6ef;border-radius:14px;overflow:auto;padding:24px}.work-panel h2{margin:0 0 12px}.pdf-page{min-height:440px;max-width:530px;background:#fff;border:1px solid #e0e5ec;box-shadow:0 5px 20px #253f5a18;padding:40px;margin:26px auto;text-align:center}.chat-placeholder{background:#f4f8ff;border-radius:12px;padding:18px;margin:20px 0}.plan-summary{display:flex;align-items:center;justify-content:space-between;margin:15px 0 10px}.plan-summary button{border:1px solid #cad6e7;background:white;border-radius:8px;padding:8px 12px;color:#284f80}.plan-body{background:#f7f9fc;border-radius:10px;padding:14px}.plan-body ol{margin:7px 0;padding-left:20px}.plan-body li{margin:10px 0}.info-note{font-size:13px;color:#697b92}.back-button{border:0;background:none;color:#2d609e;font-size:14px;padding:8px 0}@media(max-width:760px){.work-grid{grid-template-columns:1fr;height:auto}.work-panel{min-height:350px}} 
 /* The hidden attribute must override .overlay display:flex. */
 [hidden] { display: none !important; }
+
+/* Dark visual system */
+:root{color-scheme:dark;color:#e7edf7;background:#0b111b}
+body{background:#0b111b;color:#e7edf7}
+header{background:#0d1624;border-bottom:1px solid #263449}
+.back,.back-button{color:#9fb8e5}
+p,.meta,.muted,.info-note{color:#a6b4c9}
+.label{color:#8c9fb8}
+h1,h2,.session strong{color:#eef4ff}
+.card,.work-panel,.dialog{background:#131e2d;border-color:#2a3b52;box-shadow:none;color:#e7edf7}
+.session{border-top-color:#2a3b52}
+.source,.plan-body,.chat-placeholder{background:#1b2a3d;color:#e7edf7}
+.badge{background:#203c5a;color:#b5d3fa}
+.bar{background:#263a54}
+.btn{background:#366dcc;color:white}
+.btn:hover{background:#4b84e4}
+.btn.ghost{background:#263750;color:#d7e6fd}
+.field input,.field select{background:#18263a;color:#eef4ff;border-color:#40536c}
+.field input::placeholder{color:#8495ad}
+.notice{background:#25251b;color:#ead39e;border:1px solid #504632}
+.overlay{background:#060d19c9}
+.plan-summary button{background:#23364f;border-color:#405a7b;color:#d8e8ff}
+.pdf-page{background:#1a2535;border-color:#354760;box-shadow:0 8px 28px #0004}
+.workspace{max-width:none;width:100%;margin:0;padding:10px 12px 12px}
+.workspace-top{margin-bottom:9px;min-height:48px}
+.workspace-top h1{font-size:23px!important}
+.workspace-top p{font-size:13px;margin:2px 0}
+.work-grid{grid-template-columns:minmax(310px,1fr) minmax(400px,1.18fr);gap:10px;height:calc(100dvh - 137px);min-height:440px}
+.work-panel{padding:22px;border-radius:12px}
+.work-panel .pdf-page{max-width:620px;min-height:70%;margin:16px auto}
+@media(max-width:760px){.workspace{padding:10px}.work-grid{grid-template-columns:1fr;height:auto;min-height:0}.work-panel{min-height:360px}}
+
 </style>
 </head>
 <body>
