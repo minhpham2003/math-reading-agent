@@ -1,0 +1,409 @@
+MATHEMATICAL READING AGENT — USER SCENARIO INVENTORY
+=====================================================
+
+Purpose
+-------
+These scenarios are prompts for product-design discussions. For each scenario,
+we should ask what the reader expects to see, what they want to do, what the
+agent should know, and how the interface should respond. They deliberately do
+not prescribe a UI solution.
+
+
+A. STARTING AND RETURNING TO READING
+------------------------------------
+
+S01 — First time opening a new book
+You add Hatcher's Algebraic Topology to the app for the first time. The system
+has never seen this book and there are no sessions yet. What should happen?
+
+S02 — Starting a normal new reading session
+You open the Hatcher project with about 60 minutes available. You know which
+section/pages you want to study and want to begin a new session.
+
+S03 — Letting the agent help choose what to read next
+You want to study Hatcher for an hour, but you are not sure what should come
+next based on your previous sessions and the structure of the book.
+
+S04 — Continuing an unfinished session
+You return the next day to a session that you stopped halfway through. You want
+to continue with minimal friction.
+
+S05 — Returning after a long break
+You return to the Hatcher project after three weeks and remember only vaguely
+what you were doing.
+
+S06 — Multiple unfinished sessions
+You open the project and have two or more unfinished sessions. You need to
+understand where each stands and decide what to continue.
+
+
+B. DEFINING A SESSION
+---------------------
+
+S07 — Selecting a reasonable reading range
+You select a section/pages for today's session. The agent thinks the amount is
+appropriate and identifies several conceptual units.
+
+S08 — Selecting too much material
+You select 25 pages for a one-hour session. The agent believes this is
+unrealistic and needs to help negotiate a smaller scope.
+
+S09 — Selection cuts through a mathematical unit
+Your chosen endpoint is halfway through an important proof or construction.
+The agent notices this before the session begins.
+
+S10 — Setting today's purpose
+You have seen the material before and want a refresher rather than a deep first
+reading. On another day, you may want proof-level mastery of the same pages.
+
+S11 — Changing the plan before starting
+The agent proposes a session plan, but you disagree with its emphasis or want
+to skip/reorder part of it.
+
+
+C. THE CORE READING EXPERIENCE
+------------------------------
+
+S12 — Reading a normal conceptual unit
+The session is underway. The agent wants you to read a specific passage of the
+PDF, understand its purpose, and then continue the discussion.
+
+S13 — Moving from one conceptual unit to the next
+You finish a unit and need to understand what was accomplished, how it connects
+to the next unit, and where to read next.
+
+S14 — A dense definition
+You reach a definition whose formal statement is short but conceptually dense.
+You need motivation, examples, and enough space to think about it yourself.
+
+S15 — A long proof
+You reach a substantial proof. Some parts matter conceptually while others are
+technical. You want the agent to guide attention without replacing the act of
+reading the proof.
+
+S16 — A formula or notation is unclear
+A displayed equation or piece of notation in the PDF is blocking your reading.
+You want to point directly at it and ask about it.
+
+S17 — Comparing two nonadjacent passages
+Understanding the current paragraph requires comparing it with a definition,
+result, or equation several pages earlier.
+
+S18 — Material that can be skimmed
+Part of the selected range is routine or less important for today's goal. The
+agent thinks you should skim rather than study it closely.
+
+S19 — Changing pace midway
+Halfway through the session you realize the current level of detail is too slow
+or too fast and tell the agent to change behavior.
+
+S20 — Changing mode locally
+The overall session is a Refresh session, but for one proof you want detailed
+Proof Workshop behavior, after which you want to return to Refresh mode.
+
+
+D. QUESTIONS, CONFUSION, AND PREREQUISITES
+-------------------------------------------
+
+S21 — Quick clarification that should stay inline
+You ask a small question that can be resolved in one or two exchanges without
+leaving the main reading path.
+
+S22 — A substantial proof detour
+A question about one step of a proof becomes a substantial discussion that may
+deserve its own branch.
+
+S23 — Missing prerequisite
+You discover that you no longer remember a prerequisite concept needed for the
+current passage. The prerequisite may require several minutes of review.
+
+S24 — Agent suggests a branch
+The agent predicts that answering your question properly will significantly
+interrupt the main reading path and suggests creating a branch. You decide
+whether to accept.
+
+S25 — Returning from a branch
+You resolve a prerequisite/proof branch and want to return to exactly where the
+main session was interrupted, with enough context to resume reading.
+
+S26 — Branch becomes substantial enough to be its own session
+A detour grows into an important topic in its own right. You decide it should no
+longer be merely a branch of the original session.
+
+S27 — You disagree with the agent
+The agent says a passage has a particular purpose, or claims your reasoning is
+incorrect, and you think the agent is wrong. You want to challenge it while
+keeping the relevant source/context visible.
+
+
+E. EXERCISES AND PRODUCTIVE STRUGGLE
+------------------------------------
+
+S28 — Beginning an exercise seriously
+You reach an exercise selected as part of the session and want to attempt it
+without seeing the solution or excessive hints.
+
+S29 — Asking for one hint
+You are stuck on an exercise and want exactly one useful hint, not the next
+several steps of the solution.
+
+S30 — Showing the agent your attempted proof
+You write or upload your argument. You want the agent to check it carefully
+without immediately replacing it with a polished solution.
+
+S31 — Your attempted solution is wrong
+There is a real flaw in your reasoning. The agent needs to help you locate the
+problem while preserving productive struggle.
+
+S32 — Consulting a solutions source
+A solution manual exists in the project's sources, but it is restricted. You
+explicitly decide that you now want to see or compare the official solution.
+
+
+F. REFERENCES AND CITATIONS
+---------------------------
+
+S33 — Referring precisely to something the agent just wrote
+The agent gives a paragraph containing several claims. You highlight one
+sentence and ask a question specifically about that sentence.
+
+S34 — Referring to an equation generated by the agent
+You want to ask about one exact displayed formula without calling it "the
+second equation above."
+
+S35 — Saving an important reference with a human name
+A construction is likely to matter repeatedly. You want to save it under a
+name such as @concatenated-homotopy.
+
+S36 — Reusing a named reference later in the same session
+Later in the discussion you invoke @concatenated-homotopy rather than finding
+and quoting the original explanation again.
+
+S37 — Citing something from another session
+While working in Session B, you remember an equation/explanation in Session A.
+You locate it, choose "Cite in Session B," and continue writing your draft in
+Session B.
+
+S38 — Following a cross-session citation
+A message contains a citation to another session. You want a quick preview and
+then, if necessary, to open the source without losing your current draft or
+place.
+
+S39 — Agent cites earlier work
+The agent says the current argument uses the same idea you encountered in an
+earlier session and provides a precise citation to that earlier discussion.
+
+S40 — A cited statement was later corrected
+An old message remains referenced, but a later session discovered that the
+statement was incomplete or wrong. The system must preserve the original while
+making the revision visible.
+
+
+G. SESSION ENDING, SUMMARIES, AND MEMORY
+----------------------------------------
+
+S41 — Finishing a normal session
+You complete the planned reading. The agent needs to help consolidate the
+session without turning the ending into a lengthy administrative task.
+
+S42 — Stopping early
+You have to leave after 35 minutes even though the session is unfinished. The
+system needs to preserve where you stopped and what remains.
+
+S43 — Reviewing the generated session summary
+The agent drafts a concrete session summary containing main ideas, demonstrated
+understanding, weaknesses, open questions, important references, and relevance
+for later material. You review it before relying on it in future sessions.
+
+S44 — Correcting the agent's assessment of your understanding
+The summary says you understand a concept well, but you think that assessment
+is too strong. You edit/correct it.
+
+S45 — Revising an old summary because of later evidence
+A later session reveals that an earlier understanding assessment was wrong or
+incomplete. The earlier summary should gain a revision with provenance rather
+than silently changing history.
+
+S46 — Looking through revision history
+You want to see how your understanding of a topic, or the agent's assessment of
+it, changed over time and why each revision occurred.
+
+S47 — Starting a new session that depends on old sessions
+The new session requires concepts studied previously. The new session agent
+should know the relevant summaries and retrieve exact prior material when it
+matters, without loading every previous transcript.
+
+
+H. SOURCES AND INSTRUCTIONS
+---------------------------
+
+S48 — Adding a supplementary book
+You add another topology book to the project and designate it as a
+supplementary explanation rather than the primary text.
+
+S49 — Adding prerequisite/reference material
+You add lecture notes or another book intended primarily for prerequisite
+lookup rather than normal reading sessions.
+
+S50 — Adding your own notes
+You add personal lecture notes or proof attempts. They should be available to
+the agent but clearly distinguished from authoritative published sources.
+
+S51 — Adding a restricted solutions source
+You add solutions but instruct the agent not to consult/reveal them unless you
+explicitly request it.
+
+S52 — Sources disagree
+Hatcher, lecture notes, and another book present something differently. The
+agent must distinguish notation/presentation differences from genuine
+mathematical disagreement and not silently blend them.
+
+S53 — Setting project-wide instructions
+You establish durable rules such as preserving productive struggle, using
+Hatcher's notation, and citing exact passages.
+
+S54 — Overriding instructions for one session
+For today's session you want unusually detailed proofs or a different notation,
+without changing the project's default behavior.
+
+
+I. NAVIGATION AND PROJECT MANAGEMENT
+------------------------------------
+
+S55 — Browsing previous sessions
+You want to find an earlier session without remembering its exact title/date.
+You may remember only the mathematical topic or a result discussed there.
+
+S56 — Finding an old branch
+You remember a useful prerequisite or proof discussion that happened inside a
+branch several sessions ago.
+
+S57 — Searching references
+You type @ or use search to find a named construction, equation, definition,
+PDF passage, or previous agent explanation.
+
+S58 — Moving between sessions with unsent drafts
+You are composing a question in one session, temporarily navigate elsewhere to
+check something, and then return. Nothing you typed should be lost.
+
+S59 — Seeing project-level progress
+After many sessions, you want an overview of what parts of the book have been
+studied, what is unfinished, what needs reinforcement, and what major open
+threads remain.
+
+S60 — Finishing a chapter
+You have completed many sessions covering a chapter and want a higher-level
+synthesis without erasing the individual session records.
+
+
+J. DIFFICULT SOURCE MATERIAL AND FAILURE CASES
+----------------------------------------------
+
+S61 — Poor PDF extraction
+The PDF looks fine visually, but text extraction is incorrect, equations are
+mangled, or the system cannot reliably map extracted text to page coordinates.
+
+S62 — Scanned or unusual mathematical PDF
+The source is a scan or has unusual multi-column/diagram-heavy formatting. The
+normal reading-assistance pipeline cannot understand it perfectly.
+
+S63 — Agent highlights the wrong passage
+The agent's explanation is useful, but its visual anchor/highlight points to the
+wrong location in the PDF.
+
+S64 — Agent misunderstands the mathematical structure
+The agent labels something as a theorem/proof/example incorrectly or proposes a
+poor conceptual division of the selected pages.
+
+S65 — Agent cannot answer confidently from the available sources
+A question requires material not present in the project's sources or is beyond
+what the agent can establish reliably.
+
+
+K. RESEARCH-PAPER READING
+-------------------------
+
+S66 — First pass through a research paper
+You add a research paper and want to understand its landscape before reading
+proofs in detail: main problem, results, dependencies, notation, and required
+background.
+
+S67 — Encountering unfamiliar literature in a paper
+The paper invokes a result or construction from another paper that you have not
+read. You need to decide whether to branch, add the cited paper as a source, or
+continue provisionally.
+
+S68 — Tracking a research idea prompted by reading
+A passage suggests an idea or question of your own. You want to preserve it
+without derailing the reading session or confusing it with the author's claim.
+
+S69 — Comparing related papers/books
+You want to compare how two sources formulate a definition, theorem, proof
+strategy, or example while retaining exact provenance.
+
+
+L. FUTURE PERSONAL MATHEMATICAL LIBRARY
+---------------------------------------
+
+S70 — Saving an example from a book
+You encounter an especially useful example and save it as a durable example
+object linked to its source, concepts, and session discussion.
+
+S71 — Saving your own example
+During a conversation you construct an example or counterexample that is not
+in the source and want to keep it in your personal library.
+
+S72 — Retrieving an old example in a new context
+Months later, a different book introduces a related concept. The agent retrieves
+an example you previously saved because it is genuinely useful here.
+
+S73 — Comparing examples
+You want to compare several saved examples/non-examples/counterexamples to see
+which properties they satisfy and what each one teaches.
+
+
+SUGGESTED DESIGN ORDER
+----------------------
+
+Do not design all 73 scenarios in sequence. A useful first pass is:
+
+1. S02 — Starting a normal new reading session
+2. S07 — Selecting a reasonable reading range
+3. S12 — Reading a normal conceptual unit
+4. S14 — A dense definition
+5. S15 — A long proof
+6. S21 — Quick clarification
+7. S23 — Missing prerequisite
+8. S24 — Agent suggests a branch
+9. S25 — Returning from a branch
+10. S28 — Beginning an exercise seriously
+11. S29 — Asking for one hint
+12. S33 — Referencing agent text
+13. S34 — Referencing an equation
+14. S41 — Finishing a normal session
+15. S43 — Reviewing the session summary
+16. S04 — Continuing an unfinished session
+17. S05 — Returning after a long break
+18. S37 — Cross-session citation
+19. S47 — New session depends on old sessions
+20. S61 — Poor PDF extraction
+
+These twenty scenarios exercise most of the core product model. Once they are
+coherent, the remaining scenarios can expose edge cases and future features.
+
+
+CORE QUESTIONS TO ASK FOR EACH SCENARIO
+---------------------------------------
+
+For every scenario, answer:
+
+1. What do I see when the scenario begins?
+2. What is the most obvious action I should be able to take?
+3. What information should remain visible while I act?
+4. What should the agent do automatically?
+5. What must require my approval?
+6. What can be hidden until I need it?
+7. What state must be preserved afterward?
+8. What permanent objects, if any, are created or changed?
+9. How do I return to where I came from?
+10. What would make this interaction annoying or distracting?
