@@ -40,3 +40,9 @@ Record concrete execution evidence here, including negative results and limitati
 - **Observed:** GitHub source readback contains action menu, confirmation and localStorage deletion logic.
 - **Result:** Source check passed; browser execution and visual tests not performed.
 - **Deployment:** [Preview workflow 41259600359](https://github.com/minhpham2003/math-reading-agent/actions/runs/41259600359) succeeded for commit 2cac0ec. Published gh-pages HTML readback contains the delete menu and confirmation/storage logic. Browser click-through and visual verification remain unperformed.
+
+## V-004 — Suppressed native confirmation regression (2026-11-01)
+- **Reported:** Clicking browser's 'Don't ask me again' blocked deletion because the handler used `window.confirm`.
+- **Fix:** [776c8b0](https://github.com/minhpham2003/math-reading-agent/commit/776c8b03c322e1ccf8901591fcdbb98b13d68c35). Added custom in-app confirmation with Cancel, Delete session, overlay and Escape dismissal; storage update on approval only.
+- **Code inspection:** Passed; fetched branch source contains custom dialog and no `window.confirm`.
+- **End-to-end browser verification:** Not performed. Test both cancel and confirm paths, refresh persistence, and other session controls.
