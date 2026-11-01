@@ -48,9 +48,9 @@ title.textContent=s.title;meta.className='meta';meta.textContent=s.section+' · 
 badge.className='badge';badge.textContent='Not started';const open=document.createElement('button');open.className='back-button';open.textContent='Open →';open.onclick=()=>showSession(s);info.append(title,meta,open);row.append(info,badge);root.append(row);
 });
 }
-function close(){overlay.hidden=true;form.reset();el('newSession').focus();}
-el('newSession').onclick=()=>{overlay.hidden=false;el('title').focus();};
-el('cancel').onclick=close;overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+function close(){overlay.hidden=true;overlay.style.setProperty('display','none','important');form.reset();el('newSession').focus();}
+el('newSession').onclick=()=>{overlay.style.removeProperty('display');overlay.hidden=false;el('title').focus();};
+el('cancel').addEventListener('click',close);overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!overlay.hidden)close();});
 form.addEventListener('submit',e=>{
 e.preventDefault();const first=Number(el('first').value),last=Number(el('last').value);
