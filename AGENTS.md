@@ -35,6 +35,12 @@ Unless the reader explicitly approves a replacement:
 5. Nearly full-screen reading workspace.
 6. Collapsible reading plan.
 
+## Batched documentation during discussion
+- During text-only scenario design, keep track of explicitly approved decisions and pending ideas in the conversation. **Do not write to GitHub after every decision.**
+- At scenario wrap-up, consolidate approved decisions, rationale, deferrals, and closure into `decisions/Sxx.md` in a single logical documentation update.
+- If application/site changes are requested earlier, update relevant design documentation alongside the implementation, including previously approved but not yet recorded decisions.
+- Maintain traceability and revision history while avoiding unnecessary per-decision commits. An explicit user request to update repository documentation is an exception.
+
 ## Always document work
 - Record scenario decisions in `decisions/Sxx.md` with IDs like `S07-D01`.
 - Format approved choices as **Decision: Option B — Workspace-first analysis**: always include the option letter **and a short descriptive keyword**. Use separate readable paragraphs for decision, alternatives, rationale, approval evidence, and implementation/verification.
