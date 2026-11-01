@@ -59,3 +59,9 @@ Preserve dashboard-first navigation; New Session popup; dark mode; agent on the 
 
 ## Current repository limitation
 As inspected on 2026-11-01, `main` contains product documentation but no prototype implementation. S02 prototype completion is user-reported; implementation location and browser verification evidence remain to be established. Do not assume this GitHub documentation repository is the deployed application repository.
+
+## Mandatory preservation of alternatives (all scenarios)
+
+Every approved or pending design decision must preserve the **original offered options** (A, B, C, and any additional choices) with their descriptive labels and substantive differences; identify the **exact selected letter**, if any, and any reader-authored amendment or hybrid. Never replace the alternatives with only a classification or a short summary of the chosen behavior. Keep **UI / Agent behavior / Both** classification *in addition to* the alternatives, not instead of them.
+
+If a decision came from free-form reader direction rather than an option choice, label it **Reader-proposed; no A/B/C vote**. If historical choices are unavailable, write **Original alternatives not recorded; do not reconstruct or invent**. For a proposal not yet chosen, preserve every presented option under **Pending**, without implying approval. This policy applies to **all existing and future scenario records**, including revisions and supersessions.
