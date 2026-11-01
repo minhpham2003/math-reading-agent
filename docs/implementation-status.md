@@ -47,3 +47,11 @@ See [S23](../decisions/S23.md), [S24](../decisions/S24.md), [S25](../decisions/S
 - **S25 — Design closed:** [decision record](../decisions/S25.md), [closure commit](https://github.com/minhpham2003/math-reading-agent/commit/58521da711bb05b46069e4c7c02f8589a7e6606b). UI: **not implemented**; agent behavior: **not implemented**; deployment/test/verification: **not established**.
 
 These are *documentation-only* closures. References UI question S24-D21 is deferred to Section F. The earlier general classified design backlog remains for historical context; these rows are the latest design status.
+
+## S23–S25 tangent interaction demonstration — 2026-11-01
+
+- **Code:** [73bcc74](https://github.com/minhpham2003/math-reading-agent/commit/73bcc744f1be52c5cb55608043583bfc9e743db9) on `prototype/s02-dashboard`, file `prototypes/s02-dashboard/index.html`.
+- **Interface implementation:** Added an embedded, browser-local interactive tangent demo within existing workspace; supports fixed example messages, message action icons, branch creation, parent summaries expandable with historical messages, breadcrumb/tree navigation, nested tangents, user-edited completion summary, message-selection editing, archive and deletion with child reparenting. Existing S02 dashboard/New Session and S07 panels retained.
+- **Agent behavior:** **Not implemented.** Chat commands are simple string-pattern demonstrations, source text and simulated agent messages are fixed; no LLM, automatic prerequisite analysis, mathematical reasoning, real summary generation or PDF integration. Do not equate the demo with approved agent behavior.
+- **Code check:** GitHub readback confirms changes on intended prototype branch; both inline scripts parse with JavaScript syntax checker. **Browser interaction not executed.** No successful deployment of this exact commit independently established.
+- **Limitations:** Prototype interactions illustrate design only and do not fully implement all S24 edge cases; in particular, message ownership and deletion/archival across complex histories require more complete state model and end-to-end testing.
