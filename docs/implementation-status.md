@@ -39,3 +39,11 @@ Updated: 2026-11-01
 | S25 | Preserve state; exact return; editable summary review | Retrieve full tangent history, remember/remention relevant unresolved questions, avoid unsolicited recap | Design only; not implemented |
 
 See [S23](../decisions/S23.md), [S24](../decisions/S24.md), [S25](../decisions/S25.md). Those scenario designs remain open. Agent behavior and UI must each be separately tested before claiming verification.
+
+## S23–S25 design closure — 2026-11-01
+
+- **S23 — Design closed:** [decision record](../decisions/S23.md), [closure commit](https://github.com/minhpham2003/math-reading-agent/commit/7b7c7f01d68109ecf27a0213037c0ecb61ba2e6f). UI: **not implemented**; agent behavior: **not implemented**; deployment/test/verification: **not established**.
+- **S24 — Design closed (D01–D24; D21 deferred):** [decision record](../decisions/S24.md), [closure commit](https://github.com/minhpham2003/math-reading-agent/commit/9a8721107031bba7fdd7702293c951848577b947). Includes later-approved D14–D24 and collapsible parent history. UI: **not implemented**; agent behavior: **not implemented**; deployment/test/verification: **not established**.
+- **S25 — Design closed:** [decision record](../decisions/S25.md), [closure commit](https://github.com/minhpham2003/math-reading-agent/commit/58521da711bb05b46069e4c7c02f8589a7e6606b). UI: **not implemented**; agent behavior: **not implemented**; deployment/test/verification: **not established**.
+
+These are *documentation-only* closures. References UI question S24-D21 is deferred to Section F. The earlier general classified design backlog remains for historical context; these rows are the latest design status.
