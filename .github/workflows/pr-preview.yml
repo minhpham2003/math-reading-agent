@@ -1,0 +1,35 @@
+name: Publish pull request preview
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'prototypes/**'
+      - '.github/workflows/pr-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-preview-${{ github.event.pull_request.number || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check prototype exists
+        run: test -f prototypes/s02-dashboard/index.html
+      - name: Publish preview to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./prototypes/s02-dashboard
+          destination_dir: previews/pr-${{ github.event.pull_request.number || 'manual' }}
+          keep_files: true
+          enable_jekyll: false
+      - name: Preview URL
+        run: echo "Preview at https://${{ github.repository_owner }}.github.io/math-reading-agent/previews/pr-${{ github.event.pull_request.number || 'manual' }}/"
