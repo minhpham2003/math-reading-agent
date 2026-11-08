@@ -20,7 +20,7 @@ export function ReadingMode({sessionId,title,units,onNavigate,onToggle,onSetup}:
  useEffect(()=>{
   if(!detailsId)return;
   const dismiss=(event:PointerEvent)=>{
-   if(event.target instanceof Node && !navigatorRef.current?.contains(event.target))setDetailsId(null);
+   if(event.target instanceof Element && !event.target.closest('.reading-nav-item'))setDetailsId(null);
   };
   document.addEventListener('pointerdown',dismiss);
   return ()=>document.removeEventListener('pointerdown',dismiss);
