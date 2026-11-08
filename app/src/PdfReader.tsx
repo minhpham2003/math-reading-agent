@@ -311,8 +311,8 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     }));
     if (!boxes.length) return;
     setPending({filename,page:Number(page.dataset.pdfPage),text:text.slice(0,2000),boxes});
-    const rects=range.getClientRects();
-    const edge=rects.item(rects.length-1) ?? bounds;
+    const selectionRects=range.getClientRects();
+    const edge=selectionRects.item(selectionRects.length-1) ?? bounds;
     setSelectionPoint({
       x:Math.max(8,Math.min(window.innerWidth-160,edge.right)),
       y:Math.max(8,Math.min(window.innerHeight-46,edge.bottom+8))
