@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { getDocument, GlobalWorkerOptions, type PDFDocumentProxy } from 'pdfjs-dist';
+import { getDocument, GlobalWorkerOptions, TextLayer, type PDFDocumentProxy } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 GlobalWorkerOptions.workerSrc = workerUrl;
@@ -52,12 +52,19 @@ export async function deleteSavedPdf(id: string): Promise<void> {
   } finally { db.close(); }
 }
 
+type Citation = { id: string; filename: string; page: number; text: string; boxes: { x:number;y:number;w:number;h:number }[] };
+const refsKey = (sessionId:string) => 'higher-math:citations:' + sessionId;
+function readRefs(sessionId:string): Citation[] {
+  try { const v:unknown = JSON.parse(localStorage.getItem(refsKey(sessionId)) || '[]'); return Array.isArray(v) ? v as Citation[] : []; }
+  catch { return []; }
+}
 type RenderTask = ReturnType<Awaited<ReturnType<PDFDocumentProxy['getPage']>>['render']>;
-type PageProps = { pdf: PDFDocumentProxy; number: number; scale: number; root: HTMLDivElement | null };
+type PageProps = { pdf: PDFDocumentProxy; number: number; scale: number; root: HTMLDivElement | null; citations: Citation[] };
 
-function ContinuousPage({ pdf, number, scale, root }: PageProps) {
+function ContinuousPage({ pdf, number, scale, root, citations }: PageProps) {
   const holder = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const layerRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [ratio, setRatio] = useState(1.414);
 
@@ -74,6 +81,7 @@ function ContinuousPage({ pdf, number, scale, root }: PageProps) {
     if (!visible || !canvas.current) return;
     let disposed = false;
     let task: RenderTask | undefined;
+    let layer: TextLayer | undefined;
     (async () => {
       try {
         const page = await pdf.getPage(number);
@@ -92,18 +100,26 @@ function ContinuousPage({ pdf, number, scale, root }: PageProps) {
         element.style.height = viewport.height + 'px';
         task = page.render({ canvasContext: context, viewport: page.getViewport({ scale: scale * pixelRatio }) });
         await task.promise;
+        if (disposed || !layerRef.current) return;
+        layerRef.current.replaceChildren();
+        layer = new TextLayer({ textContentSource: page.streamTextContent(), container: layerRef.current, viewport });
+        await layer.render();
       } catch (error) {
         if (!disposed && !(error instanceof Error && error.name === 'RenderingCancelledException'))
           console.error('PDF page render failed', number, error);
       }
     })();
-    return () => { disposed = true; task?.cancel(); };
+    return () => { disposed = true; task?.cancel(); layer?.cancel(); };
   }, [pdf, number, scale, visible]);
 
   const width = pdfPageWidth * scale;
   return <div ref={holder} className="continuous-pdf-page" data-pdf-page={number}
     style={{ width, minHeight: width * ratio }} aria-label={`PDF page ${number}`}>
     <canvas ref={canvas} aria-hidden="true" style={{ display: visible ? 'block' : 'none' }} />
+    <div ref={layerRef} className="textLayer" />
+    {citations.flatMap(ref => ref.boxes.map((b, i) =>
+      <div key={ref.id + '-' + i} className="source-highlight" title={ref.text}
+        style={{left:(b.x*100)+'%',top:(b.y*100)+'%',width:(b.w*100)+'%',height:(b.h*100)+'%'}} />))}
     {!visible && <span className="pdf-page-loading">Page {number}</span>}
   </div>;
 }
@@ -124,6 +140,9 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
   const [toolbarHost, setToolbarHost] = useState<HTMLElement | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [citations, setCitations] = useState<Citation[]>(() => readRefs(sessionId));
+  const [pending, setPending] = useState<Omit<Citation,'id'> | null>(null);
+  const [showCitations, setShowCitations] = useState(false);
   const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
   const onChangeRef = useRef(onPageChange);
   onChangeRef.current = onPageChange;
@@ -147,6 +166,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     let cancelled = false;
     ignoreScrollRef.current = true;
     lastPageRef.current = initialPage;
+    setCitations(readRefs(sessionId)); setPending(null);
     setPdf(null); setFilename(''); setPageNumber(initialPage);
     setPageInput(String(initialPage)); setMessage('');
     getSavedPdf(sessionId).then(async saved => {
@@ -204,6 +224,47 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     }
   }
 
+  function captureSelection() {
+    if (!scrollRoot) return;
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return;
+    const text = sel.toString().trim();
+    if (!text) return;
+    const range = sel.getRangeAt(0);
+    const origin = range.startContainer.nodeType === Node.ELEMENT_NODE ?
+      range.startContainer as Element : range.startContainer.parentElement;
+    const ending = range.endContainer.nodeType === Node.ELEMENT_NODE ?
+      range.endContainer as Element : range.endContainer.parentElement;
+    const page = origin?.closest<HTMLElement>('[data-pdf-page]');
+    if (!page || page !== ending?.closest('[data-pdf-page]') || !scrollRoot.contains(page)) {
+      setMessage('Please select a passage within one PDF page.'); return;
+    }
+    const bounds = page.getBoundingClientRect();
+    const boxes = Array.from(range.getClientRects()).filter(b => b.width > 1 && b.height > 1)
+      .map(b => ({x:(b.left-bounds.left)/bounds.width,y:(b.top-bounds.top)/bounds.height,
+        w:b.width/bounds.width,h:b.height/bounds.height}));
+    if (!boxes.length) return;
+    setPending({filename,page:Number(page.dataset.pdfPage),text:text.slice(0,2000),boxes});
+    setMessage('');
+  }
+  function saveCitation() {
+    if (!pending) return;
+    const next = [...citations, {...pending,id:crypto.randomUUID()}];
+    try {localStorage.setItem(refsKey(sessionId),JSON.stringify(next));setCitations(next);
+      setPending(null);window.getSelection()?.removeAllRanges();setShowCitations(true);}
+    catch {setMessage('Could not save the citation in browser storage.');}
+  }
+  function deleteCitation(id:string) {
+    const next = citations.filter(ref => ref.id !== id);
+    try {localStorage.setItem(refsKey(sessionId),JSON.stringify(next));setCitations(next);}
+    catch {setMessage('Could not delete citation.');}
+  }
+  function goCitation(ref:Citation) {
+    if (ref.filename !== filename) {setMessage('This citation belongs to another imported PDF.');return;}
+    jump(ref.page);
+    setShowCitations(false);
+  }
+
   function submitPage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const next = Number(pageInput);
@@ -224,7 +285,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       ignoreScrollRef.current = true;
       lastPageRef.current = 1;
       setPdf(loaded); setFilename(file.name); setPageNumber(1); setPageInput('1');
-      setZoom(1); setFitWidth(true);
+      setZoom(1); setFitWidth(true); setPending(null);
       onChangeRef.current(1);
     } catch {
       setMessage('The PDF could not be imported or saved. Check the file and your browser storage.');
@@ -232,6 +293,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
   }
 
   const controls = <div className="pdf-toolbar">
+    <button className="secondary" onClick={() => setShowCitations(v => !v)}>Sources ({citations.length})</button>
     <label className="secondary pdf-import">{filename ? 'Replace PDF' : 'Import PDF'}
       <input type="file" accept=".pdf,application/pdf" disabled={busy} onChange={e => {
         const file = e.target.files?.[0]; if (file) void importFile(file); e.target.value = '';
@@ -262,10 +324,23 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     {toolbarHost ? createPortal(controls, toolbarHost) : (!toolbarHostId ? controls : null)}
     {message && <p role="alert" className="pdf-error">{message}</p>}
     {busy && <p className="muted">Importing PDF…</p>}
+    {pending && <div className="selection-actions"><span>Page {pending.page}: “{pending.text.slice(0,90)}”</span>
+      <button className="primary" onClick={saveCitation}>Save citation</button>
+      <button className="secondary" onClick={() => {setPending(null);window.getSelection()?.removeAllRanges();}}>Cancel</button></div>}
+    {showCitations && <aside className="sources-drawer" aria-label="Saved source references">
+      <div className="sources-heading"><strong>Saved citations</strong><button onClick={() => setShowCitations(false)}>×</button></div>
+      {citations.length===0 && <p>Select text in your PDF to create a citation.</p>}
+      {citations.map(ref => <div className="source-entry" key={ref.id}>
+        <button className="source-entry-link" onClick={() => goCitation(ref)}>
+          <strong>{ref.filename} · p. {ref.page}</strong><span>“{ref.text}”</span></button>
+        <button className="secondary" onClick={() => void navigator.clipboard.writeText(ref.filename+', PDF p. '+ref.page+': “'+ref.text+'”').catch(()=>setMessage('Clipboard unavailable.'))}>Copy</button>
+        <button className="secondary" onClick={() => deleteCitation(ref.id)}>Remove</button>
+      </div>)}
+    </aside>
     {pdf ?
-      <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll}>
+      <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseUp={() => window.setTimeout(captureSelection,0)} onKeyUp={() => window.setTimeout(captureSelection,0)}>
         {Array.from({ length: pdf.numPages }, (_, i) =>
-          <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} />)}
+          <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} />)}
       </div> :
       <div className="pdf-placeholder"><div className="eyebrow">Real PDF reader</div><h3>Choose a PDF to begin</h3>
         <p>The file is stored locally in this browser for this session. It is not uploaded to a server.</p>
