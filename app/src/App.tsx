@@ -107,6 +107,11 @@ export function App() {
         {agentOpen && <article className="work-panel agent-panel"><div className="eyebrow">Reading agent · left panel</div><h2>Your session</h2><div className="agent-placeholder"><div className="eyebrow">Agent not connected</div><strong>Let's plan your reading session</strong><p>You selected {active.target}, printed pages {active.firstPage}–{active.lastPage}. Source analysis will be added after the real PDF reader is connected.</p></div>
           <div className="plan-heading"><strong>Reading plan</strong><button className="secondary" aria-expanded={planOpen} onClick={() => setPlanOpen(!planOpen)}>{planOpen ? 'Collapse ▴' : 'Expand ▾'}</button></div>
           {planOpen && <div className="plan-body"><p>No plan has been generated. The S07 assessment → plan approval flow is part of a later implementation milestone.</p></div>}
+          <div className="reader-test-note" role="note">
+            <strong>Try this in the PDF</strong>
+            <p>Select an entire paragraph across a line or paragraph break, including the top lines. Does the selection capture everything? Then try saving it as a citation.</p>
+            <span>Testing the PDF text-selection feature · no AI connected yet</span>
+          </div>
         </article>}
         <article className="work-panel pdf-panel">
           <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} toolbarHostId="reader-toolbar-slot" />
