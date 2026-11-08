@@ -138,3 +138,11 @@
 
 /* Citation action moves with document content instead of sticking to viewport. */
 .floating-citation-action{position:absolute;z-index:12;top:auto;left:auto;height:auto}
+
+/* Replace irregular native selection rectangles with one consistent band per visual line
+   while the selection action is active. Normal browser selection remains during dragging. */
+.pdf-reader.has-visual-selection .textLayer ::selection{background:transparent!important}
+.continuous-pdf-page .visual-selection-highlight{
+  position:absolute;z-index:3;pointer-events:none;background:rgba(72,133,231,.28);
+  border-radius:2px;outline:0;
+}
