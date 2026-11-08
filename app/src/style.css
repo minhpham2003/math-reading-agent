@@ -146,3 +146,26 @@
   position:absolute;z-index:3;pointer-events:none;background:rgba(72,133,231,.28);
   border-radius:2px;outline:0;
 }
+
+/* Manual S07 scope assessment and reading-plan editor */
+.reading-flow{display:flex;flex-direction:column;gap:11px;color:#dce8fb}
+.reading-flow h2{margin:0}.reading-flow p{margin:0}
+.reading-flow input,.reading-flow textarea{width:100%;border:1px solid #435d7c;border-radius:7px;background:#0d1b2e;color:#e6f0ff;padding:8px;font:inherit;font-size:13px;resize:vertical}
+.reading-flow label{font-size:12px;color:#bfcfe6;display:block}
+.reading-flow label input,.reading-flow label textarea{margin-top:5px}
+.assessment-fields{display:grid;gap:11px}
+.assessment-summary{border:1px solid #344e69;border-radius:8px;padding:12px;background:#182b40}
+.assessment-summary p{font-size:12px;line-height:1.55;margin-bottom:8px;overflow-wrap:anywhere}
+.flow-stage{font-size:12px;color:#a8d3e5;border:1px solid #36566d;border-radius:8px;padding:10px;background:#14283b}
+.flow-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.flow-actions .secondary,.flow-actions .primary,.flow-plan>.primary{font-size:12px;padding:8px 10px}
+.flow-actions button:disabled{opacity:.35}
+.reading-flow .plan-heading{margin:13px 0 0;border-top:1px solid #34516b;padding-top:15px}
+.flow-plan{display:flex;flex-direction:column;gap:13px}
+.flow-unit,.new-unit{display:flex;flex-direction:column;gap:10px;border:1px solid #364f6a;background:#192a3f;padding:11px;border-radius:9px}
+.flow-unit-title{display:flex;align-items:center;gap:8px}
+.flow-unit-title input{flex:1;font-weight:700}
+.flow-unit-fields{display:grid;grid-template-columns:90px 1fr;gap:8px}
+.new-unit strong{font-size:13px}
+.unit-done{display:flex!important;gap:5px;align-items:center}
+.unit-done input{width:auto;margin:0}
