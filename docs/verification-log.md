@@ -26,3 +26,12 @@
 - **Destination (conditional on success):** https://minhpham2003.github.io/math-reading-agent/previews/react-foundation/
 - **Last observed:** GitHub Actions run in progress. Build result, deployment, published files, browser behavior and visual layout not yet verified.
 - **Isolation:** Workflow targets a separate gh-pages subfolder and uses keep_files, preserving the earlier S02 preview.
+
+## V-011 — PDF.js browser PDF integration (2026-11-08)
+
+- **Implementation:** [f06a797](https://github.com/minhpham2003/math-reading-agent/commit/f06a797b0e1277e8fa644b4f744e00a5991ae6a5).
+- **First build:** [run 42526692837](https://github.com/minhpham2003/math-reading-agent/actions/runs/42526692837) failed TypeScript because the PDF worker ?url import lacked Vite client type declarations.
+- **Fix:** Added `vite-env.d.ts` declaring Vite client types.
+- **Subsequent build and deployment:** [run 42526745787](https://github.com/minhpham2003/math-reading-agent/actions/runs/42526745787) **passed**. GitHub Pages published index HTML and linked bundle verified via repo readback.
+- **Not yet tested:** Render a real uploaded PDF in browser; next/previous page clicks; zoom; reload/resume PDF position; PDF file persistence across reload; replacement import; storage quota failures; deletion cleanup; mobile layout and console; regression of S02 buttons.
+- **Status:** Build/deployment verified; browser user-flow verification pending.
