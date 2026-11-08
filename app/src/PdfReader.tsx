@@ -1,7 +1,8 @@
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { getDocument, GlobalWorkerOptions, TextLayer, type PDFDocumentProxy } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import 'pdfjs-dist/web/pdf_viewer.css';
 
 GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -125,7 +126,7 @@ function ContinuousPage({ pdf, number, scale, root, citations }: PageProps) {
 
   const width = pdfPageWidth * scale;
   return <div ref={holder} className="continuous-pdf-page" data-pdf-page={number}
-    style={{ width, minHeight: width * ratio }} aria-label={`PDF page ${number}`}>
+    style={{ width, minHeight: width * ratio, '--scale-factor': scale } as CSSProperties} aria-label={`PDF page ${number}`}>
     <canvas ref={canvas} aria-hidden="true" style={{ display: visible ? 'block' : 'none' }} />
     <div ref={layerRef} className="textLayer" />
     {citations.flatMap(ref => tidyBoxes(ref.boxes).map((b, i) =>
