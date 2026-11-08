@@ -319,6 +319,19 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     });
     setMessage('');
   }
+  useEffect(() => {
+    if (!pending) return;
+    const dismiss = (event: PointerEvent) => {
+      const element = event.target;
+      if (element instanceof Element && element.closest('.floating-citation-action')) return;
+      // Allow a new drag selection to replace the pending selection on mouse-up.
+      setPending(null);
+      setSelectionPoint(null);
+    };
+    window.document.addEventListener('pointerdown', dismiss);
+    return () => window.document.removeEventListener('pointerdown', dismiss);
+  }, [pending]);
+
   function saveCitation() {
     if (!pending) return;
     const next = [...citations, {...pending,id:crypto.randomUUID()}];
@@ -416,9 +429,6 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     </aside>}
     {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
       <button type="button" className="primary" onClick={saveCitation}>Save Citation</button>
-      <button type="button" className="floating-dismiss" aria-label="Dismiss citation selection" onClick={()=>{
-        setPending(null);setSelectionPoint(null);window.getSelection()?.removeAllRanges();
-      }}>×</button>
     </div>}
     {pdf ?
       <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseUp={() => window.setTimeout(captureSelection,0)} onKeyUp={() => window.setTimeout(captureSelection,0)}>
