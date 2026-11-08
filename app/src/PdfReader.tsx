@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { getDocument, GlobalWorkerOptions, TextLayer, type PDFDocumentProxy } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -171,6 +171,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
   const ignoreScrollRef = useRef(true);
   const zoomAnchor = useRef<{page:number; fraction:number; viewportY:number} | null>(null);
   const previousScale = useRef<number | null>(null);
+  const dragStart = useRef<{x:number;y:number;page:number} | null>(null);
 
   useEffect(() => {
     setToolbarHost(toolbarHostId ? window.document.getElementById(toolbarHostId) : null);
@@ -287,6 +288,75 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       setPageNumber(current); setPageInput(String(current));
       onChangeRef.current(current);
     }
+  }
+
+
+  // Visual-order selection: PDF text streams may store a sentence-ending period
+  // before its preceding equation. Sort glyphs by their *screen* position instead.
+  function captureVisualDrag(endX:number,endY:number) {
+    const start=dragStart.current;
+    dragStart.current=null;
+    if(!start||!scrollRoot||Math.hypot(endX-start.x,endY-start.y)<4)return false;
+    const layer=scrollRoot.querySelector<HTMLElement>('[data-pdf-page="'+start.page+'"]');
+    if(!layer)return false;
+    const pageRect=layer.getBoundingClientRect();
+    type Glyph={value:string;rect:DOMRect;cx:number;cy:number};
+    const glyphs:Glyph[]=[];
+    for(const span of layer.querySelectorAll<HTMLElement>('.textLayer span')){
+      const node=span.firstChild;
+      if(!node || node.nodeType!==Node.TEXT_NODE || !node.textContent)continue;
+      const content=node.textContent;
+      const range=window.document.createRange();
+      for(let i=0;i<content.length;i++){
+        if(content[i]==='\n'||content[i]==='\r')continue;
+        range.setStart(node,i);range.setEnd(node,i+1);
+        const box=range.getBoundingClientRect();
+        if(box.width<.2||box.height<1)continue;
+        glyphs.push({value:content[i],rect:box,cx:(box.left+box.right)/2,cy:(box.top+box.bottom)/2});
+      }
+      range.detach();
+    }
+    if(!glyphs.length)return false;
+    // Use same-line y tolerance, then x order: visual reading order does not
+    // depend on the order in which equations were encoded in the PDF.
+    glyphs.sort((a,b)=>Math.abs(a.cy-b.cy)<Math.min(a.rect.height,b.rect.height)*.42
+      ? a.cx-b.cx : a.cy-b.cy);
+    function nearest(x:number,y:number){
+      let best=0,score=Infinity;
+      glyphs.forEach((g,i)=>{
+        const dx=Math.max(g.rect.left-x,0,x-g.rect.right);
+        const dy=Math.max(g.rect.top-y,0,y-g.rect.bottom);
+        const dist=dx*dx+dy*dy;
+        if(dist<score){score=dist;best=i;}
+      });
+      return best;
+    }
+    const a=nearest(start.x,start.y),b=nearest(endX,endY);
+    const chosen=glyphs.slice(Math.min(a,b),Math.max(a,b)+1);
+    if(!chosen.length)return false;
+    const boxes=chosen.filter(g=>g.value.trim()).map(g=>({
+      x:(g.rect.left-pageRect.left)/pageRect.width,y:(g.rect.top-pageRect.top)/pageRect.height,
+      w:g.rect.width/pageRect.width,h:g.rect.height/pageRect.height
+    }));
+    if(!boxes.length)return false;
+    const text=chosen.map(g=>g.value).join('').slice(0,2000);
+    setPending({filename,page:start.page,text,boxes});
+    setVisualSelection({page:start.page,boxes});
+    setSelectionPoint({x:Math.max(8,endX-scrollRoot.getBoundingClientRect().left+scrollRoot.scrollLeft),
+      y:Math.max(8,endY-scrollRoot.getBoundingClientRect().top+scrollRoot.scrollTop+8)});
+    window.getSelection()?.removeAllRanges();
+    setMessage('');
+    return true;
+  }
+  function onPdfMouseDown(event: ReactMouseEvent<HTMLDivElement>){
+    if(event.button!==0 || !(event.target instanceof Element) ||
+       !event.target.closest('.textLayer')){dragStart.current=null;return;}
+    const page=event.target.closest<HTMLElement>('[data-pdf-page]');
+    dragStart.current=page?{x:event.clientX,y:event.clientY,page:Number(page.dataset.pdfPage)}:null;
+  }
+  function onPdfMouseUp(event: React.MouseEvent<HTMLDivElement>){
+    if(captureVisualDrag(event.clientX,event.clientY))return;
+    window.setTimeout(captureSelection,0);
   }
 
   function captureSelection() {
@@ -460,7 +530,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       </div>)}
     </aside>}
     {pdf ?
-      <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseUp={() => window.setTimeout(captureSelection,0)} onKeyUp={() => window.setTimeout(captureSelection,0)}>
+      <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseDown={onPdfMouseDown} onMouseUp={onPdfMouseUp} onKeyUp={() => window.setTimeout(captureSelection,0)}>
     {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
       <button type="button" className="primary" onClick={saveCitation}>Save Citation</button>
     </div>}
