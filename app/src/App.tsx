@@ -72,7 +72,7 @@ export function App() {
   }, [deleteId, newSessionOpen]);
 
   return <div className="app-shell">
-    <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><span className="topbar-tag">App foundation · no AI connected</span></header>
+    {!active && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><span className="topbar-tag">App foundation · no AI connected</span></header>}
     {storageError && <div role="alert" className="alert">{storageError}</div>}
     {!active ? <main className="dashboard">
       <div className="breadcrumb">← Library / Projects / Hatcher</div>
@@ -93,14 +93,22 @@ export function App() {
       </div>
       <p className="notice">Application foundation: sessions and printed-page position are saved in this browser. AI analysis, reading plans, PDF rendering, and cloud sync are not connected.</p>
     </main> : <section className="workspace">
-      <div className="workspace-top"><div><button className="text-button" onClick={() => navigate(null)}>← Back to Hatcher dashboard</button><h1>{active.title}</h1><p>{active.target} · pp. {active.firstPage}–{active.lastPage} · {active.durationMinutes} min</p></div><span className="badge">Session setup</span></div>
+      <div className="reader-header">
+        <div className="reader-header-identity">
+          <button className="reader-back" onClick={() => navigate(null)} aria-label="Back to Hatcher dashboard" title="Back to dashboard">←</button>
+          <span className="reader-session-name" title={active.title}>{active.title}</span>
+          <details className="reader-details"><summary title="Session details" aria-label="Session details">⋯</summary><div className="reader-details-pop"><strong>{active.title}</strong><p>{active.target}</p><p>Printed pp. {active.firstPage}–{active.lastPage} · {active.durationMinutes} min</p><p>PDF page numbers may differ from printed pages.</p></div></details>
+        </div>
+        <div id="reader-toolbar-slot" className="reader-toolbar-slot" aria-label="PDF controls"></div>
+        <button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button>
+      </div>
       <div className={agentOpen ? "work-grid" : "work-grid agent-collapsed"}>
-        {agentOpen && <article className="work-panel agent-panel"><div className="panel-toolbar"><button className="secondary" type="button" onClick={() => setAgentOpen(false)} aria-label="Collapse reading agent panel">Hide agent ←</button></div><div className="eyebrow">Reading agent · left panel</div><h2>Your session</h2><div className="agent-placeholder"><div className="eyebrow">Agent not connected</div><strong>Let's plan your reading session</strong><p>You selected {active.target}, printed pages {active.firstPage}–{active.lastPage}. Source analysis will be added after the real PDF reader is connected.</p></div>
+        {agentOpen && <article className="work-panel agent-panel"><div className="eyebrow">Reading agent · left panel</div><h2>Your session</h2><div className="agent-placeholder"><div className="eyebrow">Agent not connected</div><strong>Let's plan your reading session</strong><p>You selected {active.target}, printed pages {active.firstPage}–{active.lastPage}. Source analysis will be added after the real PDF reader is connected.</p></div>
           <div className="plan-heading"><strong>Reading plan</strong><button className="secondary" aria-expanded={planOpen} onClick={() => setPlanOpen(!planOpen)}>{planOpen ? 'Collapse ▴' : 'Expand ▾'}</button></div>
           {planOpen && <div className="plan-body"><p>No plan has been generated. The S07 assessment → plan approval flow is part of a later implementation milestone.</p></div>}
         </article>}
-        <article className="work-panel pdf-panel"><div className="panel-toolbar">{!agentOpen && <button type="button" className="secondary" onClick={() => setAgentOpen(true)}>→ Show reading agent</button>}</div><div className="eyebrow">Primary source · right panel</div><h2>Hatcher — Algebraic Topology</h2><div className="muted">Selected printed pages: {active.firstPage}–{active.lastPage}</div>
-          <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} />
+        <article className="work-panel pdf-panel">
+          <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} toolbarHostId="reader-toolbar-slot" />
         </article>
       </div>
     </section>}
