@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { loadSessions, saveSessions, type ReadingSession } from './storage';
+import { PdfReader, deleteSavedPdf } from './PdfReader';
 
 type SessionFormState = {
   title: string; target: string; firstPage: string; lastPage: string; durationMinutes: string;
@@ -49,13 +50,14 @@ export function App() {
     if (persist(sessions.filter(s => s.id !== deleteId))) {
       if (activeId === deleteId) navigate(null);
       setDeleteId(null);
+      void deleteSavedPdf(deleteId).catch(() => setStorageError('Session deleted, but its cached PDF could not be cleared.'));
     }
   }
   function updatePage(page: number) {
-    if (!active || page < active.firstPage || page > active.lastPage) return;
+    if (!active || page < 1) return;
     const now = new Date().toISOString();
     persist(sessions.map(s => s.id === active.id ? {
-      ...s, currentPrintedPage: page, updatedAt: now, status: 'in-progress'
+      ...s, pdfPage: page, updatedAt: now, status: 'in-progress'
     } : s));
   }
   useEffect(() => {
@@ -97,7 +99,7 @@ export function App() {
           {planOpen && <div className="plan-body"><p>No plan has been generated. The S07 assessment → plan approval flow is part of a later implementation milestone.</p></div>}
         </article>
         <article className="work-panel pdf-panel"><div className="eyebrow">Primary source · right panel</div><h2>Hatcher — Algebraic Topology</h2><div className="muted">Selected printed pages: {active.firstPage}–{active.lastPage}</div>
-          <div className="pdf-placeholder"><div className="eyebrow">PDF reader integration pending</div><h3>Printed page {active.currentPrintedPage}</h3><p>This is a position tracker, not a rendered PDF page.</p><div className="page-controls"><button className="secondary" disabled={active.currentPrintedPage <= active.firstPage} onClick={() => updatePage(active.currentPrintedPage - 1)}>← Previous</button><button className="secondary" disabled={active.currentPrintedPage >= active.lastPage} onClick={() => updatePage(active.currentPrintedPage + 1)}>Next →</button></div></div>
+          <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} />
         </article>
       </div>
     </section>}
