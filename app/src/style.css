@@ -179,3 +179,19 @@
 .flow-unit-location{color:#b6d6ef;font-size:12px}
 .flow-page-range label{min-width:0}
 .flow-page-range input{width:100%}
+
+/* Readable agent-side typography; keep the Collapse / Expand control at its original size. */
+.reading-flow{font-size:16px;line-height:1.55;gap:15px}
+.reading-flow .eyebrow{font-size:14px}
+.reading-flow h2{font-size:25px}
+.reading-flow p,.reading-flow .muted{font-size:16px;line-height:1.6}
+.reading-flow .flow-stage{font-size:16px}
+.reading-flow .assessment-summary p{font-size:17px;line-height:1.6;margin-bottom:11px}
+.reading-flow label{font-size:16px}
+.reading-flow input,.reading-flow textarea{font-size:16px;line-height:1.45}
+.reading-flow .flow-actions .secondary,.reading-flow .flow-actions .primary,.reading-flow .flow-plan>.primary{font-size:16px}
+.reading-flow .flow-plan .flow-unit-location{font-size:16px}
+.reading-flow .new-unit strong{font-size:17px}
+.reading-flow .plan-heading strong{font-size:20px}
+/* Explicit exception requested: the Collapse button remains unchanged. */
+.reading-flow .plan-heading > button{font-size:12px}
