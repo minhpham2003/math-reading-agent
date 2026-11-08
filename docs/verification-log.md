@@ -50,3 +50,11 @@
 - **Changed:** All PDF pages in a vertical scroll container, with IntersectionObserver-based lazy canvas rendering; current physical PDF page tracks scroll, editable page-number form jumps on Enter, arrow buttons remain; page position persists using existing session state.
 - **Build:** [GitHub Actions run 42528701219](https://github.com/minhpham2003/math-reading-agent/actions/runs/42528701219) succeeded. Deployed index exists on gh-pages.
 - **Outstanding:** Browser verification of scrolling, rendering, page tracking, page jump and restoration; performance on large documents, mixed page dimensions, and very fast scrolling not yet verified.
+
+## V-014 — Selectable PDF text and saved local source citations (2026-11-08)
+
+- **Implementation:** [061b40a](https://github.com/minhpham2003/math-reading-agent/commit/061b40acdbca498947a2271256b02223fa93db86), [2ecbc6b](https://github.com/minhpham2003/math-reading-agent/commit/2ecbc6bd957842d56295ea1fa3c3b42ce0ed9dd1), [a5c97af](https://github.com/minhpham2003/math-reading-agent/commit/a5c97af315a0a011067b4e6bc9cf3945d02d065d).
+- **Features in source:** PDF.js per-page selectable text overlays; selecting text within one page exposes save citation; references contain filename, physical PDF page, text quotation and normalized selection rectangles; saved in browser localStorage by session; citations drawer supports navigation, copy and removal; persistent highlights drawn on the PDF; session deletion also clears local citation records.
+- **Build:** First attempt failed from a JSX closing brace, fixed. Latest [run 42530169298](https://github.com/minhpham2003/math-reading-agent/actions/runs/42530169298) succeeded. Published bundle available on gh-pages.
+- **Limitations:** Source anchors are page/selection-box based, not stable text-offset or equation identifiers. Only same-page text selections. PDF extraction may not correctly reconstruct mathematical symbols. References are local browser data, not synced. No agent integration yet. Changing a PDF with the same filename may invalidate stored highlights.
+- **Outstanding browser checks:** Selection alignment and drag interaction, quote accuracy, highlights at different zoom levels, citation navigation, reload persistence, session deletion, and earlier PDF features. Build/deployment verification is not behavioral verification.
