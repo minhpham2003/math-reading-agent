@@ -242,7 +242,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       <div className="pdf-control-group pdf-navigation-group">
       <button className="secondary" onClick={() => jump(pageNumber - 1)} disabled={pageNumber <= 1} aria-label="Previous PDF page">←</button>
       <form className="pdf-page-form" onSubmit={submitPage}>
-        <span>PDF </span><input name="page" type="number" min={1} max={pdf.numPages} value={pageInput}
+        <input name="page" type="number" min={1} max={pdf.numPages} value={pageInput}
           onChange={e => setPageInput(e.target.value)} aria-label="Jump to PDF page"
           onBlur={() => setPageInput(String(pageNumber))} />
         <span> / {pdf.numPages}</span>
