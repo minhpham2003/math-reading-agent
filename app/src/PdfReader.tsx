@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { getDocument, GlobalWorkerOptions, TextLayer, type PDFDocumentProxy } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
@@ -57,6 +57,17 @@ const refsKey = (sessionId:string) => 'higher-math:citations:' + sessionId;
 function readRefs(sessionId:string): Citation[] {
   try { const v:unknown = JSON.parse(localStorage.getItem(refsKey(sessionId)) || '[]'); return Array.isArray(v) ? v as Citation[] : []; }
   catch { return []; }
+}
+type Box = Citation['boxes'][number];
+function tidyBoxes(boxes: Box[]): Box[] {
+ const rows: Box[] = [];
+ for(const b of boxes.filter(b=>[b.x,b.y,b.w,b.h].every(Number.isFinite) && b.w>0 && b.h>0).sort((a,b)=>a.y-b.y||a.x-b.x)){
+  const row=rows.find(r=>Math.abs((r.y+r.h/2)-(b.y+b.h/2))<Math.min(r.h,b.h)*.4 && b.x<=r.x+r.w+.022 && b.x+b.w>=r.x-.022);
+  if(!row){rows.push({...b});continue;}
+  const x=Math.min(row.x,b.x), y=Math.min(row.y,b.y);
+  row.w=Math.max(row.x+row.w,b.x+b.w)-x; row.h=Math.max(row.y+row.h,b.y+b.h)-y;row.x=x;row.y=y;
+ }
+ return rows.map(b=>({x:b.x,y:b.y+b.h*.15,w:b.w,h:b.h*.7}));
 }
 type RenderTask = ReturnType<Awaited<ReturnType<PDFDocumentProxy['getPage']>>['render']>;
 type PageProps = { pdf: PDFDocumentProxy; number: number; scale: number; root: HTMLDivElement | null; citations: Citation[] };
@@ -117,7 +128,7 @@ function ContinuousPage({ pdf, number, scale, root, citations }: PageProps) {
     style={{ width, minHeight: width * ratio }} aria-label={`PDF page ${number}`}>
     <canvas ref={canvas} aria-hidden="true" style={{ display: visible ? 'block' : 'none' }} />
     <div ref={layerRef} className="textLayer" />
-    {citations.flatMap(ref => ref.boxes.map((b, i) =>
+    {citations.flatMap(ref => tidyBoxes(ref.boxes).map((b, i) =>
       <div key={ref.id + '-' + i} className="source-highlight" title={ref.text}
         style={{left:(b.x*100)+'%',top:(b.y*100)+'%',width:(b.w*100)+'%',height:(b.h*100)+'%'}} />))}
     {!visible && <span className="pdf-page-loading">Page {number}</span>}
@@ -148,6 +159,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
   onChangeRef.current = onPageChange;
   const lastPageRef = useRef(initialPage);
   const ignoreScrollRef = useRef(true);
+  const zoomAnchor = useRef<{page:number; fraction:number; viewportY:number} | null>(null);
 
   useEffect(() => {
     setToolbarHost(toolbarHostId ? window.document.getElementById(toolbarHostId) : null);
