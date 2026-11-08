@@ -563,6 +563,11 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
           <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} selectionBoxes={visualSelection?.page===i+1 ? visualSelection.boxes : undefined} />)}
       </div> :
       <div className="pdf-placeholder"><div className="eyebrow">Real PDF reader</div><h3>Choose a PDF to begin</h3>
+        <label className="primary pdf-import pdf-empty-import">Import PDF
+          <input type="file" accept=".pdf,application/pdf" disabled={busy} onChange={e => {
+            const file=e.target.files?.[0]; if(file) void importFile(file); e.target.value='';
+          }} />
+        </label>
         <p>The file is stored locally in this browser for this session. It is not uploaded to a server.</p>
         <p className="muted">PDF page numbers may differ from printed textbook page numbers.</p></div>}
   </div>;
