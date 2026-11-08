@@ -58,3 +58,10 @@
 - **Build:** First attempt failed from a JSX closing brace, fixed. Latest [run 42530169298](https://github.com/minhpham2003/math-reading-agent/actions/runs/42530169298) succeeded. Published bundle available on gh-pages.
 - **Limitations:** Source anchors are page/selection-box based, not stable text-offset or equation identifiers. Only same-page text selections. PDF extraction may not correctly reconstruct mathematical symbols. References are local browser data, not synced. No agent integration yet. Changing a PDF with the same filename may invalidate stored highlights.
 - **Outstanding browser checks:** Selection alignment and drag interaction, quote accuracy, highlights at different zoom levels, citation navigation, reload persistence, session deletion, and earlier PDF features. Build/deployment verification is not behavioral verification.
+
+## V-015 — Citation highlight / passage navigation / zoom anchor corrections (2026-11-08)
+
+- **User-reported bugs:** Fragmented harsh highlighting, citation return to page top instead of selected passage, page switching during zoom.
+- **Changes:** [e9bf19e](https://github.com/minhpham2003/math-reading-agent/commit/e9bf19eb26ff1b7bec5b5b264171f210b8d706b4) combines adjacent selection fragments into line bands; [d318d24](https://github.com/minhpham2003/math-reading-agent/commit/d318d2460a1f9de5fe5a8836afc4610038182cf3) scrolls to selected normalized y-position and tracks passage-relative zoom location; [6ecb4ba](https://github.com/minhpham2003/math-reading-agent/commit/6ecb4ba77f8df710005e88db818294b6b90d60f3) softens highlight visuals.
+- **Build/deploy:** [run 42530685687](https://github.com/minhpham2003/math-reading-agent/actions/runs/42530685687) succeeded; published Pages index confirmed.
+- **User browser verification pending:** citation highlight line grouping, exact scroll offset under zoom, stability when fit width changes or resizing panels, PDF page number tracking.
