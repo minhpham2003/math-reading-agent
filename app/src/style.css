@@ -104,3 +104,10 @@
 
 /* Softer, consolidated passage highlights instead of fragmented outlined blocks. */
 .continuous-pdf-page .source-highlight{background:rgba(244,195,54,.22);outline:none;border-radius:2px;box-shadow:none;mix-blend-mode:multiply}
+
+/* Keep the browser from shifting the page on canvas/text-layer reflow. */
+.workspace .pdf-canvas-scroll.continuous-scroll{overflow-anchor:none}
+.continuous-pdf-page{overflow-anchor:none}
+.continuous-pdf-page .textLayer{pointer-events:none}
+.continuous-pdf-page .textLayer span{pointer-events:auto;cursor:text}
+.continuous-pdf-page .textLayer br{pointer-events:none}
