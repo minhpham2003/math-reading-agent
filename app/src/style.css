@@ -119,3 +119,9 @@
 .floating-dismiss{border:0;background:#263750;color:#dae9ff;border-radius:5px;padding:6px 8px;box-shadow:0 4px 14px #0008}
 
 .floating-citation-action{position:fixed;height:auto;top:auto;left:auto}
+
+/* Selection across PDF text runs and line/paragraph gaps:
+   the text layer itself must receive drag events, not just isolated spans. */
+.continuous-pdf-page .textLayer{pointer-events:auto;user-select:text}
+.continuous-pdf-page .textLayer span{user-select:text}
+.continuous-pdf-page .textLayer br{pointer-events:auto}
