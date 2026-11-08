@@ -43,3 +43,10 @@
 - **Build:** Earlier run [42527457991](https://github.com/minhpham2003/math-reading-agent/actions/runs/42527457991) failed due to shadowing `document`; fixed by using `window.document`.
 - **Result:** [Run 42527511119](https://github.com/minhpham2003/math-reading-agent/actions/runs/42527511119) completed successfully; gh-pages index readback showed generated assets.
 - **Still pending:** Actual browser verification of toolbar placement, fit-width behavior, preserved PDF rendering and session actions, responsive layout.
+
+## V-013 — Continuous PDF scrolling (2026-11-08)
+
+- **Implementation:** [9b21164](https://github.com/minhpham2003/math-reading-agent/commit/9b211641300cebe0753eed93df952082e45c9d2b) and [d26dba1](https://github.com/minhpham2003/math-reading-agent/commit/d26dba1acaa7bc4f5607ac0a499b038b4d0065a1).
+- **Changed:** All PDF pages in a vertical scroll container, with IntersectionObserver-based lazy canvas rendering; current physical PDF page tracks scroll, editable page-number form jumps on Enter, arrow buttons remain; page position persists using existing session state.
+- **Build:** [GitHub Actions run 42528701219](https://github.com/minhpham2003/math-reading-agent/actions/runs/42528701219) succeeded. Deployed index exists on gh-pages.
+- **Outstanding:** Browser verification of scrolling, rendering, page tracking, page jump and restoration; performance on large documents, mixed page dimensions, and very fast scrolling not yet verified.
