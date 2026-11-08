@@ -54,3 +54,17 @@
 .pdf-page-form input:hover,.pdf-page-form input:focus{border-color:#58759a;background:#1b2a3d;outline:none}
 .pdf-page-form input::-webkit-inner-spin-button,.pdf-page-form input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 @media(max-width:760px){.pdf-page-form input{width:29px}.pdf-page-form{font-size:10px}}
+
+/* Give the compact PDF toolbar clearer visual grouping without added height. */
+.reader-header .pdf-toolbar{gap:9px}
+.reader-header .pdf-filename{margin-right:7px}
+.reader-header .pdf-page-form{gap:5px;margin:0 4px}
+.reader-header .pdf-page-form input{width:38px}
+.reader-header .pdf-toolbar .page-indicator{margin:0 3px}
+@media(max-width:760px){
+  .reader-header .pdf-toolbar{gap:5px}
+  .reader-header .pdf-filename{margin-right:2px}
+  .reader-header .pdf-page-form{gap:2px;margin:0 1px}
+  .reader-header .pdf-page-form input{width:30px}
+  .reader-header .pdf-toolbar .page-indicator{margin:0}
+}
