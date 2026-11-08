@@ -77,9 +77,9 @@ function tidyBoxes(boxes: Box[]): Box[] {
   return lines.map(b=>({x:b.x,y:b.y+b.h*.22,w:b.w,h:b.h*.56}));
 }
 type RenderTask = ReturnType<Awaited<ReturnType<PDFDocumentProxy['getPage']>>['render']>;
-type PageProps = { pdf: PDFDocumentProxy; number: number; scale: number; root: HTMLDivElement | null; citations: Citation[] };
+type PageProps = { pdf: PDFDocumentProxy; number: number; scale: number; root: HTMLDivElement | null; citations: Citation[]; selectionBoxes?: Box[] };
 
-function ContinuousPage({ pdf, number, scale, root, citations }: PageProps) {
+function ContinuousPage({ pdf, number, scale, root, citations, selectionBoxes }: PageProps) {
   const holder = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
@@ -138,6 +138,7 @@ function ContinuousPage({ pdf, number, scale, root, citations }: PageProps) {
     {citations.flatMap(ref => tidyBoxes(ref.boxes).map((b, i) =>
       <div key={ref.id + '-' + i} className="source-highlight" title={ref.text}
         style={{left:(b.x*100)+'%',top:(b.y*100)+'%',width:(b.w*100)+'%',height:(b.h*100)+'%'}} />))}
+    {selectionBoxes?.length ? tidyBoxes(selectionBoxes).map((b,i) => <div key={'selected-'+i} className="visual-selection-highlight" style={{left:(b.x*100)+'%',top:(b.y*100)+'%',width:(b.w*100)+'%',height:(b.h*100)+'%'}} />) : null}
     {!visible && <span className="pdf-page-loading">Page {number}</span>}
   </div>;
 }
@@ -161,6 +162,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
   const [citations, setCitations] = useState<Citation[]>(() => readRefs(sessionId));
   const [pending, setPending] = useState<Omit<Citation,'id'> | null>(null);
   const [selectionPoint, setSelectionPoint] = useState<{x:number;y:number} | null>(null);
+  const [visualSelection, setVisualSelection] = useState<{page:number;boxes:Box[]} | null>(null);
   const [showCitations, setShowCitations] = useState(false);
   const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
   const onChangeRef = useRef(onPageChange);
@@ -187,7 +189,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     let cancelled = false;
     ignoreScrollRef.current = true;
     lastPageRef.current = initialPage;
-    setCitations(readRefs(sessionId)); setPending(null); setSelectionPoint(null);
+    setCitations(readRefs(sessionId)); setPending(null); setSelectionPoint(null); setVisualSelection(null);
     setPdf(null); setFilename(''); setPageNumber(initialPage);
     setPageInput(String(initialPage)); setMessage('');
     getSavedPdf(sessionId).then(async saved => {
@@ -319,6 +321,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     const boxes=fragments;
     if (!boxes.length) return;
     setPending({filename,page:Number(page.dataset.pdfPage),text:text.slice(0,2000),boxes});
+    setVisualSelection({page:Number(page.dataset.pdfPage),boxes});
     const selectionRects=range.getClientRects();
     const edge=selectionRects.item(selectionRects.length-1) ?? bounds;
     setSelectionPoint({
@@ -335,6 +338,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       // Allow a new drag selection to replace the pending selection on mouse-up.
       setPending(null);
       setSelectionPoint(null);
+      setVisualSelection(null);
     };
     window.document.addEventListener('pointerdown', dismiss);
     return () => window.document.removeEventListener('pointerdown', dismiss);
@@ -344,7 +348,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     if (!pending) return;
     const next = [...citations, {...pending,id:crypto.randomUUID()}];
     try {localStorage.setItem(refsKey(sessionId),JSON.stringify(next));setCitations(next);
-      setPending(null);setSelectionPoint(null);window.getSelection()?.removeAllRanges();setShowCitations(true);}
+      setPending(null);setSelectionPoint(null);setVisualSelection(null);window.getSelection()?.removeAllRanges();setShowCitations(true);}
     catch {setMessage('Could not save the citation in browser storage.');}
   }
   function deleteCitation(id:string) {
@@ -386,7 +390,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       ignoreScrollRef.current = true;
       lastPageRef.current = 1;
       setPdf(loaded); setFilename(file.name); setPageNumber(1); setPageInput('1');
-      setZoom(1); setFitWidth(true); setPending(null); setSelectionPoint(null);
+      setZoom(1); setFitWidth(true); setPending(null); setSelectionPoint(null); setVisualSelection(null);
       onChangeRef.current(1);
     } catch {
       setMessage('The PDF could not be imported or saved. Check the file and your browser storage.');
@@ -441,7 +445,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       <button type="button" className="primary" onClick={saveCitation}>Save Citation</button>
     </div>}
         {Array.from({ length: pdf.numPages }, (_, i) =>
-          <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} />)}
+          <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} selectionBoxes={visualSelection?.page===i+1 ? visualSelection.boxes : undefined} />)}
       </div> :
       <div className="pdf-placeholder"><div className="eyebrow">Real PDF reader</div><h3>Choose a PDF to begin</h3>
         <p>The file is stored locally in this browser for this session. It is not uploaded to a server.</p>
