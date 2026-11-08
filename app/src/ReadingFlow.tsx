@@ -52,9 +52,10 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const [state,setState]=useState<State>(()=>load(sessionId,title,firstPage,lastPage,duration));
  const [expanded,setExpanded]=useState(true);
  const [editingAssessment,setEditingAssessment]=useState(false);
+ const [assessmentOpen,setAssessmentOpen]=useState(!state.assessmentApproved);
  const [draft,setDraft]=useState({title:'',page:String(firstPage),endPage:'',description:''});
  const [error,setError]=useState('');
- useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);},[sessionId]);
+ useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(!load(sessionId,title,firstPage,lastPage,duration).assessmentApproved);},[sessionId]);
  function change(next:State) {
   try {localStorage.setItem(key(sessionId),JSON.stringify(next));setState(next);setError('');}
   catch{setError('Unable to save this session. Check browser storage.');}
@@ -81,25 +82,25 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const canApprove=fields.every(f=>state.assessment[f.id].trim());
  return <div className="reading-flow">
   <div className="eyebrow">Mock reading agent · interactive demo</div>
-  <h2>Understand the reading range</h2>
-  <p className="muted">This is a sample assessment and sample plan—not an analysis of your PDF. Review, correct, and approve them to test how the future agent will work.</p>
+  <div className="assessment-toggle-row"><h2>Reading range assessment</h2><button className="secondary" aria-expanded={assessmentOpen} onClick={()=>setAssessmentOpen(v=>!v)}>{assessmentOpen?'Collapse ▴':'Expand ▾'}</button></div>
   <div className="flow-stage">{state.assessmentApproved?'✓ Assessment approved':'1 · Sample assessment ready for review'}</div>
-  {editingAssessment && <div className="assessment-fields">
+  {assessmentOpen && <p className="muted">This is a sample assessment and sample plan—not an analysis of your PDF. Review, correct, and approve them to test how the future agent will work.</p>}
+  {assessmentOpen && editingAssessment && <div className="assessment-fields">
    {fields.map(field=><label key={field.id}>{field.label}
     {field.id==='minutes'?<input type="number" min="1" value={state.assessment[field.id]} onChange={e=>updateAssessment(field.id,e.target.value)}/>:
      <textarea rows={field.id==='structure'?3:2} placeholder={field.placeholder} value={state.assessment[field.id]} onChange={e=>updateAssessment(field.id,e.target.value)}/>}
    </label>)}
   </div>}
-  {!editingAssessment&&<div className="assessment-summary">
+  {assessmentOpen && !editingAssessment&&<div className="assessment-summary">
     {fields.map(field=><p key={field.id}><strong>{field.label}:</strong> {state.assessment[field.id]}</p>)}
   </div>}
-  <div className="flow-actions">
+  {assessmentOpen && <div className="flow-actions">
    <button className="secondary" onClick={()=>setEditingAssessment(v=>!v)}>{editingAssessment?'Done editing':'Correct assessment'}</button>
-   <button className="secondary" onClick={()=>{change(defaultState(title,firstPage,lastPage,duration));setEditingAssessment(false);}}>Reset mock</button>
+   <button className="secondary" onClick={()=>{change(defaultState(title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(true);}}>Reset mock</button>
    {!state.assessmentApproved&&<button className="primary" disabled={!canApprove} onClick={()=>{
-    change({...state,assessmentApproved:true,stage:'plan'});setEditingAssessment(false);
+    change({...state,assessmentApproved:true,stage:'plan'});setEditingAssessment(false);setAssessmentOpen(false);
    }}>Agree to assessment →</button>}
-  </div>
+  </div>}
   <div className="plan-heading"><strong>Reading plan {state.planApproved?'✓':''}</strong>
    <button className="secondary" aria-expanded={expanded} onClick={()=>setExpanded(v=>!v)}>{expanded?'Collapse ▴':'Expand ▾'}</button>
   </div>
