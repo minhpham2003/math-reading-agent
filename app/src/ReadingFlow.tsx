@@ -50,11 +50,11 @@ const fields:{id:keyof Assessment;label:string;placeholder:string}[]=[
 export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavigate}:
  {sessionId:string;title:string;firstPage:number;lastPage:number;duration:number;onNavigate:(page:number)=>void}) {
  const [state,setState]=useState<State>(()=>load(sessionId,title,firstPage,lastPage,duration));
- const [expanded,setExpanded]=useState(true);
+ const [expanded,setExpanded]=useState(!state.planApproved);
  const [editingAssessment,setEditingAssessment]=useState(false);
  const [assessmentOpen,setAssessmentOpen]=useState(!state.assessmentApproved);
  const [error,setError]=useState('');
- useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(!load(sessionId,title,firstPage,lastPage,duration).assessmentApproved);},[sessionId]);
+ useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(!load(sessionId,title,firstPage,lastPage,duration).assessmentApproved);setExpanded(!load(sessionId,title,firstPage,lastPage,duration).planApproved);},[sessionId]);
  function change(next:State) {
   try {localStorage.setItem(key(sessionId),JSON.stringify(next));setState(next);setError('');}
   catch{setError('Unable to save this session. Check browser storage.');}
@@ -90,8 +90,8 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const canApprove=fields.every(f=>state.assessment[f.id].trim());
  return <div className="reading-flow">
   <div className="eyebrow">Mock reading agent · interactive demo</div>
-  <div className="assessment-toggle-row"><h2>Reading assessment</h2><button className="secondary" aria-expanded={assessmentOpen} onClick={()=>setAssessmentOpen(v=>!v)}>{assessmentOpen?'Collapse ▴':'Expand ▾'}</button></div>
-  <div className="flow-stage">{state.assessmentApproved?'✓ Assessment approved':'1 · Sample assessment ready for review'}</div>
+  <div className="assessment-toggle-row"><h2 className={state.assessmentApproved?"approved-heading":""}>Reading assessment {state.assessmentApproved&&<span aria-label="Approved">✓</span>}</h2><button className="secondary" aria-expanded={assessmentOpen} onClick={()=>setAssessmentOpen(v=>!v)}>{assessmentOpen?'Collapse ▴':'Expand ▾'}</button></div>
+
   {assessmentOpen && <p className="muted">This is a sample assessment and sample plan—not an analysis of your PDF. Review, correct, and approve them to test how the future agent will work.</p>}
   {assessmentOpen && editingAssessment && <div className="assessment-fields">
    {fields.map(field=><label key={field.id}>{field.label}
@@ -109,7 +109,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
     change({...state,assessmentApproved:true,stage:'plan'});setEditingAssessment(false);setAssessmentOpen(false);
    }}>Agree to assessment →</button>}
   </div>}
-  <div className="plan-heading"><strong>Reading plan {state.planApproved?'✓':''}</strong>
+  <div className="plan-heading"><strong className={state.planApproved?"approved-heading":""}>Reading plan {state.planApproved&&<span aria-label="Approved">✓</span>}</strong>
    <button className="secondary" aria-expanded={expanded} onClick={()=>setExpanded(v=>!v)}>{expanded?'Collapse ▴':'Expand ▾'}</button>
   </div>
   {expanded&&<div className="flow-plan">
@@ -136,7 +136,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
     {!state.planApproved?<button className="primary" onClick={()=>{
      const problem=validatePlan();
      if(problem){setError(problem);return;}
-     change({...state,planApproved:true,stage:'reading'});onNavigate(state.units[0].page);
+     change({...state,planApproved:true,stage:'reading'});setExpanded(false);onNavigate(state.units[0].page);
     }}>Accept reading plan →</button>:<div className="flow-stage">✓ Plan accepted · Reading in progress
        <p className="muted">Choose a unit to navigate to its source. Nothing is explained automatically.</p>
        <button className="secondary" onClick={()=>change({...state,planApproved:false,stage:'plan'})}>Edit plan</button>
