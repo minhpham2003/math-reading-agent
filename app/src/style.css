@@ -68,3 +68,16 @@
   .reader-header .pdf-page-form input{width:30px}
   .reader-header .pdf-toolbar .page-indicator{margin:0}
 }
+
+/* Deliberate control grouping: tight spacing inside navigation/zoom, clear separation between. */
+.reader-header .pdf-toolbar{gap:14px}
+.reader-header .pdf-control-group{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.reader-header .pdf-navigation-group{margin-right:10px}
+.reader-header .pdf-page-form{margin:0 2px;gap:3px}
+.reader-header .pdf-toolbar .page-indicator{margin:0 2px}
+.reader-header .pdf-filename{margin-right:0}
+@media(max-width:760px){
+  .reader-header .pdf-toolbar{gap:7px}
+  .reader-header .pdf-control-group{gap:3px}
+  .reader-header .pdf-navigation-group{margin-right:5px}
+}
