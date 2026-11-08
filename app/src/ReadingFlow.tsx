@@ -143,6 +143,6 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
      </div>}
    </>}
   </div>}
-  {error&&<p role="alert" className="form-error">{error}</p>}
+  {error&&<div className="flow-error-toast" role="alert" aria-live="assertive"><span>{error}</span><button type="button" aria-label="Dismiss error" onClick={()=>setError('')}>×</button></div>}
  </div>;
 }
