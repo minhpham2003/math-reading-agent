@@ -65,3 +65,10 @@
 - **Changes:** [e9bf19e](https://github.com/minhpham2003/math-reading-agent/commit/e9bf19eb26ff1b7bec5b5b264171f210b8d706b4) combines adjacent selection fragments into line bands; [d318d24](https://github.com/minhpham2003/math-reading-agent/commit/d318d2460a1f9de5fe5a8836afc4610038182cf3) scrolls to selected normalized y-position and tracks passage-relative zoom location; [6ecb4ba](https://github.com/minhpham2003/math-reading-agent/commit/6ecb4ba77f8df710005e88db818294b6b90d60f3) softens highlight visuals.
 - **Build/deploy:** [run 42530685687](https://github.com/minhpham2003/math-reading-agent/actions/runs/42530685687) succeeded; published Pages index confirmed.
 - **User browser verification pending:** citation highlight line grouping, exact scroll offset under zoom, stability when fit width changes or resizing panels, PDF page number tracking.
+
+## V-016 — Visual-order text drag selection (2026-11-08)
+
+- **Reported:** Browser/native PDF selection could not reliably include the final punctuation or start from paragraph ends, especially around equations.
+- **Implementation:** [9c82b7b](https://github.com/minhpham2003/math-reading-agent/commit/9c82b7b58853a2c36b9ec00b283e52e825a85e30) adds mouse-drag selection using character-level PDF.js DOM geometry, choosing drag endpoints by proximity and arranging glyphs by visual position. Existing keyboard/native selection path retained separately.
+- **Build and deployment:** [GitHub Actions run 42532950587](https://github.com/minhpham2003/math-reading-agent/actions/runs/42532950587) succeeded.
+- **Outstanding validation:** Actual browser interaction with backward drag from sentence-final punctuation, equation superscripts/subscripts, long lines, multi-line selections, native selection interference, performance on dense PDF pages. Visual-order sorting is a first iteration; mathematical extraction and punctuation order may still need improvement.
