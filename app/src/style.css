@@ -125,3 +125,9 @@
 .continuous-pdf-page .textLayer{pointer-events:auto;user-select:text}
 .continuous-pdf-page .textLayer span{user-select:text}
 .continuous-pdf-page .textLayer br{pointer-events:auto}
+
+/* In-app testing prompt below the Reading plan, distinct from generated guidance. */
+.reader-test-note{margin-top:16px;border:1px solid #365c83;border-radius:10px;background:#182c43;padding:13px;color:#dce9fb}
+.reader-test-note strong{font-size:13px}
+.reader-test-note p{font-size:13px;line-height:1.5;margin:8px 0}
+.reader-test-note span{font-size:11px;color:#a9c1dc}
