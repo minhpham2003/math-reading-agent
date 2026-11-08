@@ -239,6 +239,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     </label>
     {filename && <span className="pdf-filename" title={filename}>{filename}</span>}
     {pdf && <>
+      <div className="pdf-control-group pdf-navigation-group">
       <button className="secondary" onClick={() => jump(pageNumber - 1)} disabled={pageNumber <= 1} aria-label="Previous PDF page">←</button>
       <form className="pdf-page-form" onSubmit={submitPage}>
         <span>PDF </span><input name="page" type="number" min={1} max={pdf.numPages} value={pageInput}
@@ -247,10 +248,13 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
         <span> / {pdf.numPages}</span>
       </form>
       <button className="secondary" onClick={() => jump(pageNumber + 1)} disabled={pageNumber >= pdf.numPages} aria-label="Next PDF page">→</button>
+      </div>
+      <div className="pdf-control-group pdf-zoom-group">
       <button className="secondary" onClick={() => { setFitWidth(false); setZoom(z => Math.max(.4, +(z - .2).toFixed(1))); }} aria-label="Zoom out">−</button>
       <span className="page-indicator">{fitWidth ? 'Fit width' : Math.round(zoom * 100) + '%'}</span>
       <button className="secondary" onClick={() => { setFitWidth(false); setZoom(z => Math.min(2.4, +(z + .2).toFixed(1))); }} aria-label="Zoom in">+</button>
       <button className="secondary" onClick={() => setFitWidth(true)} aria-label="Fit PDF to available width">↔</button>
+      </div>
     </>}
   </div>;
 
