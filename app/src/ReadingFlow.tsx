@@ -53,7 +53,6 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const [expanded,setExpanded]=useState(true);
  const [editingAssessment,setEditingAssessment]=useState(false);
  const [assessmentOpen,setAssessmentOpen]=useState(!state.assessmentApproved);
- const [draft,setDraft]=useState({title:'',page:String(firstPage),endPage:'',description:''});
  const [error,setError]=useState('');
  useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(!load(sessionId,title,firstPage,lastPage,duration).assessmentApproved);},[sessionId]);
  function change(next:State) {
@@ -67,11 +66,20 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
   change({...state,units:state.units.map(unit=>unit.id===id?{...unit,...patch}:unit),planApproved:false,stage:'plan'});
  }
  function addUnit(){
-  const page=Number(draft.page);
-  const endPage=draft.endPage.trim()?Number(draft.endPage):page;
-  if(!draft.title.trim()||!Number.isInteger(page)||page<1||!Number.isInteger(endPage)||endPage<page){setError('Enter a unit title and valid PDF pages (end page must be at least the start page).');return;}
-  change({...state,units:[...state.units,{id:crypto.randomUUID(),title:draft.title.trim(),page,endPage,description:draft.description.trim(),done:false}],planApproved:false,stage:'plan'});
-  setDraft({title:'',page:String(page),endPage:'',description:''});
+  // Adding a unit creates its editable card immediately; approval validates the draft.
+  change({...state,units:[...state.units,{
+   id:crypto.randomUUID(),title:'',page:0,endPage:undefined,description:'',done:false
+  }],planApproved:false,stage:'plan'});
+ }
+ function validatePlan():string|null {
+  if(!state.units.length)return 'Add at least one conceptual unit before accepting the plan.';
+  for(const [index,unit] of state.units.entries()){
+   if(!unit.title.trim())return 'Unit '+(index+1)+' needs a title.';
+   if(!Number.isInteger(unit.page)||unit.page<1)return 'Unit '+(index+1)+' needs a valid PDF start page.';
+   if(unit.endPage!==undefined&&(!Number.isInteger(unit.endPage)||unit.endPage<unit.page))
+     return 'Unit '+(index+1)+' needs an end page at or after its start page.';
+  }
+  return null;
  }
  function move(id:string,delta:number){
   const list=[...state.units],i=list.findIndex(unit=>unit.id===id),j=i+delta;
@@ -109,10 +117,10 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
    <>
     <p className="muted">Suggested mock units are editable. Their PDF page ranges are placeholders, not verified source locations. Modify them before accepting.</p>
     {state.units.map((unit,i)=><div className="flow-unit" key={unit.id}>
-      <div className="flow-unit-title"><span>{i+1}.</span><input aria-label={'Unit '+(i+1)+' title'} value={unit.title} onChange={e=>updateUnit(unit.id,{title:e.target.value})}/></div>
-      <div className="flow-unit-location"><strong>{(unit.endPage??unit.page)===unit.page?'PDF page '+unit.page:'PDF pages '+unit.page+'–'+(unit.endPage??unit.page)}</strong></div>
+      <div className="flow-unit-title"><span>{i+1}.</span><input placeholder="Unit title" autoFocus={unit.title===''&&i===state.units.length-1} aria-label={'Unit '+(i+1)+' title'} value={unit.title} onChange={e=>updateUnit(unit.id,{title:e.target.value})}/></div>
+      <div className="flow-unit-location"><strong>{unit.page<1?'PDF page not set':(unit.endPage??unit.page)===unit.page?'PDF page '+unit.page:'PDF pages '+unit.page+'–'+(unit.endPage??unit.page)}</strong></div>
       <div className="flow-page-range">
-       <label>PDF start page<input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF start page'} value={unit.page} onChange={e=>updateUnit(unit.id,{page:Number(e.target.value)})}/></label>
+       <label>PDF start page<input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF start page'} value={unit.page||''} onChange={e=>updateUnit(unit.id,{page:e.target.value===''?0:Number(e.target.value)})}/></label>
        <label>PDF end page <span className="muted">(optional)</span><input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF end page'} placeholder="Same page" value={unit.endPage===undefined?'':unit.endPage} onChange={e=>updateUnit(unit.id,{endPage:e.target.value===''?undefined:Number(e.target.value)})}/></label>
       </div>
       <label>Description<textarea rows={2} aria-label={'Unit '+(i+1)+' description'} value={unit.description} onChange={e=>updateUnit(unit.id,{description:e.target.value})}/></label>
@@ -124,14 +132,10 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
        {state.planApproved&&<label className="unit-done"><input type="checkbox" checked={unit.done} onChange={e=>change({...state,units:state.units.map(x=>x.id===unit.id?{...x,done:e.target.checked}:x)})}/> Read</label>}
       </div>
     </div>)}
-    {!state.planApproved&&<div className="new-unit">
-      <strong>Add a conceptual unit</strong>
-      <input placeholder="Unit title" aria-label="New unit title" value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})}/>
-      <div className="flow-page-range"><label>PDF start page<input type="number" min="1" aria-label="New unit PDF start page" value={draft.page} onChange={e=>setDraft({...draft,page:e.target.value})}/></label><label>PDF end page <span className="muted">(optional)</span><input type="number" min="1" aria-label="New unit PDF end page" placeholder="Same page" value={draft.endPage} onChange={e=>setDraft({...draft,endPage:e.target.value})}/></label></div>
-      <textarea rows={2} placeholder="Brief description (optional)" aria-label="New unit description" value={draft.description} onChange={e=>setDraft({...draft,description:e.target.value})}/>
-      <button className="secondary" onClick={addUnit}>+ Add unit</button>
-    </div>}
-    {!state.planApproved?<button className="primary" disabled={!state.units.length||state.units.some(u=>!u.title.trim()||!Number.isInteger(u.page)||u.page<1||!Number.isInteger(u.endPage??u.page)||(u.endPage??u.page)<u.page)} onClick={()=>{
+    {!state.planApproved&&<button className="secondary add-unit-trigger" type="button" onClick={addUnit}>+ Add unit</button>}
+    {!state.planApproved?<button className="primary" onClick={()=>{
+     const problem=validatePlan();
+     if(problem){setError(problem);return;}
      change({...state,planApproved:true,stage:'reading'});onNavigate(state.units[0].page);
     }}>Accept reading plan →</button>:<div className="flow-stage">✓ Plan accepted · Reading in progress
        <p className="muted">Choose a unit to navigate to its source. Nothing is explained automatically.</p>
