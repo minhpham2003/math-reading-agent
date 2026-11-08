@@ -117,3 +117,5 @@
 .floating-citation-action{position:sticky;z-index:12;width:max-content;height:0;display:flex;gap:3px;align-items:flex-start;pointer-events:auto}
 .floating-citation-action .primary{font-size:12px;padding:8px 11px;white-space:nowrap;box-shadow:0 4px 14px #0008;border:1px solid #7ca7e0}
 .floating-dismiss{border:0;background:#263750;color:#dae9ff;border-radius:5px;padding:6px 8px;box-shadow:0 4px 14px #0008}
+
+.floating-citation-action{position:fixed;height:auto;top:auto;left:auto}
