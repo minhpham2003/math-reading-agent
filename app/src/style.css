@@ -195,3 +195,9 @@
 .reading-flow .plan-heading strong{font-size:20px}
 /* Explicit exception requested: the Collapse button remains unchanged. */
 .reading-flow .plan-heading > button{font-size:12px}
+
+/* PDF is chosen at New Session creation; older sessions can still import in reader. */
+.new-session-pdf-field{background:#1b2d42;border:1px solid #476a8c;border-radius:10px;padding:12px}
+.new-session-pdf-field .required-marker{float:right;font-size:11px;color:#b5d6f7;font-weight:600}
+.new-session-pdf-field input[type="file"]{cursor:pointer;background:#10243a}
+.new-session-pdf-field small{display:block;margin-top:8px;color:#a6c1de;font-size:12px;font-weight:400;overflow-wrap:anywhere}
