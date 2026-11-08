@@ -169,3 +169,7 @@
 .new-unit strong{font-size:13px}
 .unit-done{display:flex!important;gap:5px;align-items:center}
 .unit-done input{width:auto;margin:0}
+
+/* Primary upload action is visible inside the empty PDF surface. */
+.pdf-empty-import{display:inline-flex;align-items:center;justify-content:center;margin:12px auto 4px;min-width:145px;cursor:pointer;position:relative}
+.pdf-empty-import:focus-within{outline:2px solid #a8caff;outline-offset:3px}
