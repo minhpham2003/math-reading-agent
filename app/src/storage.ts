@@ -9,6 +9,7 @@ export type ReadingSession = {
   updatedAt: string;
   status: 'not-started' | 'in-progress' | 'paused' | 'complete';
   currentPrintedPage: number;
+  pdfPage?: number;
 };
 export const STORAGE_KEY = 'math-reading-agent:app:sessions:v1';
 export function loadSessions(): ReadingSession[] {
