@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { getDocument, GlobalWorkerOptions, type PDFDocumentProxy } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -51,15 +52,32 @@ export async function deleteSavedPdf(id: string): Promise<void> {
   } finally { db.close(); }
 }
 
-type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void };
-export function PdfReader({ sessionId, initialPage, onPageChange }: Props) {
+type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void; toolbarHostId?: string };
+export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId }: Props) {
   const [document, setDocument] = useState<PDFDocumentProxy | null>(null);
   const [filename, setFilename] = useState('');
   const [pageNumber, setPageNumber] = useState(initialPage);
   const [zoom, setZoom] = useState(1);
+  const [fitWidth, setFitWidth] = useState(true);
+  const [availableWidth, setAvailableWidth] = useState(700);
+  const [toolbarHost, setToolbarHost] = useState<HTMLElement | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setToolbarHost(toolbarHostId ? document.getElementById(toolbarHostId) : null);
+  }, [toolbarHostId]);
+  useEffect(() => {
+    const scroll = scrollRef.current;
+    if (!scroll) return;
+    const measure = () => setAvailableWidth(Math.max(100, scroll.clientWidth - 4));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(scroll);
+    return () => observer.disconnect();
+  }, [document]);
 
   useEffect(() => {
     let cancelled = false;
@@ -84,7 +102,9 @@ export function PdfReader({ sessionId, initialPage, onPageChange }: Props) {
       try {
         const page = await document.getPage(pageNumber);
         if (cancelled) return;
-        const viewport = page.getViewport({ scale: 1.35 * zoom });
+        const baseWidth = page.getViewport({ scale: 1 }).width;
+        const renderScale = fitWidth ? availableWidth / baseWidth : 1.35 * zoom;
+        const viewport = page.getViewport({ scale: renderScale });
         const canvas = canvasRef.current;
         if (!canvas) return;
         const context = canvas.getContext('2d');
@@ -94,7 +114,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange }: Props) {
         canvas.height = Math.floor(viewport.height * ratio);
         canvas.style.width = viewport.width + 'px';
         canvas.style.height = viewport.height + 'px';
-        renderTask = page.render({ canvasContext: context, viewport: page.getViewport({ scale: 1.35 * zoom * ratio }) });
+        renderTask = page.render({ canvasContext: context, viewport: page.getViewport({ scale: renderScale * ratio }) });
         await renderTask.promise;
       } catch (error) {
         if (!cancelled && !(error instanceof Error && error.name === 'RenderingCancelledException')) {
@@ -104,7 +124,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange }: Props) {
     };
     void draw();
     return () => { cancelled = true; renderTask?.cancel(); };
-  }, [document, pageNumber, zoom]);
+  }, [document, pageNumber, zoom, fitWidth, availableWidth]);
 
   function jump(next: number) {
     if (!document) return;
@@ -122,15 +142,14 @@ export function PdfReader({ sessionId, initialPage, onPageChange }: Props) {
       const bytes = await file.arrayBuffer();
       const pdf = await getDocument({ data: new Uint8Array(bytes.slice(0)) }).promise;
       await savePdf(sessionId, file.name, bytes);
-      setDocument(pdf); setFilename(file.name); setPageNumber(1); setZoom(1);
+      setDocument(pdf); setFilename(file.name); setPageNumber(1); setZoom(1); setFitWidth(true);
       onPageChange(1);
     } catch {
       setMessage('The PDF could not be imported or saved. Check the file and your browser storage.');
     } finally { setBusy(false); }
   }
 
-  return <div className="pdf-reader">
-    <div className="pdf-toolbar">
+  const controls = <div className="pdf-toolbar">
       <label className="secondary pdf-import">
         {filename ? 'Replace PDF' : 'Import PDF'}
         <input type="file" accept=".pdf,application/pdf" disabled={busy} onChange={e => {
@@ -142,15 +161,18 @@ export function PdfReader({ sessionId, initialPage, onPageChange }: Props) {
         <button className="secondary" onClick={() => jump(pageNumber - 1)} disabled={pageNumber <= 1} aria-label="Previous PDF page">←</button>
         <span className="page-indicator">PDF {pageNumber} / {document.numPages}</span>
         <button className="secondary" onClick={() => jump(pageNumber + 1)} disabled={pageNumber >= document.numPages} aria-label="Next PDF page">→</button>
-        <button className="secondary" onClick={() => setZoom(z => Math.max(.6, +(z - .2).toFixed(1)))} disabled={zoom <= .6} aria-label="Zoom out">−</button>
-        <span className="page-indicator">{Math.round(zoom * 100)}%</span>
-        <button className="secondary" onClick={() => setZoom(z => Math.min(2.4, +(z + .2).toFixed(1)))} disabled={zoom >= 2.4} aria-label="Zoom in">+</button>
+        <button className="secondary" onClick={() => { setFitWidth(false); setZoom(z => Math.max(.4, +(z - .2).toFixed(1))); }} aria-label="Zoom out">−</button>
+        <span className="page-indicator">{fitWidth ? "Fit width" : Math.round(zoom * 100) + "%"}</span>
+        <button className="secondary" onClick={() => { setFitWidth(false); setZoom(z => Math.min(2.4, +(z + .2).toFixed(1))); }} aria-label="Zoom in">+</button>
+        <button className="secondary" onClick={() => setFitWidth(true)} aria-label="Fit PDF to available width" title="Fit width">↔</button>
       </>}
-    </div>
+    </div>;
+  return <div className="pdf-reader">
+    {toolbarHost ? createPortal(controls, toolbarHost) : (!toolbarHostId ? controls : null)}
     {message && <p role="alert" className="pdf-error">{message}</p>}
     {busy && <p className="muted">Importing PDF…</p>}
     {document ?
-      <div className="pdf-canvas-scroll"><canvas ref={canvasRef} aria-label={`PDF page ${pageNumber}`} /></div> :
+      <div className="pdf-canvas-scroll" ref={scrollRef}><canvas ref={canvasRef} aria-label={`PDF page ${pageNumber}`} /></div> :
       <div className="pdf-placeholder"><div className="eyebrow">Real PDF reader</div><h3>Choose a PDF to begin</h3><p>The file is stored locally in this browser for this session. It is not uploaded to a server.</p><p className="muted">PDF page numbers may differ from printed textbook page numbers.</p></div>}
   </div>;
 }
