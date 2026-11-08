@@ -129,7 +129,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
        <button className="secondary" disabled={i===0} onClick={()=>move(unit.id,-1)} aria-label="Move unit up">↑</button>
        <button className="secondary" disabled={i===state.units.length-1} onClick={()=>move(unit.id,1)} aria-label="Move unit down">↓</button>
        <button className="secondary" onClick={()=>change({...state,units:state.units.filter(x=>x.id!==unit.id),planApproved:false,stage:'plan'})}>Remove</button>
-       {state.planApproved&&<label className="unit-done"><input type="checkbox" checked={unit.done} onChange={e=>change({...state,units:state.units.map(x=>x.id===unit.id?{...x,done:e.target.checked}:x)})}/> Read</label>}
+       {state.planApproved&&<button type="button" className={'secondary unit-completed-toggle'+(unit.done?' is-completed':'')} aria-pressed={unit.done} onClick={()=>change({...state,units:state.units.map(x=>x.id===unit.id?{...x,done:!x.done}:x)})}>{unit.done?'✓ Completed':'Completed'}</button>}
       </div>
     </div>)}
     {!state.planApproved&&<button className="secondary add-unit-trigger" type="button" onClick={addUnit}>+ Add unit</button>}
