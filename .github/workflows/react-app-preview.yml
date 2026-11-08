@@ -1,0 +1,44 @@
+name: Publish React app preview
+on:
+  push:
+    branches:
+      - implementation/react-foundation
+    paths:
+      - 'app/**'
+      - '.github/workflows/react-app-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-react-app-preview
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+      - name: Install dependencies
+        working-directory: app
+        run: npm install
+      - name: Typecheck and build
+        working-directory: app
+        run: npm run build
+      - name: Publish isolated preview
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./app/dist
+          destination_dir: previews/react-foundation
+          keep_files: true
+          enable_jekyll: false
+      - name: Preview address
+        run: echo "https://${{ github.repository_owner }}.github.io/math-reading-agent/previews/react-foundation/"
