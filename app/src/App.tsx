@@ -19,6 +19,7 @@ export function App() {
   const [storageError, setStorageError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [planOpen, setPlanOpen] = useState(true);
+  const [agentOpen, setAgentOpen] = useState(true);
   const active = sessions.find(s => s.id === activeId) ?? null;
   const pendingDelete = sessions.find(s => s.id === deleteId);
 
@@ -93,12 +94,12 @@ export function App() {
       <p className="notice">Application foundation: sessions and printed-page position are saved in this browser. AI analysis, reading plans, PDF rendering, and cloud sync are not connected.</p>
     </main> : <section className="workspace">
       <div className="workspace-top"><div><button className="text-button" onClick={() => navigate(null)}>← Back to Hatcher dashboard</button><h1>{active.title}</h1><p>{active.target} · pp. {active.firstPage}–{active.lastPage} · {active.durationMinutes} min</p></div><span className="badge">Session setup</span></div>
-      <div className="work-grid">
-        <article className="work-panel"><div className="eyebrow">Reading agent · left panel</div><h2>Your session</h2><div className="agent-placeholder"><div className="eyebrow">Agent not connected</div><strong>Let's plan your reading session</strong><p>You selected {active.target}, printed pages {active.firstPage}–{active.lastPage}. Source analysis will be added after the real PDF reader is connected.</p></div>
+      <div className={agentOpen ? "work-grid" : "work-grid agent-collapsed"}>
+        {agentOpen && <article className="work-panel agent-panel"><div className="panel-toolbar"><button className="secondary" type="button" onClick={() => setAgentOpen(false)} aria-label="Collapse reading agent panel">Hide agent ←</button></div><div className="eyebrow">Reading agent · left panel</div><h2>Your session</h2><div className="agent-placeholder"><div className="eyebrow">Agent not connected</div><strong>Let's plan your reading session</strong><p>You selected {active.target}, printed pages {active.firstPage}–{active.lastPage}. Source analysis will be added after the real PDF reader is connected.</p></div>
           <div className="plan-heading"><strong>Reading plan</strong><button className="secondary" aria-expanded={planOpen} onClick={() => setPlanOpen(!planOpen)}>{planOpen ? 'Collapse ▴' : 'Expand ▾'}</button></div>
           {planOpen && <div className="plan-body"><p>No plan has been generated. The S07 assessment → plan approval flow is part of a later implementation milestone.</p></div>}
-        </article>
-        <article className="work-panel pdf-panel"><div className="eyebrow">Primary source · right panel</div><h2>Hatcher — Algebraic Topology</h2><div className="muted">Selected printed pages: {active.firstPage}–{active.lastPage}</div>
+        </article>}
+        <article className="work-panel pdf-panel"><div className="panel-toolbar">{!agentOpen && <button type="button" className="secondary" onClick={() => setAgentOpen(true)}>→ Show reading agent</button>}</div><div className="eyebrow">Primary source · right panel</div><h2>Hatcher — Algebraic Topology</h2><div className="muted">Selected printed pages: {active.firstPage}–{active.lastPage}</div>
           <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} />
         </article>
       </div>
