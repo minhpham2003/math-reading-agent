@@ -311,12 +311,11 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     }));
     if (!boxes.length) return;
     setPending({filename,page:Number(page.dataset.pdfPage),text:text.slice(0,2000),boxes});
-    const viewer=scrollRoot.getBoundingClientRect();
     const rects=range.getClientRects();
     const edge=rects.item(rects.length-1) ?? bounds;
     setSelectionPoint({
-      x:Math.max(80,Math.min(viewer.width-90,edge.right-viewer.left)),
-      y:Math.max(8,Math.min(viewer.height-45,edge.bottom-viewer.top+8))
+      x:Math.max(8,Math.min(window.innerWidth-160,edge.right)),
+      y:Math.max(8,Math.min(window.innerHeight-46,edge.bottom+8))
     });
     setMessage('');
   }
@@ -415,14 +414,14 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
         <button className="secondary" onClick={() => deleteCitation(ref.id)}>Remove</button>
       </div>)}
     </aside>}
+    {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
+      <button type="button" className="primary" onClick={saveCitation}>Save Citation</button>
+      <button type="button" className="floating-dismiss" aria-label="Dismiss citation selection" onClick={()=>{
+        setPending(null);setSelectionPoint(null);window.getSelection()?.removeAllRanges();
+      }}>×</button>
+    </div>}
     {pdf ?
       <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseUp={() => window.setTimeout(captureSelection,0)} onKeyUp={() => window.setTimeout(captureSelection,0)}>
-        {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
-          <button type="button" className="primary" onClick={saveCitation}>Save Citation</button>
-          <button type="button" className="floating-dismiss" aria-label="Dismiss citation selection" onClick={()=>{
-            setPending(null);setSelectionPoint(null);window.getSelection()?.removeAllRanges();
-          }}>×</button>
-        </div>}
         {Array.from({ length: pdf.numPages }, (_, i) =>
           <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} />)}
       </div> :
