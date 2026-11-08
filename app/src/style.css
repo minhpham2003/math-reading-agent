@@ -213,3 +213,7 @@
 .dialog .new-session-pdf-field small{font-size:15px}
 .dialog .new-session-pdf-field .required-marker{font-size:13px}
 @media(max-width:580px){.dialog{padding:18px}.dialog h2{font-size:23px}.dialog p{font-size:16px}.dialog input,.dialog select{font-size:16px}.dialog label{font-size:16px}}
+
+.assessment-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.assessment-toggle-row h2{margin:0}
+.assessment-toggle-row button{font-size:12px;white-space:nowrap}
