@@ -147,8 +147,8 @@ function ContinuousPage({ pdf, number, scale, root, citations, selectionBoxes }:
 // approximate reserved height with its actual ratio when it becomes visible.
 let pdfPageWidth = 612;
 
-type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void; toolbarHostId?: string };
-export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId }: Props) {
+type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void; toolbarHostId?: string; pageJump?: {page:number;seq:number}|null };
+export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId, pageJump }: Props) {
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [filename, setFilename] = useState('');
   const [pageNumber, setPageNumber] = useState(initialPage);
@@ -273,6 +273,10 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     setPageInput(String(safe));
     onChangeRef.current(safe);
   }
+
+  useEffect(() => {
+    if (pdf && scrollRoot && pageJump) jump(pageJump.page);
+  }, [pageJump?.seq, pdf, scrollRoot]);
 
   function onScroll() {
     if (!scrollRoot || !pdf || ignoreScrollRef.current) return;
