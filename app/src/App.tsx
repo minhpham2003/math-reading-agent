@@ -69,6 +69,7 @@ export function App() {
       setDeleteId(null);
       localStorage.removeItem('higher-math:citations:' + deleteId);
       localStorage.removeItem('higher-math:reading-flow:v1:' + deleteId);
+      localStorage.removeItem('higher-math:reading-notes:v1:' + deleteId);
       void deleteSavedPdf(deleteId).catch(() => setStorageError('Session deleted, but its cached PDF could not be cleared.'));
     }
   }
