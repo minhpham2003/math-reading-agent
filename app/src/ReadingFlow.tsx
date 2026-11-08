@@ -90,7 +90,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const canApprove=fields.every(f=>state.assessment[f.id].trim());
  return <div className="reading-flow">
   <div className="eyebrow">Mock reading agent · interactive demo</div>
-  <div className="assessment-toggle-row"><h2>Reading range assessment</h2><button className="secondary" aria-expanded={assessmentOpen} onClick={()=>setAssessmentOpen(v=>!v)}>{assessmentOpen?'Collapse ▴':'Expand ▾'}</button></div>
+  <div className="assessment-toggle-row"><h2>Reading assessment</h2><button className="secondary" aria-expanded={assessmentOpen} onClick={()=>setAssessmentOpen(v=>!v)}>{assessmentOpen?'Collapse ▴':'Expand ▾'}</button></div>
   <div className="flow-stage">{state.assessmentApproved?'✓ Assessment approved':'1 · Sample assessment ready for review'}</div>
   {assessmentOpen && <p className="muted">This is a sample assessment and sample plan—not an analysis of your PDF. Review, correct, and approve them to test how the future agent will work.</p>}
   {assessmentOpen && editingAssessment && <div className="assessment-fields">
