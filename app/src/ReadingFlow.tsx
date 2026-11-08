@@ -7,10 +7,27 @@ type Assessment = {
 type Unit = {id:string; title:string; page:number; description:string; done:boolean};
 type State = {assessment:Assessment; assessmentApproved:boolean; planApproved:boolean; units:Unit[]; stage:'assessment'|'plan'|'reading'};
 const key=(id:string)=>'higher-math:reading-flow:v1:'+id;
+function mockAssessment(title:string,first:number,last:number,minutes:number):Assessment {
+ return {
+ scope:title+' · selected printed pages '+first+'–'+last,
+ structure:'Sample structure: introductory definitions → key propositions → examples and applications. Confirm these against the actual PDF.',
+ difficulty:'Sample estimate: moderate, with some abstract definitions and proof techniques.',
+ dependencies:'Sample prerequisites: relevant earlier definitions, basic topology, and familiarity with the notation used.',
+ minutes:String(minutes),
+ recommendation:'Sample recommendation: first map the definitions and statements, then read the structural proofs, pausing to test your intuition.'
+ };
+}
+function mockUnits(first:number,last:number):Unit[] {
+ const mid=Math.max(first,Math.min(last,first+Math.floor((last-first)/2)));
+ return [
+  {id:crypto.randomUUID(),title:'Definitions and motivating questions',page:first,description:'Demo unit: locate the central definitions and motivation in the source.',done:false},
+  {id:crypto.randomUUID(),title:'Main results and proof structure',page:mid,description:'Demo unit: identify important claims and the role of their proofs.',done:false},
+  {id:crypto.randomUUID(),title:'Examples, consequences, and recap',page:last,description:'Demo unit: connect the results to examples and consolidate understanding.',done:false}
+ ];
+}
 function defaultState(title:string,first:number,last:number,minutes:number):State {
- return {assessment:{scope:title+' (printed pp. '+first+'–'+last+')',
- structure:'',difficulty:'',dependencies:'',minutes:String(minutes),
- recommendation:''},assessmentApproved:false,planApproved:false,units:[],stage:'assessment'};
+ return {assessment:mockAssessment(title,first,last,minutes),
+ assessmentApproved:false,planApproved:false,units:mockUnits(first,last),stage:'assessment'};
 }
 function load(id:string,title:string,first:number,last:number,minutes:number):State {
  const fallback=defaultState(title,first,last,minutes);
@@ -34,10 +51,10 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  {sessionId:string;title:string;firstPage:number;lastPage:number;duration:number;onNavigate:(page:number)=>void}) {
  const [state,setState]=useState<State>(()=>load(sessionId,title,firstPage,lastPage,duration));
  const [expanded,setExpanded]=useState(true);
- const [editingAssessment,setEditingAssessment]=useState(true);
+ const [editingAssessment,setEditingAssessment]=useState(false);
  const [draft,setDraft]=useState({title:'',page:String(firstPage),description:''});
  const [error,setError]=useState('');
- useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(true);},[sessionId]);
+ useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);},[sessionId]);
  function change(next:State) {
   try {localStorage.setItem(key(sessionId),JSON.stringify(next));setState(next);setError('');}
   catch{setError('Unable to save this session. Check browser storage.');}
@@ -62,21 +79,22 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  }
  const canApprove=fields.every(f=>state.assessment[f.id].trim());
  return <div className="reading-flow">
-  <div className="eyebrow">Session assessment · manually prepared</div>
+  <div className="eyebrow">Mock reading agent · interactive demo</div>
   <h2>Understand the reading range</h2>
-  <p className="muted">No AI is connected. These are your editable notes, not an automatically generated assessment. Confirm the scope before assembling your plan.</p>
-  <div className="flow-stage">{state.assessmentApproved?'✓ Assessment approved':'1 · Assessment in progress'}</div>
-  {(editingAssessment||!state.assessmentApproved) && <div className="assessment-fields">
+  <p className="muted">This is a sample assessment and sample plan—not an analysis of your PDF. Review, correct, and approve them to test how the future agent will work.</p>
+  <div className="flow-stage">{state.assessmentApproved?'✓ Assessment approved':'1 · Sample assessment ready for review'}</div>
+  {editingAssessment && <div className="assessment-fields">
    {fields.map(field=><label key={field.id}>{field.label}
     {field.id==='minutes'?<input type="number" min="1" value={state.assessment[field.id]} onChange={e=>updateAssessment(field.id,e.target.value)}/>:
      <textarea rows={field.id==='structure'?3:2} placeholder={field.placeholder} value={state.assessment[field.id]} onChange={e=>updateAssessment(field.id,e.target.value)}/>}
    </label>)}
   </div>}
-  {state.assessmentApproved&&!editingAssessment&&<div className="assessment-summary">
+  {!editingAssessment&&<div className="assessment-summary">
     {fields.map(field=><p key={field.id}><strong>{field.label}:</strong> {state.assessment[field.id]}</p>)}
   </div>}
   <div className="flow-actions">
-   {state.assessmentApproved?<button className="secondary" onClick={()=>setEditingAssessment(v=>!v)}>{editingAssessment?'Hide assessment':'Revise assessment'}</button>:null}
+   <button className="secondary" onClick={()=>setEditingAssessment(v=>!v)}>{editingAssessment?'Done editing':'Correct assessment'}</button>
+   <button className="secondary" onClick={()=>{change(defaultState(title,firstPage,lastPage,duration));setEditingAssessment(false);}}>Reset mock</button>
    {!state.assessmentApproved&&<button className="primary" disabled={!canApprove} onClick={()=>{
     change({...state,assessmentApproved:true,stage:'plan'});setEditingAssessment(false);
    }}>Agree to assessment →</button>}
@@ -87,7 +105,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
   {expanded&&<div className="flow-plan">
    {!state.assessmentApproved?<p className="muted">Approve the assessment before constructing the reading plan.</p>:
    <>
-    <p className="muted">Create conceptual units manually. Enter <strong>PDF page numbers</strong>, which can differ from printed textbook pages.</p>
+    <p className="muted">Suggested mock units are editable. Their PDF page numbers are placeholders, not verified source locations. Modify them before accepting.</p>
     {state.units.map((unit,i)=><div className="flow-unit" key={unit.id}>
       <div className="flow-unit-title"><span>{i+1}.</span><input aria-label={'Unit '+(i+1)+' title'} value={unit.title} onChange={e=>updateUnit(unit.id,{title:e.target.value})}/></div>
       <div className="flow-unit-fields"><label>PDF page<input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF page'} value={unit.page} onChange={e=>updateUnit(unit.id,{page:Number(e.target.value)})}/></label>
