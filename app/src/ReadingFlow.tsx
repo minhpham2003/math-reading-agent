@@ -97,6 +97,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  }
  return <div className="reading-flow">
   {state.assessmentApproved&&state.planApproved&&<button className="secondary return-reading" onClick={()=>setSetupMode(false)}>← Return to reading</button>}
+  <h2 className="session-setup-heading">Session setup</h2>
   <div className="eyebrow">Mock reading agent · interactive demo</div>
   <div className="assessment-toggle-row"><h2 className={state.assessmentApproved?"approved-heading":""}>Reading assessment {state.assessmentApproved&&<span aria-label="Approved">✓</span>}</h2><button className="secondary" aria-expanded={assessmentOpen} onClick={()=>setAssessmentOpen(v=>!v)}>{assessmentOpen?'Collapse ▴':'Expand ▾'}</button></div>
 
