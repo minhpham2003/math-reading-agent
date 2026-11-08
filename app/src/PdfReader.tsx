@@ -316,7 +316,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       return [{x:(left-bounds.left)/bounds.width,y:(top-bounds.top)/bounds.height,
         w:(right-left)/bounds.width,h:(bottom-top)/bounds.height}];
     }));
-    const boxes=tidyBoxes(fragments);
+    const boxes=fragments;
     if (!boxes.length) return;
     setPending({filename,page:Number(page.dataset.pdfPage),text:text.slice(0,2000),boxes});
     const selectionRects=range.getClientRects();
