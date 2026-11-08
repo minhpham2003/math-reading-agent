@@ -349,10 +349,12 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     return true;
   }
   function onPdfMouseDown(event: ReactMouseEvent<HTMLDivElement>){
-    if(event.button!==0 || !(event.target instanceof Element) ||
-       !event.target.closest('.textLayer')){dragStart.current=null;return;}
+    if(event.button!==0 || !(event.target instanceof Element)){dragStart.current=null;return;}
+    // The last character of a line may have no selectable DOM hit target just
+    // beyond its right edge. Allow dragging from the page surface as well as text.
     const page=event.target.closest<HTMLElement>('[data-pdf-page]');
-    dragStart.current=page?{x:event.clientX,y:event.clientY,page:Number(page.dataset.pdfPage)}:null;
+    if(!page || !event.currentTarget.contains(page)){dragStart.current=null;return;}
+    dragStart.current={x:event.clientX,y:event.clientY,page:Number(page.dataset.pdfPage)};
   }
   function onPdfMouseUp(event: React.MouseEvent<HTMLDivElement>){
     if(captureVisualDrag(event.clientX,event.clientY))return;
