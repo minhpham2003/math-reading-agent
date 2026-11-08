@@ -81,3 +81,6 @@
   .reader-header .pdf-control-group{gap:3px}
   .reader-header .pdf-navigation-group{margin-right:5px}
 }
+
+/* Make the editable PDF page number visibly editable even when unfocused. */
+.reader-header .pdf-page-form input{border:1px solid #58759a;background:#192b40;border-radius:7px}
