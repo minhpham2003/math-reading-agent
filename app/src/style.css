@@ -87,9 +87,9 @@
 
 /* PDF.js selectable-text overlay and local source reference UI */
 .continuous-pdf-page{isolation:isolate}
-.continuous-pdf-page .textLayer{position:absolute;inset:0;overflow:hidden;opacity:1;line-height:1;text-align:initial;pointer-events:auto;z-index:2;user-select:text;transform-origin:0 0}
-.textLayer span,.textLayer br{position:absolute;white-space:pre;cursor:text;transform-origin:0 0;color:transparent}
-.textLayer ::selection{background:rgba(60,128,230,.45);color:transparent}
+
+
+
 .continuous-pdf-page .source-highlight{position:absolute;background:rgba(248,207,62,.28);outline:1px solid rgba(255,207,45,.4);pointer-events:none;z-index:1}
 .selection-actions{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#172e46;border-bottom:1px solid #42648c;color:#dceaff;font-size:12px}
 .selection-actions span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -108,9 +108,9 @@
 /* Keep the browser from shifting the page on canvas/text-layer reflow. */
 .workspace .pdf-canvas-scroll.continuous-scroll{overflow-anchor:none}
 .continuous-pdf-page{overflow-anchor:none}
-.continuous-pdf-page .textLayer{pointer-events:none}
-.continuous-pdf-page .textLayer span{pointer-events:auto;cursor:text}
-.continuous-pdf-page .textLayer br{pointer-events:none}
+
+
+
 
 /* Contextual citation action, anchored beside selected PDF text. */
 .workspace .pdf-canvas-scroll.continuous-scroll{position:relative}
@@ -122,12 +122,16 @@
 
 /* Selection across PDF text runs and line/paragraph gaps:
    the text layer itself must receive drag events, not just isolated spans. */
-.continuous-pdf-page .textLayer{pointer-events:auto;user-select:text}
-.continuous-pdf-page .textLayer span{user-select:text}
-.continuous-pdf-page .textLayer br{pointer-events:auto}
+
+
+
 
 /* In-app testing prompt below the Reading plan, distinct from generated guidance. */
 .reader-test-note{margin-top:16px;border:1px solid #365c83;border-radius:10px;background:#182c43;padding:13px;color:#dce9fb}
 .reader-test-note strong{font-size:13px}
 .reader-test-note p{font-size:13px;line-height:1.5;margin:8px 0}
 .reader-test-note span{font-size:11px;color:#a9c1dc}
+
+/* PDF.js supplies the actual text geometry; do not override its span layout. */
+.continuous-pdf-page > .textLayer{position:absolute;inset:0;z-index:2;overflow:hidden;user-select:text;pointer-events:auto}
+.continuous-pdf-page > .textLayer ::selection{background:rgba(65,127,220,.26)}
