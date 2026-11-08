@@ -41,6 +41,21 @@ async function savePdf(id: string, name: string, bytes: ArrayBuffer): Promise<vo
     });
   } finally { db.close(); }
 }
+/** Validate and attach the uploaded PDF to the new session before opening it. */
+export async function importSessionPdf(id: string, file: File): Promise<void> {
+  if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+    throw new Error('Please choose a PDF file.');
+  }
+  const bytes = await file.arrayBuffer();
+  const task = getDocument({ data: new Uint8Array(bytes.slice(0)) });
+  const document = await task.promise;
+  try {
+    await savePdf(id, file.name, bytes);
+  } finally {
+    await document.destroy();
+  }
+}
+
 export async function deleteSavedPdf(id: string): Promise<void> {
   const db = await openDatabase();
   try {
