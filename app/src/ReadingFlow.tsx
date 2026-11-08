@@ -103,7 +103,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
     {fields.map(field=><p key={field.id}><strong>{field.label}:</strong> {state.assessment[field.id]}</p>)}
   </div>}
   {assessmentOpen && <div className="flow-actions">
-   <button className="secondary" onClick={()=>setEditingAssessment(v=>!v)}>{editingAssessment?'Done editing':'Correct assessment'}</button>
+   <button className="secondary" onClick={()=>setEditingAssessment(v=>!v)}>{editingAssessment?'Done editing':'Edit'}</button>
    <button className="secondary" onClick={()=>{change(defaultState(title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(true);}}>Reset mock</button>
    {!state.assessmentApproved&&<button className="primary" disabled={!canApprove} onClick={()=>{
     change({...state,assessmentApproved:true,stage:'plan'});setEditingAssessment(false);setAssessmentOpen(false);
