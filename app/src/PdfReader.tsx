@@ -209,11 +209,43 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
 
   const scale = fitWidth ? availableWidth / pdfPageWidth : 1.35 * zoom;
 
+  function pageScrollTop(page:number, fraction=0) {
+    if (!scrollRoot) return null;
+    const el=scrollRoot.querySelector<HTMLElement>('[data-pdf-page="'+page+'"]');
+    if (!el) return null;
+    return scrollRoot.scrollTop+el.getBoundingClientRect().top-scrollRoot.getBoundingClientRect().top+fraction*el.offsetHeight;
+  }
+  function captureZoomAnchor(){
+    if(!scrollRoot)return;
+    const top=scrollRoot.getBoundingClientRect().top+20;
+    const pages=Array.from(scrollRoot.querySelectorAll<HTMLElement>('[data-pdf-page]'));
+    const el=pages.find(e=>e.getBoundingClientRect().bottom>top)??pages[pages.length-1];
+    if(!el)return;
+    const rect=el.getBoundingClientRect();
+    zoomAnchor.current={page:Number(el.dataset.pdfPage),fraction:Math.max(0,Math.min(1,(top-rect.top)/rect.height)),viewportY:20};
+    ignoreScrollRef.current=true;
+  }
+  function changeZoom(direction:-1|1){
+    captureZoomAnchor();
+    const current=fitWidth?scale/1.35:zoom;
+    setFitWidth(false);
+    setZoom(Math.max(.4,Math.min(2.4,+(current+direction*.2).toFixed(2))));
+  }
+  function fitPageWidth(){captureZoomAnchor();setFitWidth(true);}
+  useLayoutEffect(()=>{
+    const a=zoomAnchor.current;
+    if(!a||!scrollRoot)return;
+    const pos=pageScrollTop(a.page,a.fraction);
+    if(pos!==null)scrollRoot.scrollTop=Math.max(0,pos-a.viewportY);
+    zoomAnchor.current=null;
+    window.setTimeout(()=>{ignoreScrollRef.current=false;},100);
+  },[scale,scrollRoot]);
   function jump(next: number) {
     if (!pdf || !scrollRoot) return;
     const safe = Math.min(pdf.numPages, Math.max(1, next));
     const el = scrollRoot.querySelector<HTMLElement>(`[data-pdf-page="${safe}"]`);
-    if (el) scrollRoot.scrollTo({ top: el.offsetTop - scrollRoot.offsetTop, behavior: 'instant' });
+    const pos=pageScrollTop(safe);
+    if (el && pos!==null) scrollRoot.scrollTo({top:pos,behavior:'instant'});
     lastPageRef.current = safe;
     setPageNumber(safe);
     setPageInput(String(safe));
@@ -273,7 +305,15 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
   }
   function goCitation(ref:Citation) {
     if (ref.filename !== filename) {setMessage('This citation belongs to another imported PDF.');return;}
-    jump(ref.page);
+    const first=tidyBoxes(ref.boxes).sort((a,b)=>a.y-b.y)[0];
+    const pos=pageScrollTop(ref.page,first?Math.max(0,first.y-.02):0);
+    if(pos!==null && scrollRoot){
+      ignoreScrollRef.current=true;
+      scrollRoot.scrollTo({top:Math.max(0,pos),behavior:'instant'});
+      lastPageRef.current=ref.page;setPageNumber(ref.page);setPageInput(String(ref.page));
+      onChangeRef.current(ref.page);
+      window.setTimeout(()=>{ignoreScrollRef.current=false;},120);
+    } else jump(ref.page);
     setShowCitations(false);
   }
 
@@ -324,10 +364,10 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       <button className="secondary" onClick={() => jump(pageNumber + 1)} disabled={pageNumber >= pdf.numPages} aria-label="Next PDF page">→</button>
       </div>
       <div className="pdf-control-group pdf-zoom-group">
-      <button className="secondary" onClick={() => { setFitWidth(false); setZoom(z => Math.max(.4, +(z - .2).toFixed(1))); }} aria-label="Zoom out">−</button>
+      <button className="secondary" onClick={() => changeZoom(-1)} aria-label="Zoom out">−</button>
       <span className="page-indicator">{fitWidth ? 'Fit width' : Math.round(zoom * 100) + '%'}</span>
-      <button className="secondary" onClick={() => { setFitWidth(false); setZoom(z => Math.min(2.4, +(z + .2).toFixed(1))); }} aria-label="Zoom in">+</button>
-      <button className="secondary" onClick={() => setFitWidth(true)} aria-label="Fit PDF to available width">↔</button>
+      <button className="secondary" onClick={() => changeZoom(1)} aria-label="Zoom in">+</button>
+      <button className="secondary" onClick={fitPageWidth} aria-label="Fit PDF to available width">↔</button>
       </div>
     </>}
   </div>;
