@@ -20,3 +20,11 @@ Updated: 2026-11-08. This branch was cut from the S02 prototype branch, which di
 ## Revision history
 
 - 2026-11-08 — [4a90b26](https://github.com/minhpham2003/math-reading-agent/commit/4a90b26b5dc1396ddc3e839f4e98fe68e2b82146) — scaffold source committed; document update follows (branch history link above).
+
+## PDF integration — 2026-11-08
+
+- **Implementation commit:** [f06a797](https://github.com/minhpham2003/math-reading-agent/commit/f06a797b0e1277e8fa644b4f744e00a5991ae6a5), including preceding PDF reader/component commits on this branch.
+- **Implemented:** PDF.js imported-PDF canvas rendering, physical-PDF page navigation, zoom, IndexedDB persistence of PDF bytes by session, localStorage persistence of PDF page position, replacement import, and cached PDF cleanup when deleting a session.
+- **Constraints:** Imported files are browser-local, not uploaded to a server; PDF page numbers are physical file pages, which may differ from printed textbook pages. Canvas rendering does not yet provide selectable PDF text, equation selection, exact source anchors, or cross-device sync. No automatic source-to-plan analysis.
+- **Deployment:** [GitHub Actions run 42526745787](https://github.com/minhpham2003/math-reading-agent/actions/runs/42526745787) succeeded; deployed HTML confirmed on gh-pages at [React preview](https://minhpham2003.github.io/math-reading-agent/previews/react-foundation/).
+- **Testing:** TypeScript build passed in GitHub Actions. Browser interaction and visual verification have not been performed.
