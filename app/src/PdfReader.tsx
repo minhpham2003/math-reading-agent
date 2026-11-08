@@ -67,7 +67,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setToolbarHost(toolbarHostId ? document.getElementById(toolbarHostId) : null);
+    setToolbarHost(toolbarHostId ? window.document.getElementById(toolbarHostId) : null);
   }, [toolbarHostId]);
   useEffect(() => {
     const scroll = scrollRef.current;
