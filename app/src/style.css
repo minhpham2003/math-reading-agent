@@ -135,3 +135,6 @@
 /* PDF.js supplies the actual text geometry; do not override its span layout. */
 .continuous-pdf-page > .textLayer{position:absolute;inset:0;z-index:2;overflow:hidden;user-select:text;pointer-events:auto}
 .continuous-pdf-page > .textLayer ::selection{background:rgba(65,127,220,.26)}
+
+/* Citation action moves with document content instead of sticking to viewport. */
+.floating-citation-action{position:absolute;z-index:12;top:auto;left:auto;height:auto}
