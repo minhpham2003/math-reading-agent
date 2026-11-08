@@ -153,6 +153,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
   const [message, setMessage] = useState('');
   const [citations, setCitations] = useState<Citation[]>(() => readRefs(sessionId));
   const [pending, setPending] = useState<Omit<Citation,'id'> | null>(null);
+  const [selectionPoint, setSelectionPoint] = useState<{x:number;y:number} | null>(null);
   const [showCitations, setShowCitations] = useState(false);
   const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
   const onChangeRef = useRef(onPageChange);
@@ -179,7 +180,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     let cancelled = false;
     ignoreScrollRef.current = true;
     lastPageRef.current = initialPage;
-    setCitations(readRefs(sessionId)); setPending(null);
+    setCitations(readRefs(sessionId)); setPending(null); setSelectionPoint(null);
     setPdf(null); setFilename(''); setPageNumber(initialPage);
     setPageInput(String(initialPage)); setMessage('');
     getSavedPdf(sessionId).then(async saved => {
@@ -310,13 +311,20 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     }));
     if (!boxes.length) return;
     setPending({filename,page:Number(page.dataset.pdfPage),text:text.slice(0,2000),boxes});
+    const viewer=scrollRoot.getBoundingClientRect();
+    const rects=range.getClientRects();
+    const edge=rects.item(rects.length-1) ?? bounds;
+    setSelectionPoint({
+      x:Math.max(80,Math.min(viewer.width-90,edge.right-viewer.left)),
+      y:Math.max(8,Math.min(viewer.height-45,edge.bottom-viewer.top+8))
+    });
     setMessage('');
   }
   function saveCitation() {
     if (!pending) return;
     const next = [...citations, {...pending,id:crypto.randomUUID()}];
     try {localStorage.setItem(refsKey(sessionId),JSON.stringify(next));setCitations(next);
-      setPending(null);window.getSelection()?.removeAllRanges();setShowCitations(true);}
+      setPending(null);setSelectionPoint(null);window.getSelection()?.removeAllRanges();setShowCitations(true);}
     catch {setMessage('Could not save the citation in browser storage.');}
   }
   function deleteCitation(id:string) {
@@ -358,7 +366,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       ignoreScrollRef.current = true;
       lastPageRef.current = 1;
       setPdf(loaded); setFilename(file.name); setPageNumber(1); setPageInput('1');
-      setZoom(1); setFitWidth(true); setPending(null);
+      setZoom(1); setFitWidth(true); setPending(null); setSelectionPoint(null);
       onChangeRef.current(1);
     } catch {
       setMessage('The PDF could not be imported or saved. Check the file and your browser storage.');
@@ -397,9 +405,6 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     {toolbarHost ? createPortal(controls, toolbarHost) : (!toolbarHostId ? controls : null)}
     {message && <p role="alert" className="pdf-error">{message}</p>}
     {busy && <p className="muted">Importing PDF…</p>}
-    {pending && <div className="selection-actions"><span>Page {pending.page}: “{pending.text.slice(0,90)}”</span>
-      <button className="primary" onClick={saveCitation}>Save citation</button>
-      <button className="secondary" onClick={() => {setPending(null);window.getSelection()?.removeAllRanges();}}>Cancel</button></div>}
     {showCitations && <aside className="sources-drawer" aria-label="Saved source references">
       <div className="sources-heading"><strong>Saved citations</strong><button onClick={() => setShowCitations(false)}>×</button></div>
       {citations.length===0 && <p>Select text in your PDF to create a citation.</p>}
@@ -412,6 +417,12 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     </aside>}
     {pdf ?
       <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseUp={() => window.setTimeout(captureSelection,0)} onKeyUp={() => window.setTimeout(captureSelection,0)}>
+        {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
+          <button type="button" className="primary" onClick={saveCitation}>Save Citation</button>
+          <button type="button" className="floating-dismiss" aria-label="Dismiss citation selection" onClick={()=>{
+            setPending(null);setSelectionPoint(null);window.getSelection()?.removeAllRanges();
+          }}>×</button>
+        </div>}
         {Array.from({ length: pdf.numPages }, (_, i) =>
           <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} />)}
       </div> :
