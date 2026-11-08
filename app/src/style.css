@@ -9,3 +9,11 @@
 .pdf-canvas-scroll{margin-top:8px;padding:0;border:0;border-radius:3px;max-height:calc(100dvh - 265px)}
 .pdf-canvas-scroll canvas{box-shadow:none}
 @media(max-width:760px){.pdf-panel{padding:8px}.pdf-canvas-scroll{max-height:75dvh}}
+
+/* The reading-agent pane can be hidden without disturbing PDF reader state. */
+.work-grid.agent-collapsed{grid-template-columns:minmax(0,1fr)}
+.panel-toolbar{display:flex;justify-content:flex-end;gap:8px}
+.panel-toolbar .secondary{padding:6px 10px;font-size:12px}
+.pdf-panel .panel-toolbar:empty{display:none}
+.pdf-panel .panel-toolbar:not(:empty){margin-bottom:8px}
+@media(max-width:760px){.work-grid.agent-collapsed{grid-template-columns:minmax(0,1fr)}}
