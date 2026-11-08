@@ -514,11 +514,11 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
 
   const controls = <div className="pdf-toolbar">
     <button className="secondary" onClick={() => setShowCitations(v => !v)}>Sources ({citations.length})</button>
-    <label className="secondary pdf-import">{filename ? 'Replace PDF' : 'Import PDF'}
+    {pdf && <label className="secondary pdf-import">Replace PDF
       <input type="file" accept=".pdf,application/pdf" disabled={busy} onChange={e => {
         const file = e.target.files?.[0]; if (file) void importFile(file); e.target.value = '';
       }} />
-    </label>
+    </label>}
     {filename && <span className="pdf-filename" title={filename}>{filename}</span>}
     {pdf && <>
       <div className="pdf-control-group pdf-navigation-group">
