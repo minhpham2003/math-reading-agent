@@ -231,3 +231,7 @@
 /* Reading-unit completion is a button-like toggle, matching other unit actions. */
 .reading-flow .flow-actions .unit-completed-toggle{border:1px solid #49617e;transition:background-color .15s,border-color .15s}
 .reading-flow .flow-actions .unit-completed-toggle.is-completed{background:#1d5b50;border-color:#49a38e;color:#e2fff4}
+
+/* Accepted sections: a green heading/check, no separate approval banner. */
+.reading-flow .approved-heading{color:#74d9ad}
+.reading-flow .approved-heading span{display:inline-block;margin-left:5px;color:#74d9ad}
