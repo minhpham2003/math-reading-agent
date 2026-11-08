@@ -317,22 +317,41 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       range.detach();
     }
     if(!glyphs.length)return false;
-    // Use same-line y tolerance, then x order: visual reading order does not
-    // depend on the order in which equations were encoded in the PDF.
-    glyphs.sort((a,b)=>Math.abs(a.cy-b.cy)<Math.min(a.rect.height,b.rect.height)*.42
-      ? a.cx-b.cx : a.cy-b.cy);
-    function nearest(x:number,y:number){
-      let best=0,score=Infinity;
-      glyphs.forEach((g,i)=>{
-        const dx=Math.max(g.rect.left-x,0,x-g.rect.right);
-        const dy=Math.max(g.rect.top-y,0,y-g.rect.bottom);
-        const dist=dx*dx+dy*dy;
-        if(dist<score){score=dist;best=i;}
-      });
-      return best;
+    // Build explicit visual lines. A pairwise tolerance comparator is not
+    // transitive and can scramble glyphs around superscripts and line ends.
+    const rows:{center:number;height:number;items:Glyph[]}[]=[];
+    for(const g of [...glyphs].sort((a,b)=>a.cy-b.cy)){
+      const row=rows.find(row=>Math.abs(row.center-g.cy)<Math.max(row.height,g.rect.height)*.55);
+      if(row){
+        row.items.push(g);
+        // Keep the row center anchored to dominant (normal-size) text.
+        if(g.rect.height>=row.height*.85){
+          row.center=(row.center*(row.items.length-1)+g.cy)/row.items.length;
+          row.height=Math.max(row.height,g.rect.height);
+        }
+      } else rows.push({center:g.cy,height:g.rect.height,items:[g]});
     }
-    const a=nearest(start.x,start.y),b=nearest(endX,endY);
-    const chosen=glyphs.slice(Math.min(a,b),Math.max(a,b)+1);
+    rows.sort((a,b)=>a.center-b.center);
+    for(const row of rows)row.items.sort((a,b)=>a.cx-b.cx);
+    function nearestPoint(x:number,y:number){
+      const row=rows.reduce((best,row)=>Math.abs(row.center-y)<Math.abs(best.center-y)?row:best,rows[0]);
+      const items=row.items;
+      // Use insertion boundary rather than closest glyph; the right end of a
+      // line is after its final glyph, not at that glyph's midpoint.
+      let index=items.findIndex(g=>x<g.cx);
+      if(index<0)index=items.length;
+      return {row:rows.indexOf(row),index};
+    }
+    const a=nearestPoint(start.x,start.y),b=nearestPoint(endX,endY);
+    const forward=a.row<b.row||(a.row===b.row&&a.index<=b.index);
+    const first=forward?a:b,last=forward?b:a;
+    const chosen:Glyph[]=[];
+    for(let row=first.row;row<=last.row;row++){
+      const glyphsInRow=rows[row].items;
+      const from=row===first.row?first.index:0;
+      const to=row===last.row?last.index:glyphsInRow.length;
+      chosen.push(...glyphsInRow.slice(from,to));
+    }
     if(!chosen.length)return false;
     const boxes=chosen.filter(g=>g.value.trim()).map(g=>({
       x:(g.rect.left-pageRect.left)/pageRect.width,y:(g.rect.top-pageRect.top)/pageRect.height,
