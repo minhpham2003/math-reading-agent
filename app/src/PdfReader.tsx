@@ -61,14 +61,20 @@ function readRefs(sessionId:string): Citation[] {
 }
 type Box = Citation['boxes'][number];
 function tidyBoxes(boxes: Box[]): Box[] {
- const rows: Box[] = [];
- for(const b of boxes.filter(b=>[b.x,b.y,b.w,b.h].every(Number.isFinite) && b.w>0 && b.h>0).sort((a,b)=>a.y-b.y||a.x-b.x)){
-  const row=rows.find(r=>Math.abs((r.y+r.h/2)-(b.y+b.h/2))<Math.min(r.h,b.h)*.4 && b.x<=r.x+r.w+.022 && b.x+b.w>=r.x-.022);
-  if(!row){rows.push({...b});continue;}
-  const x=Math.min(row.x,b.x), y=Math.min(row.y,b.y);
-  row.w=Math.max(row.x+row.w,b.x+b.w)-x; row.h=Math.max(row.y+row.h,b.y+b.h)-y;row.x=x;row.y=y;
- }
- return rows.map(b=>({x:b.x,y:b.y+b.h*.24,w:b.w,h:b.h*.52}));
+  // One continuous, glyph-height rectangle per visual line, not one per PDF span.
+  const lines: Box[] = [];
+  const ordered=boxes.filter(b=>[b.x,b.y,b.w,b.h].every(Number.isFinite)&&b.w>0&&b.h>0)
+    .sort((a,b)=>(a.y+a.h/2)-(b.y+b.h/2)||a.x-b.x);
+  for(const b of ordered){
+    const center=b.y+b.h/2;
+    const line=lines.find(r=>Math.abs((r.y+r.h/2)-center)<Math.max(r.h,b.h)*.65);
+    if(!line){lines.push({...b});continue;}
+    const left=Math.min(line.x,b.x),top=Math.min(line.y,b.y);
+    line.w=Math.max(line.x+line.w,b.x+b.w)-left;
+    line.h=Math.max(line.y+line.h,b.y+b.h)-top;
+    line.x=left;line.y=top;
+  }
+  return lines.map(b=>({x:b.x,y:b.y+b.h*.22,w:b.w,h:b.h*.56}));
 }
 type RenderTask = ReturnType<Awaited<ReturnType<PDFDocumentProxy['getPage']>>['render']>;
 type PageProps = { pdf: PDFDocumentProxy; number: number; scale: number; root: HTMLDivElement | null; citations: Citation[] };
@@ -297,19 +303,20 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       setMessage('Please select a passage within one PDF page.'); return;
     }
     const bounds = page.getBoundingClientRect();
-    // Restrict highlights to actual PDF.js text spans rather than oversized
-    // range rectangles (which can include leading, paragraph gaps, and line breaks).
+    // Browser selection rectangles include line boxes and trailing whitespace.
+    // Intersect them with text spans and then consolidate them per visual line.
     const spans=Array.from(page.querySelectorAll<HTMLElement>('.textLayer span'))
-      .filter(el=>range.intersectsNode(el) && (el.textContent?.trim().length ?? 0)>0);
-    const rects=Array.from(range.getClientRects()).filter(b=>b.width>2 && b.height>2);
-    const boxes=rects.flatMap(b=>spans.flatMap(span=>{
+      .filter(el=>range.intersectsNode(el) && !!el.textContent?.trim());
+    const rects=Array.from(range.getClientRects()).filter(b=>b.width>0.3 && b.height>1);
+    const fragments=rects.flatMap(b=>spans.flatMap(span=>{
       const t=span.getBoundingClientRect();
       const left=Math.max(b.left,t.left),right=Math.min(b.right,t.right);
       const top=Math.max(b.top,t.top),bottom=Math.min(b.bottom,t.bottom);
-      if(right-left<2 || bottom-top<2)return [];
+      if(right-left<.3 || bottom-top<1)return [];
       return [{x:(left-bounds.left)/bounds.width,y:(top-bounds.top)/bounds.height,
         w:(right-left)/bounds.width,h:(bottom-top)/bounds.height}];
     }));
+    const boxes=tidyBoxes(fragments);
     if (!boxes.length) return;
     setPending({filename,page:Number(page.dataset.pdfPage),text:text.slice(0,2000),boxes});
     const selectionRects=range.getClientRects();
