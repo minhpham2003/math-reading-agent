@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { loadSessions, saveSessions, type ReadingSession } from './storage';
-import { PdfReader, deleteSavedPdf } from './PdfReader';
+import { PdfReader, deleteSavedPdf, importSessionPdf } from './PdfReader';
 import { ReadingFlow } from './ReadingFlow';
 
 type SessionFormState = {
@@ -16,6 +16,8 @@ export function App() {
   });
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [form, setForm] = useState<SessionFormState>(initialForm);
+  const [newPdf, setNewPdf] = useState<File | null>(null);
+  const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState('');
   const [storageError, setStorageError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -32,20 +34,33 @@ export function App() {
     setActiveId(id);
     window.history.replaceState(null, '', id ? '#session-' + encodeURIComponent(id) : window.location.pathname + window.location.search);
   }
-  function createSession(event: FormEvent<HTMLFormElement>) {
+  async function createSession(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const first = Number(form.firstPage), last = Number(form.lastPage);
     if (!form.title.trim() || !form.target.trim() || !Number.isInteger(first) || first < 1 || !Number.isInteger(last) || last < first) {
       setFormError('Enter a title, reading target, and a valid printed-page range.'); return;
     }
+    if (!newPdf) { setFormError('Choose the PDF for this reading session.'); return; }
+    setCreating(true);
+    setFormError('');
     const now = new Date().toISOString();
     const session: ReadingSession = {
       id: crypto.randomUUID(), title: form.title.trim(), target: form.target.trim(),
       firstPage: first, lastPage: last, durationMinutes: Number(form.durationMinutes),
       createdAt: now, updatedAt: now, status: 'not-started', currentPrintedPage: first
     };
-    if (!persist([...sessions, session])) return;
-    setNewSessionOpen(false); setForm(initialForm); setFormError(''); navigate(session.id);
+    try {
+      await importSessionPdf(session.id, newPdf);
+      if (!persist([...sessions, session])) {
+        await deleteSavedPdf(session.id).catch(() => undefined);
+        return;
+      }
+      setNewSessionOpen(false); setForm(initialForm); setNewPdf(null); setFormError(''); navigate(session.id);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'Could not import this PDF. Try another file.');
+    } finally {
+      setCreating(false);
+    }
   }
   function deleteSession() {
     if (!deleteId) return;
@@ -68,11 +83,11 @@ export function App() {
     function handleKeys(event: KeyboardEvent) {
       if (event.key !== 'Escape') return;
       if (deleteId) setDeleteId(null);
-      else if (newSessionOpen) { setNewSessionOpen(false); setFormError(''); }
+      else if (newSessionOpen && !creating) { setNewSessionOpen(false); setFormError(''); }
     }
     document.addEventListener('keydown', handleKeys);
     return () => document.removeEventListener('keydown', handleKeys);
-  }, [deleteId, newSessionOpen]);
+  }, [deleteId, newSessionOpen, creating]);
 
   return <div className="app-shell">
     {!active && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><span className="topbar-tag">App foundation · no AI connected</span></header>}
@@ -116,14 +131,19 @@ export function App() {
         </article>
       </div>
     </section>}
-    {newSessionOpen && <div className="overlay" role="presentation" onMouseDown={e => {if (e.target === e.currentTarget) setNewSessionOpen(false);}}>
+    {newSessionOpen && <div className="overlay" role="presentation" onMouseDown={e => {if (e.target === e.currentTarget && !creating) setNewSessionOpen(false);}}>
       <form className="dialog" onSubmit={createSession} role="dialog" aria-modal="true" aria-labelledby="new-session-title"><h2 id="new-session-title">New reading session</h2><p>Choose a scope and time. We will refine the plan inside the workspace.</p>
+        <label className="new-session-pdf-field">PDF document <span className="required-marker">Required</span>
+          <input type="file" accept=".pdf,application/pdf" required disabled={creating}
+            onChange={e => setNewPdf(e.target.files?.[0] ?? null)}/>
+          <small>{newPdf ? newPdf.name : 'Choose the document you want to read. The file stays in this browser.'}</small>
+        </label>
         <label>Session title<input autoFocus required maxLength={120} placeholder="e.g. Homotopy equivalence" value={form.title} onChange={e => setForm({...form,title:e.target.value})}/></label>
         <label>Section or reading target<input required placeholder="e.g. Chapter 3, §3.1" value={form.target} onChange={e => setForm({...form,target:e.target.value})}/></label>
         <div className="form-row"><label>First printed page<input type="number" min="1" required value={form.firstPage} onChange={e => setForm({...form,firstPage:e.target.value})}/></label><label>Last printed page<input type="number" min="1" required value={form.lastPage} onChange={e => setForm({...form,lastPage:e.target.value})}/></label></div>
         <label>Available time<select value={form.durationMinutes} onChange={e => setForm({...form,durationMinutes:e.target.value})}><option value="30">30 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></label>
         {formError && <p role="alert" className="form-error">{formError}</p>}
-        <div className="dialog-actions"><button className="secondary" type="button" onClick={() => {setNewSessionOpen(false);setFormError('');}}>Cancel</button><button className="primary" type="submit">Create session</button></div>
+        <div className="dialog-actions"><button className="secondary" type="button" disabled={creating} onClick={() => {setNewSessionOpen(false);setFormError('');setNewPdf(null);}}>Cancel</button><button className="primary" type="submit" disabled={creating}>{creating ? 'Importing PDF…' : 'Create session'}</button></div>
       </form></div>}
     {pendingDelete && <div className="overlay" onMouseDown={e => {if (e.target === e.currentTarget) setDeleteId(null);}}><div className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title"><h2 id="delete-title">Delete session?</h2><p>Delete “{pendingDelete.title}” from this browser? This cannot be undone.</p><div className="dialog-actions"><button className="secondary" onClick={() => setDeleteId(null)}>Cancel</button><button className="danger" onClick={deleteSession}>Delete session</button></div></div></div>}
   </div>;
