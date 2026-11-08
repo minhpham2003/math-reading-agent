@@ -322,8 +322,8 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     const selectionRects=range.getClientRects();
     const edge=selectionRects.item(selectionRects.length-1) ?? bounds;
     setSelectionPoint({
-      x:Math.max(8,Math.min(window.innerWidth-160,edge.right)),
-      y:Math.max(8,Math.min(window.innerHeight-46,edge.bottom+8))
+      x:Math.max(8,edge.right-scrollRoot.getBoundingClientRect().left+scrollRoot.scrollLeft),
+      y:Math.max(8,edge.bottom-scrollRoot.getBoundingClientRect().top+scrollRoot.scrollTop+8)
     });
     setMessage('');
   }
@@ -435,11 +435,11 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
         <button className="secondary" onClick={() => deleteCitation(ref.id)}>Remove</button>
       </div>)}
     </aside>}
+    {pdf ?
+      <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseUp={() => window.setTimeout(captureSelection,0)} onKeyUp={() => window.setTimeout(captureSelection,0)}>
     {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
       <button type="button" className="primary" onClick={saveCitation}>Save Citation</button>
     </div>}
-    {pdf ?
-      <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseUp={() => window.setTimeout(captureSelection,0)} onKeyUp={() => window.setTimeout(captureSelection,0)}>
         {Array.from({ length: pdf.numPages }, (_, i) =>
           <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} />)}
       </div> :
