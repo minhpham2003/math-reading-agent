@@ -84,3 +84,20 @@
 
 /* Make the editable PDF page number visibly editable even when unfocused. */
 .reader-header .pdf-page-form input{border:1px solid #58759a;background:#192b40;border-radius:7px}
+
+/* PDF.js selectable-text overlay and local source reference UI */
+.continuous-pdf-page{isolation:isolate}
+.continuous-pdf-page .textLayer{position:absolute;inset:0;overflow:hidden;opacity:1;line-height:1;text-align:initial;pointer-events:auto;z-index:2;user-select:text;transform-origin:0 0}
+.textLayer span,.textLayer br{position:absolute;white-space:pre;cursor:text;transform-origin:0 0;color:transparent}
+.textLayer ::selection{background:rgba(60,128,230,.45);color:transparent}
+.continuous-pdf-page .source-highlight{position:absolute;background:rgba(248,207,62,.28);outline:1px solid rgba(255,207,45,.4);pointer-events:none;z-index:1}
+.selection-actions{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#172e46;border-bottom:1px solid #42648c;color:#dceaff;font-size:12px}
+.selection-actions span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.selection-actions button{padding:6px 9px;white-space:nowrap}
+.sources-drawer{position:absolute;right:6px;top:49px;z-index:8;width:min(390px,90vw);max-height:65dvh;overflow:auto;border:1px solid #455e7b;border-radius:9px;background:#17283c;box-shadow:0 12px 30px #0009;padding:13px}
+.sources-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sources-heading button{border:0;background:transparent;color:#e0edff;font-size:22px;cursor:pointer}
+.source-entry{border-top:1px solid #40516a;padding:10px 0;display:flex;gap:6px;flex-wrap:wrap}
+.source-entry-link{display:flex;flex-direction:column;flex-basis:100%;text-align:left;gap:5px;color:#cde0fb;border:0;background:transparent;cursor:pointer}
+.source-entry-link span{font-size:12px;line-height:1.4;max-height:65px;overflow:hidden}
+.source-entry .secondary{padding:5px 9px;font-size:12px}
