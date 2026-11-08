@@ -336,7 +336,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
         <button className="secondary" onClick={() => void navigator.clipboard.writeText(ref.filename+', PDF p. '+ref.page+': “'+ref.text+'”').catch(()=>setMessage('Clipboard unavailable.'))}>Copy</button>
         <button className="secondary" onClick={() => deleteCitation(ref.id)}>Remove</button>
       </div>)}
-    </aside>
+    </aside>}
     {pdf ?
       <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseUp={() => window.setTimeout(captureSelection,0)} onKeyUp={() => window.setTimeout(captureSelection,0)}>
         {Array.from({ length: pdf.numPages }, (_, i) =>
