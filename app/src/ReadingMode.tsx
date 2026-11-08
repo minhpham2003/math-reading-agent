@@ -33,16 +33,10 @@ export function ReadingMode({sessionId,title,units,onNavigate,onToggle,onSetup}:
    <div className="reading-nav-heading"><strong>Reading plan · {units.filter(u=>u.done).length}/{units.length} completed</strong>
     <button className="secondary" aria-expanded={listOpen} onClick={()=>setListOpen(v=>!v)}>{listOpen?'Collapse ▴':'Expand ▾'}</button></div>
    {listOpen&&<div className="reading-nav-list">{units.map((unit,i)=><div className={'reading-nav-item'+(selected?.id===unit.id?' is-current':'')} key={unit.id}>
-    <button className="reading-nav-link" onClick={()=>{setSelectedId(unit.id);onNavigate(unit.page)}}><span>{unit.done?'✓':selected?.id===unit.id?'●':'○'} {i+1}. {unit.title}</span><small>{location(unit)}</small></button>
+    <button className="reading-nav-link" onClick={()=>{setSelectedId(unit.id);onNavigate(unit.page)}}><span>{unit.done?'✓':selected?.id===unit.id?'●':'○'} {i+1}. {unit.title}</span><small>{location(unit)}</small>{unit.description&&<span className="reading-unit-description">{unit.description}</span>}</button>
     <button className={'secondary unit-completed-toggle'+(unit.done?' is-completed':'')} aria-pressed={unit.done} onClick={()=>onToggle(unit.id)}>{unit.done?'✓ Completed':'Completed'}</button>
    </div>)}</div>}
   </section>
-  {selected&&<section className="current-reading-unit">
-    <div className="eyebrow">Currently reading</div><h3>{selected.title}</h3><p>{location(selected)}</p>
-    {selected.description&&<p>{selected.description}</p>}
-    <div className="flow-actions"><button className="secondary" onClick={()=>onNavigate(selected.page)}>Go to PDF ↗</button>
-    <button className={'secondary unit-completed-toggle'+(selected.done?' is-completed':'')} aria-pressed={selected.done} onClick={()=>onToggle(selected.id)}>{selected.done?'✓ Completed':'Completed'}</button></div>
-  </section>}
   <section className="reading-conversation">
    <h3>Reading agent</h3><p className="muted">This is the conversation layout preview. No AI replies yet—questions and observations are saved as local notes.</p>
    <div className="reading-note-list">{notes.length===0?<p className="muted">No notes yet. Add a question or observation as you read.</p>:notes.map((note,i)=><div className="reading-note" key={i}>{note}</div>)}</div>
