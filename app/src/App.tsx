@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { loadSessions, saveSessions, type ReadingSession } from './storage';
 import { PdfReader, deleteSavedPdf } from './PdfReader';
+import { ReadingFlow } from './ReadingFlow';
 
 type SessionFormState = {
   title: string; target: string; firstPage: string; lastPage: string; durationMinutes: string;
@@ -18,7 +19,7 @@ export function App() {
   const [formError, setFormError] = useState('');
   const [storageError, setStorageError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [planOpen, setPlanOpen] = useState(true);
+  const [pageJump, setPageJump] = useState<{page:number;seq:number}|null>(null);
   const [agentOpen, setAgentOpen] = useState(true);
   const active = sessions.find(s => s.id === activeId) ?? null;
   const pendingDelete = sessions.find(s => s.id === deleteId);
@@ -104,17 +105,13 @@ export function App() {
         <button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button>
       </div>
       <div className={agentOpen ? "work-grid" : "work-grid agent-collapsed"}>
-        {agentOpen && <article className="work-panel agent-panel"><div className="eyebrow">Reading agent · left panel</div><h2>Your session</h2><div className="agent-placeholder"><div className="eyebrow">Agent not connected</div><strong>Let's plan your reading session</strong><p>You selected {active.target}, printed pages {active.firstPage}–{active.lastPage}. Source analysis will be added after the real PDF reader is connected.</p></div>
-          <div className="plan-heading"><strong>Reading plan</strong><button className="secondary" aria-expanded={planOpen} onClick={() => setPlanOpen(!planOpen)}>{planOpen ? 'Collapse ▴' : 'Expand ▾'}</button></div>
-          {planOpen && <div className="plan-body"><p>No plan has been generated. The S07 assessment → plan approval flow is part of a later implementation milestone.</p></div>}
-          <div className="reader-test-note" role="note">
-            <strong>Try this in the PDF</strong>
-            <p>Select an entire paragraph across a line or paragraph break, including the top lines. Does the selection capture everything? Then try saving it as a citation.</p>
-            <span>Testing the PDF text-selection feature · no AI connected yet</span>
-          </div>
+        {agentOpen && <article className="work-panel agent-panel">
+          <ReadingFlow key={active.id} sessionId={active.id} title={active.target}
+            firstPage={active.firstPage} lastPage={active.lastPage} duration={active.durationMinutes}
+            onNavigate={page => setPageJump(old=>({page,seq:(old?.seq??0)+1}))}/>
         </article>}
         <article className="work-panel pdf-panel">
-          <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} toolbarHostId="reader-toolbar-slot" />
+          <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} toolbarHostId="reader-toolbar-slot" pageJump={pageJump} />
         </article>
       </div>
     </section>}
