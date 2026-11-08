@@ -220,3 +220,6 @@
 
 /* Add-unit is a compact trigger; unit details live in the editable plan card. */
 .reading-flow .add-unit-trigger{align-self:flex-start;padding:9px 16px;font-size:16px}
+
+/* Match Reading plan heading to Reading assessment. */
+.reading-flow .plan-heading strong{font-size:25px;line-height:1.25}
