@@ -51,6 +51,7 @@ export function App() {
     if (persist(sessions.filter(s => s.id !== deleteId))) {
       if (activeId === deleteId) navigate(null);
       setDeleteId(null);
+      localStorage.removeItem('higher-math:citations:' + deleteId);
       void deleteSavedPdf(deleteId).catch(() => setStorageError('Session deleted, but its cached PDF could not be cleared.'));
     }
   }
