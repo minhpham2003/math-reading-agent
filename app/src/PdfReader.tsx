@@ -323,6 +323,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     // If the selection stops just before the last punctuation mark, include
     // that glyph. PDFs frequently isolate the period into a separate span.
     const lastRect=rects.reduce((best,b)=>!best || b.right>best.right ? b : best, undefined as DOMRect | undefined);
+    let punctuationSuffix = '';
     if (lastRect) {
       const punctuation=Array.from(page.querySelectorAll<HTMLElement>('.textLayer span'))
         .filter(span => /^[.!?;:,]+$/.test(span.textContent?.trim() ?? ''))
@@ -333,12 +334,13 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
             item.rect.left>=lastRect.right-2 && item.rect.left<=lastRect.right+18;
         }).sort((a,b)=>a.rect.left-b.rect.left)[0];
       if(punctuation && !/[.!?;:,]$/.test(text)) {
+        punctuationSuffix=punctuation.span.textContent?.trim() ?? '';
         const b=punctuation.rect;
         boxes.push({x:(b.left-bounds.left)/bounds.width,y:(b.top-bounds.top)/bounds.height,
           w:b.width/bounds.width,h:b.height/bounds.height});
       }
     }
-    setPending({filename,page:Number(page.dataset.pdfPage),text:text.slice(0,2000),boxes});
+    setPending({filename,page:Number(page.dataset.pdfPage),text:(text + punctuationSuffix).slice(0,2000),boxes});
     setVisualSelection({page:Number(page.dataset.pdfPage),boxes});
     const selectionRects=range.getClientRects();
     const edge=selectionRects.item(selectionRects.length-1) ?? bounds;
