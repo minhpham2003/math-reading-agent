@@ -262,3 +262,6 @@
 .reading-conversation form button{align-self:flex-end}
 .return-reading{align-self:flex-start;font-size:14px}
 @media(max-width:550px){.reading-nav-item{flex-wrap:wrap}.reading-nav-item>.unit-completed-toggle{margin-left:auto}}
+
+/* Unit details live directly in the plan navigator, not a duplicate card. */
+.reading-nav-link .reading-unit-description{display:block;margin-top:3px;font-size:14px;line-height:1.45;color:#bacee3;white-space:normal;overflow-wrap:anywhere}
