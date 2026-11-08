@@ -72,3 +72,11 @@
 - **Implementation:** [9c82b7b](https://github.com/minhpham2003/math-reading-agent/commit/9c82b7b58853a2c36b9ec00b283e52e825a85e30) adds mouse-drag selection using character-level PDF.js DOM geometry, choosing drag endpoints by proximity and arranging glyphs by visual position. Existing keyboard/native selection path retained separately.
 - **Build and deployment:** [GitHub Actions run 42532950587](https://github.com/minhpham2003/math-reading-agent/actions/runs/42532950587) succeeded.
 - **Outstanding validation:** Actual browser interaction with backward drag from sentence-final punctuation, equation superscripts/subscripts, long lines, multi-line selections, native selection interference, performance on dense PDF pages. Visual-order sorting is a first iteration; mathematical extraction and punctuation order may still need improvement.
+
+## V-017 — Manual S07 assessment and reading-plan workflow (2026-11-08)
+
+- **Implementation:** [ReadingFlow.tsx](https://github.com/minhpham2003/math-reading-agent/blob/implementation/react-foundation/app/src/ReadingFlow.tsx) with App/PdfReader integration.
+- **In source:** Six-field editable range assessment (scope, conceptual structure, difficulty, dependencies, estimated time, recommendation), explicit assessment agreement, manual plan-unit creation, title/description/PDF-page editing, reorder/remove, explicit plan acceptance, clickable source page navigation without automatic explanations, read-status checkboxes, local persistence per session, and cleanup on session deletion.
+- **Honesty:** No language-model calls or automatic assessments/plans exist. The user prepares the assessment and units manually. Source location is physical PDF page number only; no automatic excerpt highlighting or semantic section detection yet.
+- **Build/deployment:** [GitHub Actions run 42533995621](https://github.com/minhpham2003/math-reading-agent/actions/runs/42533995621) succeeded, gh-pages bundle present.
+- **Still unverified:** Browser interaction of approvals, edits, plan navigation, cross-reload persistence, regression of PDF toolbars/selection/citations and responsive rendering.
