@@ -67,7 +67,7 @@ function tidyBoxes(boxes: Box[]): Box[] {
   const x=Math.min(row.x,b.x), y=Math.min(row.y,b.y);
   row.w=Math.max(row.x+row.w,b.x+b.w)-x; row.h=Math.max(row.y+row.h,b.y+b.h)-y;row.x=x;row.y=y;
  }
- return rows.map(b=>({x:b.x,y:b.y+b.h*.15,w:b.w,h:b.h*.7}));
+ return rows.map(b=>({x:b.x,y:b.y+b.h*.24,w:b.w,h:b.h*.52}));
 }
 type RenderTask = ReturnType<Awaited<ReturnType<PDFDocumentProxy['getPage']>>['render']>;
 type PageProps = { pdf: PDFDocumentProxy; number: number; scale: number; root: HTMLDivElement | null; citations: Citation[] };
@@ -160,6 +160,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
   const lastPageRef = useRef(initialPage);
   const ignoreScrollRef = useRef(true);
   const zoomAnchor = useRef<{page:number; fraction:number; viewportY:number} | null>(null);
+  const previousScale = useRef<number | null>(null);
 
   useEffect(() => {
     setToolbarHost(toolbarHostId ? window.document.getElementById(toolbarHostId) : null);
@@ -223,6 +224,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
     if(!el)return;
     const rect=el.getBoundingClientRect();
     zoomAnchor.current={page:Number(el.dataset.pdfPage),fraction:Math.max(0,Math.min(1,(top-rect.top)/rect.height)),viewportY:20};
+    previousScale.current=scale;
     ignoreScrollRef.current=true;
   }
   function changeZoom(direction:-1|1){
@@ -235,8 +237,17 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
   useLayoutEffect(()=>{
     const a=zoomAnchor.current;
     if(!a||!scrollRoot)return;
+    const oldScale=previousScale.current;
     const pos=pageScrollTop(a.page,a.fraction);
-    if(pos!==null)scrollRoot.scrollTop=Math.max(0,pos-a.viewportY);
+    if(pos!==null){
+      // Correct the browser's automatic scroll anchoring on scale changes.
+      scrollRoot.scrollTop=Math.max(0,pos-a.viewportY);
+      window.requestAnimationFrame(()=>{
+        const corrected=pageScrollTop(a.page,a.fraction);
+        if(corrected!==null)scrollRoot.scrollTop=Math.max(0,corrected-a.viewportY);
+      });
+    }
+    void oldScale;
     zoomAnchor.current=null;
     window.setTimeout(()=>{ignoreScrollRef.current=false;},100);
   },[scale,scrollRoot]);
@@ -284,9 +295,19 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId 
       setMessage('Please select a passage within one PDF page.'); return;
     }
     const bounds = page.getBoundingClientRect();
-    const boxes = Array.from(range.getClientRects()).filter(b => b.width > 1 && b.height > 1)
-      .map(b => ({x:(b.left-bounds.left)/bounds.width,y:(b.top-bounds.top)/bounds.height,
-        w:b.width/bounds.width,h:b.height/bounds.height}));
+    // Restrict highlights to actual PDF.js text spans rather than oversized
+    // range rectangles (which can include leading, paragraph gaps, and line breaks).
+    const spans=Array.from(page.querySelectorAll<HTMLElement>('.textLayer span'))
+      .filter(el=>range.intersectsNode(el) && (el.textContent?.trim().length ?? 0)>0);
+    const rects=Array.from(range.getClientRects()).filter(b=>b.width>2 && b.height>2);
+    const boxes=rects.flatMap(b=>spans.flatMap(span=>{
+      const t=span.getBoundingClientRect();
+      const left=Math.max(b.left,t.left),right=Math.min(b.right,t.right);
+      const top=Math.max(b.top,t.top),bottom=Math.min(b.bottom,t.bottom);
+      if(right-left<2 || bottom-top<2)return [];
+      return [{x:(left-bounds.left)/bounds.width,y:(top-bounds.top)/bounds.height,
+        w:(right-left)/bounds.width,h:(bottom-top)/bounds.height}];
+    }));
     if (!boxes.length) return;
     setPending({filename,page:Number(page.dataset.pdfPage),text:text.slice(0,2000),boxes});
     setMessage('');
