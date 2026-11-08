@@ -4,7 +4,7 @@ type Assessment = {
  scope:string; structure:string; difficulty:string; dependencies:string;
  minutes:string; recommendation:string;
 };
-type Unit = {id:string; title:string; page:number; description:string; done:boolean};
+type Unit = {id:string; title:string; page:number; endPage?:number; description:string; done:boolean};
 type State = {assessment:Assessment; assessmentApproved:boolean; planApproved:boolean; units:Unit[]; stage:'assessment'|'plan'|'reading'};
 const key=(id:string)=>'higher-math:reading-flow:v1:'+id;
 function mockAssessment(title:string,first:number,last:number,minutes:number):Assessment {
@@ -20,9 +20,9 @@ function mockAssessment(title:string,first:number,last:number,minutes:number):As
 function mockUnits(first:number,last:number):Unit[] {
  const mid=Math.max(first,Math.min(last,first+Math.floor((last-first)/2)));
  return [
-  {id:crypto.randomUUID(),title:'Definitions and motivating questions',page:first,description:'Demo unit: locate the central definitions and motivation in the source.',done:false},
-  {id:crypto.randomUUID(),title:'Main results and proof structure',page:mid,description:'Demo unit: identify important claims and the role of their proofs.',done:false},
-  {id:crypto.randomUUID(),title:'Examples, consequences, and recap',page:last,description:'Demo unit: connect the results to examples and consolidate understanding.',done:false}
+  {id:crypto.randomUUID(),title:'Definitions and motivating questions',page:first,endPage:Math.max(first,mid-1),description:'Demo unit: locate the central definitions and motivation in the source.',done:false},
+  {id:crypto.randomUUID(),title:'Main results and proof structure',page:mid,endPage:Math.max(mid,last-1),description:'Demo unit: identify important claims and the role of their proofs.',done:false},
+  {id:crypto.randomUUID(),title:'Examples, consequences, and recap',page:last,endPage:last,description:'Demo unit: connect the results to examples and consolidate understanding.',done:false}
  ];
 }
 function defaultState(title:string,first:number,last:number,minutes:number):State {
@@ -52,7 +52,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const [state,setState]=useState<State>(()=>load(sessionId,title,firstPage,lastPage,duration));
  const [expanded,setExpanded]=useState(true);
  const [editingAssessment,setEditingAssessment]=useState(false);
- const [draft,setDraft]=useState({title:'',page:String(firstPage),description:''});
+ const [draft,setDraft]=useState({title:'',page:String(firstPage),endPage:'',description:''});
  const [error,setError]=useState('');
  useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);},[sessionId]);
  function change(next:State) {
@@ -67,9 +67,10 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  }
  function addUnit(){
   const page=Number(draft.page);
-  if(!draft.title.trim()||!Number.isInteger(page)||page<1){setError('Provide a unit title and a positive PDF page number.');return;}
-  change({...state,units:[...state.units,{id:crypto.randomUUID(),title:draft.title.trim(),page,description:draft.description.trim(),done:false}],planApproved:false,stage:'plan'});
-  setDraft({title:'',page:String(page),description:''});
+  const endPage=draft.endPage.trim()?Number(draft.endPage):page;
+  if(!draft.title.trim()||!Number.isInteger(page)||page<1||!Number.isInteger(endPage)||endPage<page){setError('Enter a unit title and valid PDF pages (end page must be at least the start page).');return;}
+  change({...state,units:[...state.units,{id:crypto.randomUUID(),title:draft.title.trim(),page,endPage,description:draft.description.trim(),done:false}],planApproved:false,stage:'plan'});
+  setDraft({title:'',page:String(page),endPage:'',description:''});
  }
  function move(id:string,delta:number){
   const list=[...state.units],i=list.findIndex(unit=>unit.id===id),j=i+delta;
@@ -105,11 +106,15 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
   {expanded&&<div className="flow-plan">
    {!state.assessmentApproved?<p className="muted">Approve the assessment before constructing the reading plan.</p>:
    <>
-    <p className="muted">Suggested mock units are editable. Their PDF page numbers are placeholders, not verified source locations. Modify them before accepting.</p>
+    <p className="muted">Suggested mock units are editable. Their PDF page ranges are placeholders, not verified source locations. Modify them before accepting.</p>
     {state.units.map((unit,i)=><div className="flow-unit" key={unit.id}>
       <div className="flow-unit-title"><span>{i+1}.</span><input aria-label={'Unit '+(i+1)+' title'} value={unit.title} onChange={e=>updateUnit(unit.id,{title:e.target.value})}/></div>
-      <div className="flow-unit-fields"><label>PDF page<input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF page'} value={unit.page} onChange={e=>updateUnit(unit.id,{page:Number(e.target.value)})}/></label>
-       <label>Description<textarea rows={2} aria-label={'Unit '+(i+1)+' description'} value={unit.description} onChange={e=>updateUnit(unit.id,{description:e.target.value})}/></label></div>
+      <div className="flow-unit-location"><strong>{(unit.endPage??unit.page)===unit.page?'PDF page '+unit.page:'PDF pages '+unit.page+'–'+(unit.endPage??unit.page)}</strong></div>
+      <div className="flow-page-range">
+       <label>PDF start page<input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF start page'} value={unit.page} onChange={e=>updateUnit(unit.id,{page:Number(e.target.value)})}/></label>
+       <label>PDF end page <span className="muted">(optional)</span><input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF end page'} placeholder="Same page" value={unit.endPage===undefined?'':unit.endPage} onChange={e=>updateUnit(unit.id,{endPage:e.target.value===''?undefined:Number(e.target.value)})}/></label>
+      </div>
+      <label>Description<textarea rows={2} aria-label={'Unit '+(i+1)+' description'} value={unit.description} onChange={e=>updateUnit(unit.id,{description:e.target.value})}/></label>
       <div className="flow-actions">
        <button className="secondary" onClick={()=>onNavigate(unit.page)}>Go to PDF ↗</button>
        <button className="secondary" disabled={i===0} onClick={()=>move(unit.id,-1)} aria-label="Move unit up">↑</button>
@@ -121,11 +126,11 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
     {!state.planApproved&&<div className="new-unit">
       <strong>Add a conceptual unit</strong>
       <input placeholder="Unit title" aria-label="New unit title" value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})}/>
-      <input type="number" min="1" aria-label="New unit PDF page" value={draft.page} onChange={e=>setDraft({...draft,page:e.target.value})}/>
+      <div className="flow-page-range"><label>PDF start page<input type="number" min="1" aria-label="New unit PDF start page" value={draft.page} onChange={e=>setDraft({...draft,page:e.target.value})}/></label><label>PDF end page <span className="muted">(optional)</span><input type="number" min="1" aria-label="New unit PDF end page" placeholder="Same page" value={draft.endPage} onChange={e=>setDraft({...draft,endPage:e.target.value})}/></label></div>
       <textarea rows={2} placeholder="Brief description (optional)" aria-label="New unit description" value={draft.description} onChange={e=>setDraft({...draft,description:e.target.value})}/>
       <button className="secondary" onClick={addUnit}>+ Add unit</button>
     </div>}
-    {!state.planApproved?<button className="primary" disabled={!state.units.length||state.units.some(u=>!u.title.trim()||!Number.isInteger(u.page)||u.page<1)} onClick={()=>{
+    {!state.planApproved?<button className="primary" disabled={!state.units.length||state.units.some(u=>!u.title.trim()||!Number.isInteger(u.page)||u.page<1||!Number.isInteger(u.endPage??u.page)||(u.endPage??u.page)<u.page)} onClick={()=>{
      change({...state,planApproved:true,stage:'reading'});onNavigate(state.units[0].page);
     }}>Accept reading plan →</button>:<div className="flow-stage">✓ Plan accepted · Reading in progress
        <p className="muted">Choose a unit to navigate to its source. Nothing is explained automatically.</p>
