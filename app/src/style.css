@@ -201,3 +201,15 @@
 .new-session-pdf-field .required-marker{float:right;font-size:11px;color:#b5d6f7;font-weight:600}
 .new-session-pdf-field input[type="file"]{cursor:pointer;background:#10243a}
 .new-session-pdf-field small{display:block;margin-top:8px;color:#a6c1de;font-size:12px;font-weight:400;overflow-wrap:anywhere}
+
+/* Larger, consistent typography in the New Reading Session dialog. */
+.dialog{font-size:18px;max-height:calc(100dvh - 36px);overflow-y:auto}
+.dialog h2{font-size:27px;line-height:1.25}
+.dialog p{font-size:18px;line-height:1.5}
+.dialog label{font-size:17px}
+.dialog input,.dialog select{font-size:18px;line-height:1.35;padding:13px 12px}
+.dialog input::placeholder{font-size:18px}
+.dialog .dialog-actions button{font-size:17px;padding:12px 17px}
+.dialog .new-session-pdf-field small{font-size:15px}
+.dialog .new-session-pdf-field .required-marker{font-size:13px}
+@media(max-width:580px){.dialog{padding:18px}.dialog h2{font-size:23px}.dialog p{font-size:16px}.dialog input,.dialog select{font-size:16px}.dialog label{font-size:16px}}
