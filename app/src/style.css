@@ -235,3 +235,30 @@
 /* Accepted sections: a green heading/check, no separate approval banner. */
 .reading-flow .approved-heading{color:#74d9ad}
 .reading-flow .approved-heading span{display:inline-block;margin-left:5px;color:#74d9ad}
+
+/* Reading mode replaces completed setup; PDF stays mounted beside it. */
+.reading-mode{display:flex;flex-direction:column;gap:16px;min-height:100%;font-size:16px;line-height:1.5}
+.reading-mode-top,.reading-nav-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.reading-mode h2{font-size:25px;margin:0}
+.reading-mode h3{font-size:20px;margin:0 0 8px}
+.reading-mode-top button,.reading-nav-heading button{font-size:13px;flex:none}
+.reading-navigator,.current-reading-unit{border:1px solid #395675;border-radius:10px;background:#172a40;padding:14px}
+.reading-nav-heading strong{font-size:17px}
+.reading-nav-list{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.reading-nav-item{display:flex;align-items:center;gap:9px;border:1px solid transparent;padding:8px;border-radius:8px}
+.reading-nav-item.is-current{background:#23405d;border-color:#466e94}
+.reading-nav-link{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;background:none;color:#e3eeff;border:0;text-align:left;cursor:pointer;font:inherit}
+.reading-nav-link small{color:#b8cde4;font-size:12px}
+.reading-nav-item>.unit-completed-toggle{font-size:12px;padding:7px 10px;flex:none}
+.reading-mode .unit-completed-toggle.is-completed{background:#1d5b50;color:#e2fff4;border:1px solid #49a38e}
+.current-reading-unit p{font-size:15px;color:#bacee3;margin:7px 0}
+.current-reading-unit .flow-actions{margin-top:12px}
+.reading-conversation{display:flex;flex-direction:column;gap:12px;flex:1;min-height:200px;border-top:1px solid #34516b;padding-top:16px}
+.reading-conversation .muted{font-size:14px}
+.reading-note-list{flex:1;min-height:80px;display:flex;flex-direction:column;gap:8px}
+.reading-note{align-self:flex-end;border-radius:10px;background:#29486d;padding:10px 12px;max-width:95%;white-space:pre-wrap;overflow-wrap:anywhere}
+.reading-conversation form{display:flex;flex-direction:column;gap:8px}
+.reading-conversation textarea{width:100%;padding:11px;border:1px solid #4c6682;border-radius:10px;background:#102036;color:#e8f0ff;font:inherit;resize:vertical}
+.reading-conversation form button{align-self:flex-end}
+.return-reading{align-self:flex-start;font-size:14px}
+@media(max-width:550px){.reading-nav-item{flex-wrap:wrap}.reading-nav-item>.unit-completed-toggle{margin-left:auto}}
