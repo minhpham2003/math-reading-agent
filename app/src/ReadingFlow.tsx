@@ -1,4 +1,5 @@
 import {useEffect,useState} from 'react';
+import {ReadingMode} from './ReadingMode';
 
 type Assessment = {
  scope:string; structure:string; difficulty:string; dependencies:string;
@@ -51,10 +52,11 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  {sessionId:string;title:string;firstPage:number;lastPage:number;duration:number;onNavigate:(page:number)=>void}) {
  const [state,setState]=useState<State>(()=>load(sessionId,title,firstPage,lastPage,duration));
  const [expanded,setExpanded]=useState(!state.planApproved);
+ const [setupMode,setSetupMode]=useState(!(state.assessmentApproved&&state.planApproved));
  const [editingAssessment,setEditingAssessment]=useState(false);
  const [assessmentOpen,setAssessmentOpen]=useState(!state.assessmentApproved);
  const [error,setError]=useState('');
- useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(!load(sessionId,title,firstPage,lastPage,duration).assessmentApproved);setExpanded(!load(sessionId,title,firstPage,lastPage,duration).planApproved);},[sessionId]);
+ useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(!load(sessionId,title,firstPage,lastPage,duration).assessmentApproved);setExpanded(!load(sessionId,title,firstPage,lastPage,duration).planApproved);setSetupMode(!(load(sessionId,title,firstPage,lastPage,duration).assessmentApproved&&load(sessionId,title,firstPage,lastPage,duration).planApproved));},[sessionId]);
  function change(next:State) {
   try {localStorage.setItem(key(sessionId),JSON.stringify(next));setState(next);setError('');}
   catch{setError('Unable to save this session. Check browser storage.');}
@@ -88,7 +90,13 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
   change({...state,units:list,planApproved:false,stage:'plan'});
  }
  const canApprove=fields.every(f=>state.assessment[f.id].trim());
+ if(state.assessmentApproved&&state.planApproved&&!setupMode) {
+  return <ReadingMode sessionId={sessionId} title={title} units={state.units}
+    onNavigate={onNavigate} onToggle={id=>change({...state,units:state.units.map(u=>u.id===id?{...u,done:!u.done}:u)})}
+    onSetup={()=>{setSetupMode(true);setAssessmentOpen(false);setExpanded(false);}} />;
+ }
  return <div className="reading-flow">
+  {state.assessmentApproved&&state.planApproved&&<button className="secondary return-reading" onClick={()=>setSetupMode(false)}>← Return to reading</button>}
   <div className="eyebrow">Mock reading agent · interactive demo</div>
   <div className="assessment-toggle-row"><h2 className={state.assessmentApproved?"approved-heading":""}>Reading assessment {state.assessmentApproved&&<span aria-label="Approved">✓</span>}</h2><button className="secondary" aria-expanded={assessmentOpen} onClick={()=>setAssessmentOpen(v=>!v)}>{assessmentOpen?'Collapse ▴':'Expand ▾'}</button></div>
 
@@ -136,7 +144,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
     {!state.planApproved?<button className="primary" onClick={()=>{
      const problem=validatePlan();
      if(problem){setError(problem);return;}
-     change({...state,planApproved:true,stage:'reading'});setExpanded(false);onNavigate(state.units[0].page);
+     change({...state,planApproved:true,stage:'reading'});setExpanded(false);setSetupMode(false);onNavigate(state.units[0].page);
     }}>Accept reading plan →</button>:<div className="flow-stage">✓ Plan accepted · Reading in progress
        <p className="muted">Choose a unit to navigate to its source. Nothing is explained automatically.</p>
        <button className="secondary" onClick={()=>change({...state,planApproved:false,stage:'plan'})}>Edit plan</button>
