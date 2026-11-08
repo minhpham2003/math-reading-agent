@@ -35,3 +35,11 @@
 - **Subsequent build and deployment:** [run 42526745787](https://github.com/minhpham2003/math-reading-agent/actions/runs/42526745787) **passed**. GitHub Pages published index HTML and linked bundle verified via repo readback.
 - **Not yet tested:** Render a real uploaded PDF in browser; next/previous page clicks; zoom; reload/resume PDF position; PDF file persistence across reload; replacement import; storage quota failures; deletion cleanup; mobile layout and console; regression of S02 buttons.
 - **Status:** Build/deployment verified; browser user-flow verification pending.
+
+## V-012 — Distraction-free reading workspace (2026-11-08)
+
+- **Implementation:** [fcf85a9](https://github.com/minhpham2003/math-reading-agent/commit/fcf85a997c0e62940cd65bfdb4fe4c0a48104954), following the toolbar/CSS commits.
+- **UI changes:** Global app header hidden only during sessions; large session heading and redundant source heading removed; compact unified reader toolbar with Back, truncated session name, optional metadata, PDF import/navigation/zoom/fit-width, and agent visibility toggle. The PDF viewer occupies the remaining viewport; left agent panel can be toggled without unmounting PDF.
+- **Build:** Earlier run [42527457991](https://github.com/minhpham2003/math-reading-agent/actions/runs/42527457991) failed due to shadowing `document`; fixed by using `window.document`.
+- **Result:** [Run 42527511119](https://github.com/minhpham2003/math-reading-agent/actions/runs/42527511119) completed successfully; gh-pages index readback showed generated assets.
+- **Still pending:** Actual browser verification of toolbar placement, fit-width behavior, preserved PDF rendering and session actions, responsive layout.
