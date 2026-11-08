@@ -101,3 +101,6 @@
 .source-entry-link{display:flex;flex-direction:column;flex-basis:100%;text-align:left;gap:5px;color:#cde0fb;border:0;background:transparent;cursor:pointer}
 .source-entry-link span{font-size:12px;line-height:1.4;max-height:65px;overflow:hidden}
 .source-entry .secondary{padding:5px 9px;font-size:12px}
+
+/* Softer, consolidated passage highlights instead of fragmented outlined blocks. */
+.continuous-pdf-page .source-highlight{background:rgba(244,195,54,.22);outline:none;border-radius:2px;box-shadow:none;mix-blend-mode:multiply}
