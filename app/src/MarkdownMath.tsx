@@ -17,7 +17,8 @@ function normalizeMath(input:string){
 }
 
 export function MarkdownMath({text,onPdfNavigate,allowedPages}:{text:string;onPdfNavigate?:(page:number,quote?:string)=>void;allowedPages?:number[]}){
- const chunks=normalizeMath(text).split(/(\[[^\]\n]+\]\(pdf-page:\d+(?:\?quote=[^)]*)?\))/g);
+ const safeText=normalizeMath(text).replace(/(\]\(pdf-page:\d+\?quote=)([^\n]*?)(?=\))/g,(_full,prefix:string,quote:string)=>prefix+quote.replace(/\(/g,'%28').replace(/\)/g,'%29'));
+ const chunks=safeText.split(/(\[[^\]\n]+\]\(pdf-page:\d+(?:\?quote=[^\s)]*)?\))/g);
  return <div className="t2-rich-text">{chunks.map((chunk,i)=><Markdown key={i}
    urlTransform={url=>/^pdf-page:\d+(?:\?quote=[^)]*)?$/.test(url)?url:defaultUrlTransform(url)}
    remarkPlugins={[remarkGfm,remarkMath]}
