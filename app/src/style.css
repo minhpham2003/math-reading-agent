@@ -531,7 +531,7 @@
 /* Smooth Hide/Show agent: preserve both mounted panes and animate a single
    grid track change so the PDF never recenters as a new grid item. */
 @media(min-width:761px){
- .workspace .work-grid.split-enabled{transition:grid-template-columns 320ms ease-in-out}
+ .workspace .work-grid.split-enabled{transition:none}
  .workspace .work-grid.agent-collapsed .agent-panel{visibility:hidden;pointer-events:none;padding-left:0;padding-right:0;border-left:0;border-right:0;overflow:hidden}
  .workspace .work-grid.agent-collapsed .pane-resizer{visibility:hidden;pointer-events:none}
  .workspace .work-grid.split-enabled .agent-panel{min-width:0}
