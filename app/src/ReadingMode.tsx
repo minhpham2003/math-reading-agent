@@ -14,7 +14,7 @@ export function ReadingMode({sessionId,title,units,onNavigate,onToggle,onSetup,c
  const [detailsId,setDetailsId]=useState<string|null>(null);
  const selected=units.find(u=>u.id===selectedId)??units.find(u=>!u.done)??units[0];
  return <div className="reading-mode">
-  <div className="eyebrow">Reading mode · Mock agent (AI not connected)</div>
+
   <div className="reading-mode-top"><h2>{title}</h2><button className="secondary" onClick={onSetup}>⚙ Session setup</button></div>
   <section className="reading-navigator">
    <div className="reading-nav-heading"><strong>Reading plan · {units.filter(u=>u.done).length}/{units.length} completed</strong>
