@@ -28,3 +28,9 @@ Updated: 2026-11-08. This branch was cut from the S02 prototype branch, which di
 - **Constraints:** Imported files are browser-local, not uploaded to a server; PDF page numbers are physical file pages, which may differ from printed textbook pages. Canvas rendering does not yet provide selectable PDF text, equation selection, exact source anchors, or cross-device sync. No automatic source-to-plan analysis.
 - **Deployment:** [GitHub Actions run 42526745787](https://github.com/minhpham2003/math-reading-agent/actions/runs/42526745787) succeeded; deployed HTML confirmed on gh-pages at [React preview](https://minhpham2003.github.io/math-reading-agent/previews/react-foundation/).
 - **Testing:** TypeScript build passed in GitHub Actions. Browser interaction and visual verification have not been performed.
+
+## Dark PDF palette refinement — 2026-11-09
+
+- **Commit:** [dc4a30d](https://github.com/minhpham2003/math-reading-agent/commit/dc4a30d2ee4363f3ca966a8ba2c404e6b5915402).
+- **Implemented:** Adjusted the dark-PDF canvas/text-layer filter from brightness .80/contrast .78/sepia .10 to .94/.84/.04 for lighter text. Changed tangent highlight yellow to a lighter pastel palette and softened default/hover fill.
+- **Verified:** GitHub source readback confirmed highlight rules. GitHub Actions deployment was in progress when checked. Browser appearance and interaction not verified.
