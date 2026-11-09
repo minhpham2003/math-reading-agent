@@ -498,3 +498,7 @@
 .t2-branch-view-body .t2-tree-title{font-size:1rem;min-width:0}
 .t2-branch-view-body .t2-tree-children>.t2-tree-node::before{top:21px}
 .t2-branch-view-body .t2-tree-children>.t2-tree-node:last-child::after{top:22px}
+
+/* Separate the chat header from the branch explorer and each tree item. */
+.t2-header{border-bottom:1px solid #64849f;padding-bottom:10px}
+.t2-branch-view-body .t2-tree-row{border-bottom:1px solid rgba(142,170,193,.42)}
