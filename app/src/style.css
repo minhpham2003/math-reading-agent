@@ -915,3 +915,11 @@ html[data-theme="light"] .dialog .dialog-actions .danger{font-weight:400}
 /* Compact selection action positioned just above the referenced text. */
 .t2-selection-pop{transform:translate(-50%,-100%);padding:4px;border-radius:7px}
 .t2-selection-pop button.primary{font-size:12px;line-height:1.2;padding:7px 11px;border-radius:6px;font-weight:400;white-space:nowrap}
+
+/* Citation glow: visible for ~2.4s, then fades smoothly over 1.8s. */
+.pdf-cited-passage{transition:background-color 1.8s ease,box-shadow 1.8s ease!important}
+.pdf-cited-passage.pdf-cited-passage-fading,
+.pdf-dark-mode .pdf-cited-passage.pdf-cited-passage-fading{
+ background:transparent!important;box-shadow:none!important;
+}
+@media(prefers-reduced-motion:reduce){.pdf-cited-passage{transition:none!important}}
