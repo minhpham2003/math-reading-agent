@@ -57,7 +57,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const [assessmentOpen,setAssessmentOpen]=useState(!state.assessmentApproved);
  const [error,setError]=useState('');
  useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(!load(sessionId,title,firstPage,lastPage,duration).assessmentApproved);setExpanded(!load(sessionId,title,firstPage,lastPage,duration).planApproved);setSetupMode(!(load(sessionId,title,firstPage,lastPage,duration).assessmentApproved&&load(sessionId,title,firstPage,lastPage,duration).planApproved));},[sessionId]);
- useEffect(()=>{const open=()=>{setSetupMode(true);setAssessmentOpen(false);setExpanded(false);};window.addEventListener('higher-math:open-session-setup',open);return()=>window.removeEventListener('higher-math:open-session-setup',open);},[]);
+ useEffect(()=>{const open=()=>{setSetupMode(v=>!v);setAssessmentOpen(false);setExpanded(false);};window.addEventListener('higher-math:open-session-setup',open);return()=>window.removeEventListener('higher-math:open-session-setup',open);},[]);
  function change(next:State) {
   try {localStorage.setItem(key(sessionId),JSON.stringify(next));setState(next);setError('');}
   catch{setError('Unable to save this session. Check browser storage.');}
@@ -97,8 +97,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
     />;
  }
  return <div className="reading-flow">
-  {state.assessmentApproved&&state.planApproved&&<button className="secondary return-reading" onClick={()=>setSetupMode(false)}>← Return to reading</button>}
-  <h2 className="session-setup-heading">Session setup</h2>
+  <div className="session-setup-title-row"><h2 className="session-setup-heading">Session setup</h2>{state.assessmentApproved&&state.planApproved&&<button type="button" className="reading-plan-settings" aria-label="Close session setup" title="Close session setup" onClick={()=>setSetupMode(false)}>⚙</button>}</div>
   
   <div className="assessment-toggle-row"><h2 className={state.assessmentApproved?"approved-heading":""}>Reading assessment {state.assessmentApproved&&<span aria-label="Approved">✓</span>}</h2><button className="secondary" aria-expanded={assessmentOpen} onClick={()=>setAssessmentOpen(v=>!v)}>{assessmentOpen?'Collapse ▴':'Expand ▾'}</button></div>
 
@@ -128,7 +127,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
     <p className="muted">Suggested mock units are editable. Their PDF page ranges are placeholders, not verified source locations. Modify them before accepting.</p>
     {state.units.map((unit,i)=><div className="flow-unit" key={unit.id}>
       <div className="flow-unit-title"><span>{i+1}.</span><input placeholder="Unit title" autoFocus={unit.title===''&&i===state.units.length-1} aria-label={'Unit '+(i+1)+' title'} value={unit.title} onChange={e=>updateUnit(unit.id,{title:e.target.value})}/></div>
-      <div className="flow-unit-location"><strong>{unit.page<1?'PDF page not set':(unit.endPage??unit.page)===unit.page?'PDF page '+unit.page:'PDF pages '+unit.page+'–'+(unit.endPage??unit.page)}</strong></div>
+
       <div className="flow-page-range">
        <label>PDF start page<input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF start page'} value={unit.page||''} onChange={e=>updateUnit(unit.id,{page:e.target.value===''?0:Number(e.target.value)})}/></label>
        <label>PDF end page <span className="muted">(optional)</span><input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF end page'} placeholder="Same page" value={unit.endPage===undefined?'':unit.endPage} onChange={e=>updateUnit(unit.id,{endPage:e.target.value===''?undefined:Number(e.target.value)})}/></label>
