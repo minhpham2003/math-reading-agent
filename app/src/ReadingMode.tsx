@@ -7,8 +7,8 @@ function location(unit:ReadingUnit){
  const end=unit.endPage??unit.page;
  return end===unit.page?'PDF page '+unit.page:'PDF pages '+unit.page+'–'+end;
 }
-export function ReadingMode({sessionId,title,units,onNavigate,onToggle,onSetup}:
- {sessionId:string;title:string;units:ReadingUnit[];onNavigate:(page:number)=>void;onToggle:(id:string)=>void;onSetup:()=>void}) {
+export function ReadingMode({sessionId,title,units,onNavigate,onToggle,onSetup,currentPdfPage}:
+ {sessionId:string;title:string;units:ReadingUnit[];currentPdfPage?:number;onNavigate:(page:number)=>void;onToggle:(id:string)=>void;onSetup:()=>void}) {
  const [listOpen,setListOpen]=useState(true);
  const [selectedId,setSelectedId]=useState<string|null>(null);
  const [detailsId,setDetailsId]=useState<string|null>(null);
@@ -24,6 +24,6 @@ export function ReadingMode({sessionId,title,units,onNavigate,onToggle,onSetup}:
     <button className={'secondary unit-completed-toggle'+(unit.done?' is-completed':'')} aria-pressed={unit.done} onClick={()=>onToggle(unit.id)}>{unit.done?'✓ Completed':'Completed'}</button>
    </div>)}</div>}
   </section>
-  <TangentWorkspace key={sessionId} sessionId={sessionId} onNavigate={onNavigate} />
+  <TangentWorkspace key={sessionId} sessionId={sessionId} currentPdfPage={currentPdfPage} onNavigate={onNavigate} />
  </div>;
 }
