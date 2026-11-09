@@ -2,6 +2,7 @@ import {useEffect,useRef,useState,type FormEvent,type MouseEvent as ReactMouseEv
 import {read,write,createTangent,CHANGED_EVENT,type TangentData,type Thread,type Entry} from './tangentStore';
 import {aiConfigured,requestAiReply,getAccessToken,setAccessToken} from './aiChat';
 import {MathText} from './MathText';
+import {MarkdownMath} from './MarkdownMath';
 
 type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number};
 const ancestorsOf=(thread:Thread,data:TangentData)=>{const result:Thread[]=[];let node:Thread|undefined=thread;while(node){result.unshift(node);node=node.parentId?data.threads.find(t=>t.id===node!.parentId):undefined;}return result;};
@@ -76,7 +77,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  function openAnchors(ids:string[],event:ReactMouseEvent){event.preventDefault();event.stopPropagation();if(ids.length===1)go(data.anchors.find(a=>a.id===ids[0])!.branchId);else setChooser({ids,x:event.clientX,y:event.clientY});}
  function linkedText(message:Entry){
   const references=anchorsFor(message.id).filter(a=>a.start!==undefined&&a.end!==undefined&&a.end>a.start);
-  if(!references.length)return <span data-message-content><MathText text={message.text}/></span>;
+  if(!references.length)return <div data-message-content>{message.role==='assistant'?<MarkdownMath text={message.text}/>:<MathText text={message.text}/>}</div>;
   const points=new Set<number>([0,message.text.length]);references.forEach(a=>{points.add(Math.min(message.text.length,a.start!));points.add(Math.min(message.text.length,a.end!));});
   const edges=[...points].sort((a,b)=>a-b);
   return <span data-message-content>{edges.slice(0,-1).map((start,i)=>{const end=edges[i+1],slice=message.text.slice(start,end);const matches=references.filter(a=>a.start!<end&&a.end!>start);if(!matches.length)return <span key={i}><MathText text={slice}/></span>;
