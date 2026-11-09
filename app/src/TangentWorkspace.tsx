@@ -97,7 +97,13 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    const rect=range.getBoundingClientRect(),box=conversationRef.current.getBoundingClientRect();
    const visible=rect.bottom>=box.top&&rect.top<=box.bottom;
    // Keep the selection for scroll-back; only hide the floating control.
-   setSelection(prev=>prev?{...prev,x:rect.left+rect.width/2,y:rect.top-8,visible}:null);
+   const popup=selectionPopRef.current;
+   if(popup){
+     popup.style.left=(rect.left+rect.width/2)+'px';
+     popup.style.top=(rect.top-8)+'px';
+     popup.style.visibility=visible?'visible':'hidden';
+     popup.style.pointerEvents=visible?'auto':'none';
+   }
   };
   const dismiss=(event:PointerEvent)=>{
    if(selectionPopRef.current?.contains(event.target as Node))return;
@@ -163,7 +169,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
     {!branch.messages.length&&!branch.contextText&&<p className="muted">Start the discussion whenever you're ready.</p>}
     {sendingThread===branch.id&&<p className="muted" role="status">AI is responding…</p>}
    </div>
-   {selection&&selection.visible!==false&&<div ref={selectionPopRef} className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Create Tangent</button></div>}
+   {selection&&<div ref={selectionPopRef} className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Create Tangent</button></div>}
    {hoverPreview&&<div className="t2-viewport-preview" role="tooltip" style={{left:hoverPreview.x,top:hoverPreview.y,transform:hoverPreview.y>120?'translateY(-100%)':'none'}}>{hoverPreview.ids.map(id=>{const anchor=data.anchors.find(a=>a.id===id);const t=data.threads.find(x=>x.id===anchor?.branchId);return t?<div key={id}><strong>{t.title}</strong><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></div>:null;})}</div>}
    {chooser&&chooser.visible&&<div ref={chooserRef} className="t2-chooser" style={{left:chooser.x,top:Math.min(window.innerHeight-180,chooser.y)}}><strong>Related tangents</strong>{chooser.ids.map(id=>{const a=data.anchors.find(x=>x.id===id);const t=data.threads.find(x=>x.id===a?.branchId);return t?<button key={id} onClick={()=>go(t.id)}>{t.title} · {t.status}</button>:null;})}</div>}
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
