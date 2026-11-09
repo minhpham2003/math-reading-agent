@@ -8,7 +8,7 @@ import {retrievePdfContext} from './pdfIndex';
 type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number};
 const ancestorsOf=(thread:Thread,data:TangentData)=>{const result:Thread[]=[];let node:Thread|undefined=thread;while(node){result.unshift(node);node=node.parentId?data.threads.find(t=>t.id===node!.parentId):undefined;}return result;};
 
-export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionId:string;currentPdfPage?:number;onNavigate:(page:number)=>void}){
+export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionId:string;currentPdfPage?:number;onNavigate:(page:number,quote?:string)=>void}){
  const [data,setData]=useState<TangentData>(()=>read(sessionId));
  const [draft,setDraft]=useState('');
  const [sendingThread,setSendingThread]=useState<string|null>(null);
