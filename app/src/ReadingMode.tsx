@@ -7,8 +7,8 @@ function location(unit:ReadingUnit){
  const end=unit.endPage??unit.page;
  return end===unit.page?'PDF page '+unit.page:'PDF pages '+unit.page+'–'+end;
 }
-export function ReadingMode({sessionId,title,units,onNavigate,onToggle,currentPdfPage}:
- {sessionId:string;title:string;units:ReadingUnit[];currentPdfPage?:number;onNavigate:(page:number)=>void;onToggle:(id:string)=>void}) {
+export function ReadingMode({sessionId,units,onNavigate,onToggle,currentPdfPage}:
+ {sessionId:string;units:ReadingUnit[];currentPdfPage?:number;onNavigate:(page:number)=>void;onToggle:(id:string)=>void}) {
  const [listOpen,setListOpen]=useState(true);
  const [selectedId,setSelectedId]=useState<string|null>(null);
  const [detailsId,setDetailsId]=useState<string|null>(null);
