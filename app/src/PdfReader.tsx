@@ -20,7 +20,7 @@ function openDatabase(): Promise<IDBDatabase> {
   });
 }
 
-async function getSavedPdf(id: string): Promise<StoredPdf | undefined> {
+export async function getSavedPdf(id: string): Promise<StoredPdf | undefined> {
   const db = await openDatabase();
   try {
     return await new Promise((resolve, reject) => {
