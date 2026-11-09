@@ -23,11 +23,12 @@ const server=createServer(async(req,res)=>{
   res.writeHead(204,{...(permitted?{'Access-Control-Allow-Origin':permitted,'Vary':'Origin'}:{}),'Access-Control-Allow-Methods':'POST, GET, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization'});res.end();return;
  }
  if(req.url==='/health'&&req.method==='GET'){respond(res,200,{status:'ok',configured:!!apiKey},permitted);return;}
- if(req.url!=='/api/chat'||req.method!=='POST'){respond(res,404,{error:'Not found'},permitted);return;}
+ if(!['/api/chat','/api/verify-token'].includes(req.url)||req.method!=='POST'){respond(res,404,{error:'Not found'},permitted);return;}
  if(!apiKey||!accessToken){respond(res,503,{error:'AI backend is not fully configured.'},permitted);return;}
  const provided=(req.headers.authorization||'').replace(/^Bearer /i,'');
  // Avoid accepting a public endpoint without an independent server-only access token.
  if(!provided||provided.length!==accessToken.length||!safeEqual(provided,accessToken)){respond(res,401,{error:'Access token required or invalid.'},permitted);return;}
+ if(req.url==='/api/verify-token'){respond(res,200,{valid:true},permitted);return;}
  const now=Date.now(),client=req.socket.remoteAddress||'unknown';
  const slot=limits.get(client)||{start:now,count:0};
  if(now-slot.start>60*60*1000){slot.start=now;slot.count=0;}
