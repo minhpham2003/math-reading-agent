@@ -26,7 +26,7 @@ function validQuote(quote:string,excerpt:string):boolean{
 }
 
 function anchorForLabel(label:string,excerpt:string):string|undefined{
- const result=/\\b(theorem|definition|lemma|proposition|corollary|example)\\s+(\\d+(?:\\.\\d+)*)\\b/i.exec(label);
+ const result=/\b(theorem|definition|lemma|proposition|corollary|example)\s+(\d+(?:\.\d+)*)\b/i.exec(label);
  if(!result)return;
  const match=new RegExp('\\\\b'+result[1]+'\\\\s*'+result[2].replace(/\\./g,'\\\\s*\\\\.\\\\s*')+'\\\\b','i').exec(excerpt);
  if(!match)return;
