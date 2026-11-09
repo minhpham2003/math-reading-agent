@@ -577,9 +577,6 @@
 :root[data-theme="light"] .pane-resizer::after{background:#7897b8}
 :root[data-theme="light"] .pdf-dark-mode .pdf-canvas-scroll{background:#172434}
 
-/* Keep reading-plan and theme actions aligned with the other header buttons. */
-.reader-header .reader-plan-toggle,.reader-header .reader-theme-toggle{height:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;padding-top:0;padding-bottom:0}
-
 /* Light mode contrast repair: override dark-only foreground rules. */
 :root[data-theme="light"] .reader-header,
 :root[data-theme="light"] .reader-header button,
@@ -609,14 +606,17 @@
 :root[data-theme="light"] .t2-message.assistant,
 :root[data-theme="light"] .t2-rich-text{color:#25394f}
 
-/* One shared geometry for all right-side toolbar actions, including portaled controls. */
+
+/* One height for EVERY control in the reading toolbar: PDF nav, zoom,
+   citations, plan, theme and agent toggle. Override earlier padding rules. */
+.reader-header .pdf-toolbar button,
+.reader-header .pdf-header-actions button,
 .reader-header .reader-header-right button,
-.reader-header .reader-header-right .reader-plan-toggle,
-.reader-header .reader-header-right .reader-theme-toggle{
+.reader-header .pdf-page-form input{
  box-sizing:border-box;
- height:32px;
- min-height:32px;
- max-height:32px;
+ height:34px;
+ min-height:34px;
+ max-height:34px;
  padding-top:0;
  padding-bottom:0;
  line-height:1;
@@ -625,3 +625,4 @@
  justify-content:center;
  vertical-align:middle;
 }
+.reader-header .pdf-page-form input{display:block;line-height:normal}
