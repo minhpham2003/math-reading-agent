@@ -599,7 +599,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseDown={onPdfMouseDown} onMouseUp={onPdfMouseUp} onKeyUp={() => window.setTimeout(captureSelection,0)}>
     {tangentMenu&&<div className="t2-pdf-menu" style={{left:tangentMenu.x,top:tangentMenu.y}}><strong>Related tangents</strong>{tangentMenu.ids.map(id=>{const a=tangentAnchors.find(x=>x.id===id);const state=readTangents(sessionId);const t=state.threads.find(t=>t.id===a?.branchId);return t?<button key={id} type="button" onClick={()=>writeActive(state,t.id)}>{t.title} · {t.status}</button>:null;})}<button type="button" onClick={()=>setTangentMenu(null)}>Close</button></div>}
     {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
-      <button type="button" className="primary" onClick={saveCitation}>Save Citation</button><button type="button" className="primary" onClick={createPdfTangent}>↗ Create Tangent</button>
+      <button type="button" className="primary" onClick={saveCitation}>Save Citation</button><button type="button" className="primary" onClick={createPdfTangent}>Create Tangent</button>
     </div>}
         {Array.from({ length: pdf.numPages }, (_, i) =>
           <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} tangentAnchors={tangentAnchors.filter(a=>a.page===i+1 && a.filename===filename)} onTangentClick={openTangentAnchor} selectionBoxes={visualSelection?.page===i+1 ? visualSelection.boxes : undefined} />)}
