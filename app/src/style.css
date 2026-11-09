@@ -949,3 +949,11 @@ html[data-theme="light"] .t2-viewport-preview small{color:#476780}
  100%{background:unset;box-shadow:none}
 }
 @media(prefers-reduced-motion:reduce){.source-highlight.source-highlight-flash{animation:none}}
+
+/* Citation list: one-line excerpts only, with ellipsis. */
+.sources-drawer .source-entry-link{min-width:0;width:100%;flex-basis:100%;overflow:hidden}
+.sources-drawer .source-entry-link span{display:block;width:100%;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:none;line-height:1.5}
+.t2-selection-pop{display:flex;align-items:center;gap:5px}
+.t2-selection-pop button.secondary{font-size:12px;line-height:1.2;padding:7px 10px;border-radius:6px;font-weight:400;white-space:nowrap}
+.t2-cited-message-flash{animation:chat-citation-glow 4.2s ease-out}
+@keyframes chat-citation-glow{0%,56%{outline:2px solid #e5a02c;background-color:#e5aa2d30}100%{outline-color:transparent;background-color:transparent}}
