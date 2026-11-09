@@ -32,6 +32,8 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
  const [error,setError]=useState('');
  const conversationRef=useRef<HTMLDivElement>(null);
  const inputRef=useRef<HTMLTextAreaElement>(null);
+ const selectedRangeRef=useRef<Range|null>(null);
+ const selectionPopRef=useRef<HTMLDivElement>(null);
  const savedScroll=useRef<Record<string,number>>({});
  const branch=data.threads.find(t=>t.id===data.activeId)??data.threads[0];
  const ancestry=ancestorsOf(branch,data);
@@ -82,9 +84,29 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
   const textNode=start.querySelector<HTMLElement>('[data-message-content]');if(!message||!textNode||!textNode.contains(range.commonAncestorContainer)){setSelection(null);return;}
   const pre=document.createRange();pre.selectNodeContents(textNode);pre.setEnd(range.startContainer,range.startOffset);
   const pos=pre.toString().length;const selected=selection.toString();if(!selected.trim()){setSelection(null);return;}
+  selectedRangeRef.current=range.cloneRange();
   const rect=range.getBoundingClientRect();setSelection({messageId,start:pos,end:pos+selected.length,text:selected,x:rect.left+rect.width/2,y:rect.bottom+7});
  }
- function makeTangent(){if(!selection)return;createTangent(sessionId,{kind:'chat',targetId:selection.messageId,start:selection.start,end:selection.end,text:selection.text});setSelection(null);window.getSelection()?.removeAllRanges();}
+ useEffect(()=>{
+  if(!selection)return;
+  const update=()=>{
+   const range=selectedRangeRef.current;
+   if(!range||!conversationRef.current){setSelection(null);return;}
+   const rect=range.getBoundingClientRect(),box=conversationRef.current.getBoundingClientRect();
+   if(rect.bottom<box.top||rect.top>box.bottom){setSelection(null);return;}
+   setSelection(prev=>prev?{...prev,x:rect.left+rect.width/2,y:Math.min(box.bottom-8,rect.bottom+7)}:null);
+  };
+  const dismiss=(event:PointerEvent)=>{
+   if(selectionPopRef.current?.contains(event.target as Node))return;
+   selectedRangeRef.current=null;setSelection(null);
+  };
+  const container=conversationRef.current;
+  container?.addEventListener('scroll',update,{passive:true});
+  window.addEventListener('resize',update);
+  document.addEventListener('pointerdown',dismiss,true);
+  return()=>{container?.removeEventListener('scroll',update);window.removeEventListener('resize',update);document.removeEventListener('pointerdown',dismiss,true);};
+ },[selection?.messageId,selection?.start,selection?.end]);
+ function makeTangent(){if(!selection)return;selectedRangeRef.current=null;createTangent(sessionId,{kind:'chat',targetId:selection.messageId,start:selection.start,end:selection.end,text:selection.text});setSelection(null);window.getSelection()?.removeAllRanges();}
  function openAnchors(ids:string[],event:ReactMouseEvent){event.preventDefault();event.stopPropagation();if(ids.length===1)go(data.anchors.find(a=>a.id===ids[0])!.branchId);else setChooser({ids,x:event.clientX,y:event.clientY});}
  function linkedText(message:Entry){
   const references=anchorsFor(message.id).filter(a=>a.start!==undefined&&a.end!==undefined&&a.end>a.start);
@@ -137,7 +159,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
     {!branch.messages.length&&!branch.contextText&&<p className="muted">Start the discussion whenever you're ready.</p>}
     {sendingThread===branch.id&&<p className="muted" role="status">AI is responding…</p>}
    </div>
-   {selection&&<div className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Create Tangent</button></div>}
+   {selection&&<div ref={selectionPopRef} className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Create Tangent</button></div>}
    {hoverPreview&&<div className="t2-viewport-preview" role="tooltip" style={{left:hoverPreview.x,top:hoverPreview.y,transform:hoverPreview.y>120?'translateY(-100%)':'none'}}>{hoverPreview.ids.map(id=>{const anchor=data.anchors.find(a=>a.id===id);const t=data.threads.find(x=>x.id===anchor?.branchId);return t?<div key={id}><strong>{t.title}</strong><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></div>:null;})}</div>}
    {chooser&&<div className="t2-chooser" style={{left:Math.min(window.innerWidth-265,chooser.x),top:Math.min(window.innerHeight-180,chooser.y)}}><strong>Related tangents</strong>{chooser.ids.map(id=>{const a=data.anchors.find(x=>x.id===id);const t=data.threads.find(x=>x.id===a?.branchId);return t?<button key={id} onClick={()=>go(t.id)}>{t.title} · {t.status}</button>:null;})}<button onClick={()=>setChooser(null)}>Close</button></div>}
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
