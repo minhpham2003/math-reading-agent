@@ -11,6 +11,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  const [sendingThread,setSendingThread]=useState<string|null>(null);
  const [selection,setSelection]=useState<SelectState|null>(null);
  const [branchesOpen,setBranchesOpen]=useState(false);
+ const [treeExpanded,setTreeExpanded]=useState<string[]>(['main']);
  const [settings,setSettings]=useState(false);
  const [nameDraft,setNameDraft]=useState('');
  const [finish,setFinish]=useState(false);
@@ -82,9 +83,9 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  function renderTree(id:string,depth:number):React.ReactNode{
   const node=data.threads.find(t=>t.id===id);if(!node)return null;
   const kids=data.threads.filter(t=>t.parentId===id);
-  const expanded=data.expandedIds.includes(id);
+  const expanded=treeExpanded.includes(id);
   return <div key={id} className={'t2-tree-node'+(depth===0?' t2-tree-root':'')}>
-   <div className="t2-tree-row">{kids.length?<button aria-label={(expanded?'Collapse ':'Expand ')+node.title} onClick={()=>persist({...data,expandedIds:expanded?data.expandedIds.filter(x=>x!==id):[...data.expandedIds,id]})}>{expanded?'▾':'▸'}</button>:<span className="t2-tree-spacer"/>}
+   <div className="t2-tree-row">{kids.length?<button aria-label={(expanded?'Collapse ':'Expand ')+node.title} onClick={()=>setTreeExpanded(ids=>expanded?ids.filter(x=>x!==id):[...ids,id])}>{expanded?'▾':'▸'}</button>:<span className="t2-tree-spacer"/>}
     <button className={'t2-tree-title'+(id===branch.id?' current':'')} onClick={()=>go(id)}>{node.title}</button>{id!=='main'&&<span className={node.status==='completed'?'t2-done':'t2-pending'} title={node.status}>{node.status==='completed'?'✓':'●'}</span>}
    </div>{expanded&&kids.length>0&&<div className="t2-tree-children">{kids.map(k=>renderTree(k.id,depth+1))}</div>}</div>;
  }
@@ -100,7 +101,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
       {breadOpen&&<div className="t2-ellipsis-menu">{ancestry.slice(1,-1).map(t=><button key={t.id} onClick={()=>go(t.id)}>{t.title}</button>)}</div>}</>}
    </div>
    {branch.id!=='main'&&<button className="t2-gear" title="Tangent settings" aria-label="Tangent settings" onClick={()=>{setNameDraft(branch.title);setSettings(true);}}>⚙</button>}
-   <button className="secondary" aria-pressed={branchesOpen} onClick={()=>{setBranchesOpen(v=>!v);setSettings(false);setSelection(null);setHoverPreview(null);}}>Branches</button>
+   <button className="secondary" aria-pressed={branchesOpen} onClick={()=>{if(!branchesOpen)setTreeExpanded(['main']);setBranchesOpen(v=>!v);setSettings(false);setSelection(null);setHoverPreview(null);}}>Branches</button>
   </header>
 
   {branchesOpen?<div className="t2-branch-view"><div className="t2-branch-view-body" role="navigation" aria-label="Conversation branches">{renderTree('main',0)}</div></div>:settings?<div className="t2-settings">
