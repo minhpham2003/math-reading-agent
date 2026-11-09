@@ -1181,3 +1181,15 @@ html[data-theme="light"] .t2-selection-pop{
  background:#d1d8e0!important;border:1px solid #a9b9ca!important;
  box-shadow:0 5px 14px rgba(26,44,64,.18)!important;
 }
+
+/* Phase 3.1: transparent PDF-grounded assessment and source evidence. */
+.assessment-source-panel{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin:12px 0;padding:12px;border:1px solid #6889a7;border-radius:10px}
+.assessment-source-panel p{margin:5px 0;line-height:1.5}
+.assessment-source-panel button.primary{color:#fff;-webkit-text-fill-color:#fff}
+.assessment-evidence{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px}
+.assessment-evidence button{font-size:12px;padding:5px 9px;font-weight:400}
+.assessment-unlock{display:flex;gap:10px;flex-wrap:wrap;align-items:end;width:100%}
+.assessment-unlock label{flex:1;min-width:170px}
+.assessment-unlock input{display:block;width:100%;box-sizing:border-box}
+.assessment-unlock button{height:36px}
+html[data-theme="light"] .assessment-source-panel{border-color:#adc1d8;background:#dfe6ed}
