@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState,type FormEvent,type MouseEvent as ReactMouseEvent,type ClipboardEvent} from 'react';
+import {createPortal} from 'react-dom';
 import {read,write,createTangent,CHANGED_EVENT,type TangentData,type Thread,type Entry} from './tangentStore';
 import {aiConfigured,requestAiReply,verifyAccessToken,getAccessToken,setAccessToken} from './aiChat';
 import {MathText} from './MathText';
@@ -132,7 +133,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    const range=selectedRangeRef.current;
    if(!range||!conversationRef.current){setSelection(null);return;}
    const rect=range.getBoundingClientRect(),box=conversationRef.current.getBoundingClientRect();
-   const visible=rect.bottom>=box.top&&rect.top<=box.bottom;
+   const visible=rect.bottom>=box.top&&rect.top<=box.bottom&&rect.right>=box.left&&rect.left<=box.right;
    // Keep the selection for scroll-back; only hide the floating control.
    const popup=selectionPopRef.current;
    if(popup){
@@ -248,7 +249,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
     {!branch.messages.length&&!branch.contextText&&<p className="muted">Start the discussion whenever you're ready.</p>}
     {sendingThread===branch.id&&<p className="muted" role="status">AI is responding…</p>}
    </div>
-   {selection&&<div ref={selectionPopRef} className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={saveSelectedCitation}>Cite</button><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Branch</button></div>}
+   {selection&&createPortal(<div ref={selectionPopRef} className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={saveSelectedCitation}>Cite</button><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Branch</button></div>,document.body)}
    {hoverPreview&&<div className="t2-viewport-preview" role="tooltip" style={{left:hoverPreview.x,top:hoverPreview.y,transform:hoverPreview.y>120?'translateY(-100%)':'none'}}>{hoverPreview.ids.map(id=>{const anchor=data.anchors.find(a=>a.id===id);const t=data.threads.find(x=>x.id===anchor?.branchId);return t?<div key={id}><strong>{t.title}</strong><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></div>:null;})}</div>}
    {chooser&&chooser.visible&&<div ref={chooserRef} className="t2-chooser" style={{left:chooser.x,top:Math.min(window.innerHeight-180,chooser.y)}}><strong>Related tangents</strong>{chooser.ids.map(id=>{const a=data.anchors.find(x=>x.id===id);const t=data.threads.find(x=>x.id===a?.branchId);return t?<button key={id} onClick={()=>go(t.id)}>{t.title} · {t.status}</button>:null;})}</div>}
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
