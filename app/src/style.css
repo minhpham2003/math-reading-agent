@@ -428,3 +428,10 @@
 .t2-send-button:hover:not(:disabled){background:#4480df}
 .t2-send-button:disabled{opacity:.42;cursor:not-allowed}
 .t2-send-button:focus-visible{outline:2px solid #bedcff;outline-offset:3px}
+
+/* PDF-only dark viewing mode: invert rendered paper and ink together.
+   The overlays stay outside the filter so citations and tangent links retain
+   their interactive hit regions and recognizable highlight colors. */
+.pdf-dark-mode .continuous-pdf-page{filter:invert(1) hue-rotate(180deg)}
+.pdf-dark-mode .pdf-canvas-scroll{background:#171c25}
+.reader-header .pdf-dark-toggle.is-on{color:#f0e2b5;border:1px solid #817659}
