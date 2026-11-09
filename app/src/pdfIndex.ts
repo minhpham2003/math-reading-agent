@@ -6,6 +6,43 @@ GlobalWorkerOptions.workerSrc=workerUrl;
 type PageText={page:number;text:string};
 type PdfIndex={pages:PageText[];name:string};
 const cache=new Map<string,Promise<PdfIndex>>();
+const INDEX_DB='higher-math-pdf-text-index';
+function openIndexDb():Promise<IDBDatabase>{
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open(INDEX_DB,1);
+  req.onupgradeneeded=()=>req.result.createObjectStore('indexes');
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>reject(req.error);
+ });
+}
+async function readIndex(id:string):Promise<PdfIndex|undefined>{
+ const db=await openIndexDb();
+ try{return await new Promise((resolve,reject)=>{
+  const req=db.transaction('indexes','readonly').objectStore('indexes').get(id);
+  req.onsuccess=()=>resolve(req.result as PdfIndex|undefined);
+  req.onerror=()=>reject(req.error);
+ });}finally{db.close();}
+}
+async function saveIndex(id:string,index:PdfIndex):Promise<void>{
+ const db=await openIndexDb();
+ try{await new Promise<void>((resolve,reject)=>{
+  const tx=db.transaction('indexes','readwrite');
+  tx.objectStore('indexes').put(index,id);
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error);
+  tx.onabort=()=>reject(tx.error);
+ });}finally{db.close();}
+}
+export async function deletePdfIndex(id:string):Promise<void>{
+ cache.delete(id);
+ const db=await openIndexDb();
+ try{await new Promise<void>((resolve,reject)=>{
+  const tx=db.transaction('indexes','readwrite');
+  tx.objectStore('indexes').delete(id);
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error);
+ });}finally{db.close();}
+}
 const words=(text:string)=>text.toLowerCase().match(/[\p{L}\p{N}]{2,}/gu)??[];
 async function extract(id:string):Promise<PdfIndex>{
  const saved=await getSavedPdf(id);
@@ -27,7 +64,7 @@ async function extract(id:string):Promise<PdfIndex>{
 }
 export function forgetPdfIndex(id:string){cache.delete(id);}
 export function getPdfIndex(id:string):Promise<PdfIndex>{
- if(!cache.has(id))cache.set(id,extract(id).catch(err=>{cache.delete(id);throw err;}));
+ if(!cache.has(id))cache.set(id,(async()=>{const saved=await readIndex(id).catch(()=>undefined);if(saved)return saved;const index=await extract(id);await saveIndex(id,index).catch(()=>undefined);return index;})().catch(err=>{cache.delete(id);throw err;}));
  return cache.get(id)!;
 }
 export async function retrievePdfContext(id:string,query:string,currentPage?:number):Promise<string>{
