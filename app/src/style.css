@@ -793,3 +793,18 @@ html[data-theme="light"] .t2-branch-view-body{color:#25394f}
 html[data-theme="light"] .t2-access-form input,
 html[data-theme="light"] .t2-finish textarea,
 html[data-theme="light"] .t2-settings input{background:#eef1f5;color:#25394f;border-color:#a6b9ce}
+
+/* Compact New Session form: fit all fields and actions on typical laptop heights. */
+.new-session-dialog{width:min(100%,500px);padding:18px 22px;max-height:calc(100dvh - 24px);overflow-y:auto;font-size:14px}
+.new-session-dialog h2{font-size:21px;line-height:1.2;margin:0 0 12px}
+.new-session-dialog label{font-size:13px;margin:9px 0;font-weight:400}
+.new-session-dialog input,.new-session-dialog select{font-size:14px;line-height:1.2;padding:8px 10px;margin-top:5px}
+.new-session-dialog input::placeholder{font-size:14px}
+.new-session-dialog .new-session-pdf-field{padding:9px 11px;margin:9px 0}
+.new-session-dialog .new-session-pdf-field input[type="file"]{font-size:13px;padding:6px}
+.new-session-dialog .new-session-pdf-field small{font-size:12px;margin-top:5px;line-height:1.35}
+.new-session-dialog .new-session-pdf-field .required-marker{font-size:12px}
+.new-session-dialog .form-row{gap:10px}
+.new-session-dialog .dialog-actions{margin-top:12px;gap:8px}
+.new-session-dialog .dialog-actions button{font-size:13px;padding:8px 12px}
+@media(max-height:650px){.new-session-dialog{padding:13px 18px}.new-session-dialog h2{margin-bottom:7px}.new-session-dialog label{margin:6px 0}.new-session-dialog input,.new-session-dialog select{padding:6px 9px}}
