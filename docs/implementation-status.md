@@ -34,3 +34,12 @@ Updated: 2026-11-08. This branch was cut from the S02 prototype branch, which di
 - **Commit:** [dc4a30d](https://github.com/minhpham2003/math-reading-agent/commit/dc4a30d2ee4363f3ca966a8ba2c404e6b5915402).
 - **Implemented:** Adjusted the dark-PDF canvas/text-layer filter from brightness .80/contrast .78/sepia .10 to .94/.84/.04 for lighter text. Changed tangent highlight yellow to a lighter pastel palette and softened default/hover fill.
 - **Verified:** GitHub source readback confirmed highlight rules. GitHub Actions deployment was in progress when checked. Browser appearance and interaction not verified.
+
+## Implementation 2 — initial chat foundation and branch-tree visualization (2026-11-09)
+
+- **Feature branch:** [implementation/02-ai-chat](https://github.com/minhpham2003/math-reading-agent/tree/implementation/02-ai-chat), separate from the visually approved Implementation 1 baseline.
+- **Basic AI chat in source:** Node HTTP backend at `server/index.mjs` forwards recent messages to the OpenAI Responses API with a server-only API key; optional React client in `app/src/aiChat.ts`; conversation replies persist as assistant messages in the existing tangent thread store.
+- **Activation requirements:** An external Node host, a server-only `OPENAI_API_KEY`, an allowed frontend origin, and frontend `VITE_AI_API_URL` pointing to that host. No credentials are included. With no configured frontend URL, notes continue to work without AI replies.
+- **Visual improvement:** Nested branch tree with parent-child connector lines and elbow guides in `TangentWorkspace.tsx` and `style.css`. The existing toggle, select, and branch status behavior is preserved in source.
+- **Preview:** Isolated GitHub Pages workflow defined in `.github/workflows/ai-chat-preview.yml`, targeting `previews/ai-chat/`; publishing status not yet confirmed.
+- **Verification:** GitHub source readback for tree markup, CSS, and workflow passed. Local build/browser visual test and real AI response not yet executed. Public hosting requires authentication and abuse controls before turning on API access.
