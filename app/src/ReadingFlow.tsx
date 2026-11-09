@@ -48,8 +48,8 @@ const fields:{id:keyof Assessment;label:string;placeholder:string}[]=[
  {id:'minutes',label:'Estimated reading time (minutes)',placeholder:'Time available'},
  {id:'recommendation',label:'Recommendation',placeholder:'How should the reader approach this range?'}
 ];
-export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavigate}:
- {sessionId:string;title:string;firstPage:number;lastPage:number;duration:number;onNavigate:(page:number)=>void}) {
+export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavigate,currentPdfPage}:
+ {sessionId:string;title:string;firstPage:number;lastPage:number;duration:number;currentPdfPage?:number;onNavigate:(page:number)=>void}) {
  const [state,setState]=useState<State>(()=>load(sessionId,title,firstPage,lastPage,duration));
  const [expanded,setExpanded]=useState(!state.planApproved);
  const [setupMode,setSetupMode]=useState(!(state.assessmentApproved&&state.planApproved));
@@ -91,7 +91,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  }
  const canApprove=fields.every(f=>state.assessment[f.id].trim());
  if(state.assessmentApproved&&state.planApproved&&!setupMode) {
-  return <ReadingMode sessionId={sessionId} title={title} units={state.units}
+  return <ReadingMode sessionId={sessionId} title={title} units={state.units} currentPdfPage={currentPdfPage}
     onNavigate={onNavigate} onToggle={id=>change({...state,units:state.units.map(u=>u.id===id?{...u,done:!u.done}:u)})}
     onSetup={()=>{setSetupMode(true);setAssessmentOpen(false);setExpanded(false);}} />;
  }
