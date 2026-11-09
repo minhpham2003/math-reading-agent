@@ -669,15 +669,17 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       
       {citations.length+chatCitations.length===0 && <p>Select text in your PDF or agent chat to create a citation.</p>}
       {chatCitations.map(ref=><div className="source-entry" key={ref.id}>
-        <button className="source-entry-link" onClick={()=>{
-          const url=new URL(citationDeepLink(sessionId,ref.id,'chat'));
-          window.history.replaceState(null,'',url.pathname+url.search+url.hash);
-          window.dispatchEvent(new CustomEvent('higher-math:open-chat-citation',{detail:{sessionId,id:ref.id}}));
-          setShowCitations(false);
-        }}>
-          <strong>Agent chat · saved excerpt</strong><span title={ref.text}>“{ref.text}”</span></button>
-        <button className="secondary" onClick={()=>void navigator.clipboard.writeText(citationDeepLink(sessionId,ref.id,'chat')).catch(()=>setMessage('Clipboard unavailable.'))}>Copy</button>
-        <button className="secondary" onClick={()=>removeChatCitation(sessionId,ref.id)}>Remove</button>
+        <div className="source-entry-toolbar">
+          <button className="source-entry-page" onClick={()=>{
+            const url=new URL(citationDeepLink(sessionId,ref.id,'chat'));
+            window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+            window.dispatchEvent(new CustomEvent('higher-math:open-chat-citation',{detail:{sessionId,id:ref.id}}));
+            setShowCitations(false);
+          }}>Agent chat ↗</button>
+          <button className="secondary" onClick={()=>void navigator.clipboard.writeText(citationDeepLink(sessionId,ref.id,'chat')).catch(()=>setMessage('Clipboard unavailable.'))}>Copy</button>
+          <button className="secondary" onClick={()=>removeChatCitation(sessionId,ref.id)}>Remove</button>
+        </div>
+        <span className="source-entry-excerpt" title={ref.text}>“{ref.text}”</span>
       </div>)}
       {citations.map(ref => <div className="source-entry" key={ref.id}>
         <div className="source-entry-toolbar">
