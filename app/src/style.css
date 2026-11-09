@@ -421,3 +421,10 @@
 
 /* Match branch selector typography to the breadcrumb text. */
 .t2-header .t2-branch-holder > .secondary{font-size:inherit;font-weight:400;line-height:inherit}
+
+/* Minimal top bar and compact circular composer send action. */
+.reader-header{border-bottom:0}
+.t2-send-button{margin-left:auto;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;flex:none;border:0;border-radius:50%;background:#306bcc;color:white;cursor:pointer;padding:0}
+.t2-send-button:hover:not(:disabled){background:#4480df}
+.t2-send-button:disabled{opacity:.42;cursor:not-allowed}
+.t2-send-button:focus-visible{outline:2px solid #bedcff;outline-offset:3px}
