@@ -70,9 +70,15 @@ export function getPdfIndex(id:string):Promise<PdfIndex>{
 export async function retrievePdfContext(id:string,query:string,currentPage?:number):Promise<string>{
  const index=await getPdfIndex(id);
  const terms=[...new Set(words(query).filter(w=>w.length>2))];
+ const namedReferences=[...query.matchAll(/\b(theorem|lemma|proposition|corollary|definition|example)\s+(\d+(?:\.\d+)*)\b/gi)].map(m=>({kind:m[1].toLowerCase(),number:m[2]}));
  const scored=index.pages.filter(p=>p.text).map(p=>{
   const text=p.text.toLowerCase();
-  const score=terms.reduce((total,term)=>total+Math.min(5,text.split(term).length-1),0);
+  // Give named results priority over generic words such as "theorem".
+  const exactReferenceScore=namedReferences.reduce((total,ref)=>{
+   const expression=new RegExp('\\b'+ref.kind+'\\s*'+ref.number.replace(/\./g,'\\s*\\.\\s*')+'\\b','i');
+   return total+(expression.test(text)?40:0);
+  },0);
+  const score=exactReferenceScore+terms.reduce((total,term)=>total+Math.min(5,text.split(term).length-1),0);
   return {p,score,near:currentPage?Math.abs(p.page-currentPage):Infinity};
  });
  scored.sort((a,b)=>(b.score-a.score)||a.near-b.near);
