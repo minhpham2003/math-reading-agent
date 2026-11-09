@@ -171,6 +171,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   const [pageNumber, setPageNumber] = useState(initialPage);
   const [pageInput, setPageInput] = useState(String(initialPage));
   const [zoom, setZoom] = useState(1);
+  const [zoomInput,setZoomInput]=useState<string|null>(null);
   const [fitWidth, setFitWidth] = useState(true);
   const [availableWidth, setAvailableWidth] = useState(700);
   const [toolbarHost, setToolbarHost] = useState<HTMLElement | null>(null);
@@ -270,7 +271,8 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     setFitWidth(false);
     setZoom(Math.max(.4,Math.min(2.4,+(current+direction*.2).toFixed(2))));
   }
-  function fitPageWidth(){captureZoomAnchor();setFitWidth(true);}
+  function submitZoom(event:FormEvent<HTMLFormElement>){event.preventDefault();const percent=Number(zoomInput);if(!Number.isFinite(percent)||percent<10||percent>500){setZoomInput(null);return;}captureZoomAnchor();setFitWidth(false);setZoom(percent/135);setZoomInput(null);(document.activeElement as HTMLElement|null)?.blur();}
+  function fitPageWidth(){captureZoomAnchor();setFitWidth(true);setZoomInput(null);}
   useLayoutEffect(()=>{
     const a=zoomAnchor.current;
     if(!a||!scrollRoot)return;
@@ -569,7 +571,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       </div>
       <div className="pdf-control-group pdf-zoom-group">
       <button className="secondary" onClick={() => changeZoom(-1)} aria-label="Zoom out">−</button>
-      <span className="page-indicator">{Math.round(scale * 100) + '%'}</span>
+      <form className="pdf-zoom-form" onSubmit={submitZoom}><input type="number" min="10" max="500" step="1" value={zoomInput??String(Math.round(scale*100))} onChange={e=>setZoomInput(e.target.value)} onFocus={()=>setZoomInput(String(Math.round(scale*100)))} onBlur={()=>setZoomInput(null)} aria-label="PDF zoom percentage" title="Enter zoom percentage and press Enter"/><span>%</span></form>
       <button className="secondary" onClick={() => changeZoom(1)} aria-label="Zoom in">+</button>
       <button className="secondary" onClick={fitPageWidth} aria-label="Fit PDF to available width">↔</button>
       </div>
