@@ -5,7 +5,7 @@ on:
       - implementation/02-ai-chat
     paths:
       - 'app/**'
-      - '.github/workflows/react-app-preview.yml'
+      - '.github/workflows/ai-chat-preview.yml'
   workflow_dispatch:
 
 permissions:
@@ -28,6 +28,8 @@ jobs:
         run: npm install
       - name: Typecheck and build
         working-directory: app
+        env:
+          VITE_AI_API_URL: https://higher-math-chat-api-oil4.onrender.com
         run: npm run build
       - name: Publish isolated preview
         uses: peaceiris/actions-gh-pages@v4
