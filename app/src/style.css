@@ -356,3 +356,19 @@
 .t2-origin-compact{margin:5px 0 14px;padding:0;color:inherit}
 .t2-origin-compact>span{display:block;font-weight:600;margin-bottom:4px}
 .t2-origin-compact .t2-origin-text{margin:0}
+
+/* Quieter reading UI: unfilled contextual actions and regular-weight chrome. */
+.floating-citation-action{gap:6px}
+.floating-citation-action .primary{
+ background:#f9fafc;color:#28394b;border:1px solid #a6b5c4;
+ box-shadow:0 3px 9px #0003;border-radius:7px;font-weight:400;
+}
+.floating-citation-action .primary:hover{background:#eef2f7;color:#162b40;border-color:#7e98af}
+.reader-header button,.reader-header summary,.reader-session-name,
+.reading-mode button,.reading-mode strong,.reading-nav-heading strong,
+.reading-nav-link,.reading-nav-link span,.reading-nav-session-title,
+.t2-workspace button,.t2-workspace strong,.t2-workspace h3,
+.t2-tree-title,.t2-origin-compact>span,.reading-flow button{
+ font-weight:400;
+}
+.reading-nav-item.is-current{background:transparent;border-color:#466e94}
