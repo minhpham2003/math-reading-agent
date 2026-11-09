@@ -957,3 +957,15 @@ html[data-theme="light"] .t2-viewport-preview small{color:#476780}
 .t2-selection-pop button.secondary{font-size:12px;line-height:1.2;padding:7px 10px;border-radius:6px;font-weight:400;white-space:nowrap}
 .t2-cited-message-flash{animation:chat-citation-glow 4.2s ease-out}
 @keyframes chat-citation-glow{0%,56%{outline:2px solid #e5a02c;background-color:#e5aa2d30}100%{outline-color:transparent;background-color:transparent}}
+
+/* Citation cards: compact page link and controls in one row; preview below. */
+.sources-drawer .source-entry{display:flex;flex-direction:column;align-items:stretch;gap:5px}
+.sources-drawer .source-entry-toolbar{display:flex;gap:7px;align-items:center;min-width:0}
+.sources-drawer .source-entry-page{flex:1;min-width:0;border:0;background:transparent;color:inherit;text-align:left;font:inherit;font-weight:400;padding:4px 2px;cursor:pointer;white-space:nowrap}
+.sources-drawer .source-entry-page:hover{text-decoration:underline;text-underline-offset:3px}
+.sources-drawer .source-entry-toolbar>.secondary{flex:none;padding:5px 8px}
+.sources-drawer .source-entry-excerpt{display:block;border:0;background:transparent;color:inherit;text-align:left;font:inherit;font-size:12px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;min-width:0;padding:2px;cursor:pointer}
+html[data-theme="light"] .sources-drawer .source-entry-page,
+html[data-theme="light"] .sources-drawer .source-entry-excerpt{color:#263b52}
+/* Match the chat selection controls to the pair of blue PDF actions. */
+.t2-selection-pop button.primary{font-size:12px;line-height:1.2;padding:8px 12px;border-radius:6px;font-weight:400;color:#fff!important;-webkit-text-fill-color:#fff}
