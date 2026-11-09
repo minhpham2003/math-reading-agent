@@ -15,6 +15,9 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  const [summary,setSummary]=useState('');
  const [chooser,setChooser]=useState<{ids:string[];x:number;y:number}|null>(null);
  const [breadOpen,setBreadOpen]=useState(false);
+ const [breadcrumbCompact,setBreadcrumbCompact]=useState(false);
+ const breadcrumbRef=useRef<HTMLDivElement>(null);
+ const breadcrumbMeasureRef=useRef<HTMLDivElement>(null);
  const [hoverPreview,setHoverPreview]=useState<{ids:string[];x:number;y:number}|null>(null);
  const [error,setError]=useState('');
  const dropdownRef=useRef<HTMLDivElement>(null);
@@ -22,6 +25,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  const savedScroll=useRef<Record<string,number>>({});
  const branch=data.threads.find(t=>t.id===data.activeId)??data.threads[0];
  const ancestry=ancestorsOf(branch,data);
+ useEffect(()=>{const container=breadcrumbRef.current,measure=breadcrumbMeasureRef.current;if(!container||!measure)return;const check=()=>setBreadcrumbCompact(measure.scrollWidth>container.clientWidth+1);check();const observer=new ResizeObserver(check);observer.observe(container);observer.observe(measure);return()=>observer.disconnect();},[data.activeId,data.threads]);
  const anchorsFor=(id:string)=>data.anchors.filter(a=>a.kind==='chat'&&a.targetId===id);
  function persist(next:TangentData){try{write(sessionId,next);setData(next);setError('');}catch{setError('Unable to save this tangent.');}}
  useEffect(()=>{const sync=(event:Event)=>{const e=event as CustomEvent<{session:string}>;if(e.detail?.session===sessionId)setData(read(sessionId));};
@@ -70,8 +74,9 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  function saveSummary(){setSummary(branch.summary);setFinish(true);}
  return <section className="t2-workspace">
   <header className="t2-header">
-   <div className="t2-breadcrumb">
-    {ancestry.length<=2?<>{ancestry.map((t,i)=><span key={t.id}>{i>0&&' › '}<button className={t.id===branch.id?'active':''} onClick={()=>go(t.id)}>{t.title}</button></span>)}</>:
+   <div className="t2-breadcrumb" ref={breadcrumbRef}>
+    <div className="t2-breadcrumb-measure" ref={breadcrumbMeasureRef} aria-hidden="true">{ancestry.map((t,i)=><span key={t.id}>{i>0?' › ':''}{t.title}</span>)}</div>
+    {!breadcrumbCompact||ancestry.length<=2?<>{ancestry.map((t,i)=><span key={t.id}>{i>0&&' › '}<button className={t.id===branch.id?'active':''} onClick={()=>go(t.id)}>{t.title}</button></span>)}</>:
      <><button onClick={()=>go('main')}>Main reading</button><span> › </span><button onClick={()=>setBreadOpen(v=>!v)}>…</button><span> › </span><button className="active" onClick={()=>go(branch.id)}>{branch.title}</button>
       {breadOpen&&<div className="t2-ellipsis-menu">{ancestry.slice(1,-1).map(t=><button key={t.id} onClick={()=>go(t.id)}>{t.title}</button>)}</div>}</>}
    </div>
