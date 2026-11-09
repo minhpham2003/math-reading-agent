@@ -442,3 +442,7 @@
 .t2-input-wrap .t2-send-button{position:absolute;right:8px;bottom:6px;width:36px;height:36px;margin:0;z-index:2}
 .t2-input-wrap .t2-send-button svg{width:21px;height:21px}
 .t2-composer .t2-compose-actions{margin-top:8px}
+
+/* Keep long drafts scrollable without displaying a scrollbar in the composer. */
+.t2-input-wrap textarea{scrollbar-width:none;-ms-overflow-style:none}
+.t2-input-wrap textarea::-webkit-scrollbar{display:none;width:0;height:0}
