@@ -296,3 +296,44 @@
 .tangent-selection-editor label{display:flex;gap:8px;align-items:flex-start}
 .tangent-selection-editor input[type=checkbox]{width:auto}
 .tangent-workspace blockquote{margin:8px 0;padding-left:10px;border-left:3px solid #6083a8;white-space:pre-wrap}
+
+/* Tangents v2: selection-based branching (separate from archived prototype styles) */
+.t2-workspace{display:flex;flex-direction:column;min-height:320px;flex:1;gap:9px;border-top:1px solid #395673;padding-top:11px;position:relative}
+.t2-header{display:flex;align-items:center;gap:7px;min-width:0;position:relative;z-index:8}
+.t2-breadcrumb{min-width:0;flex:1;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+.t2-breadcrumb button{font:inherit;border:0;background:transparent;color:#b9d7f2;cursor:pointer;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t2-breadcrumb button.active{color:#fff;font-weight:700}
+.t2-gear{background:transparent;border:0;color:#d5e7f9;cursor:pointer;font-size:20px}
+.t2-branch-holder{position:relative;flex-shrink:0}
+.t2-tree-pop{position:absolute;right:0;top:calc(100% + 5px);min-width:245px;max-width:min(400px,85vw);max-height:360px;overflow:auto;padding:11px;border-radius:9px;background:#142c42;border:1px solid #4f6f8d;box-shadow:0 12px 30px #0008;z-index:30}
+.t2-tree-row{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.t2-tree-row>button:first-child{background:transparent;color:#c9e0f3;border:0;cursor:pointer;width:18px;flex:none}
+.t2-tree-spacer{width:18px;flex:none}
+.t2-tree-title{flex:1;text-align:left;background:transparent;border:0;color:#dcebf9;padding:6px 4px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t2-tree-title.current{background:#365775;border-radius:5px;font-weight:700}
+.t2-done{color:#51da93;font-weight:800}.t2-pending{color:#b6c6d9}
+.t2-ellipsis-menu{position:absolute;left:45px;top:25px;background:#172c44;border:1px solid #51708d;border-radius:7px;display:flex;flex-direction:column;z-index:40}
+.t2-ellipsis-menu button{max-width:none;text-align:left;padding:7px}
+.t2-return{align-self:flex-start;background:transparent;border:0;color:#b4dafa;cursor:pointer;font:inherit;padding:4px 0}
+.t2-conversation{flex:1;min-height:110px;max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:7px 2px}
+.t2-message{max-width:95%;border-radius:10px;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.t2-message.user{align-self:flex-end;background:#284b6c}
+.t2-message.system{align-self:flex-start;background:#1b3e4b;border:1px solid #365e68}
+.t2-origin{border-left:3px solid #6996bf;margin:8px 0;padding:10px;background:#1b3349;border-radius:6px;white-space:pre-wrap}
+.t2-origin p{margin-bottom:0}
+.t2-link{display:inline;position:relative;color:#a8d8ff;text-decoration:underline;text-decoration-thickness:1px;background:transparent;border:0;padding:0;font:inherit;cursor:pointer;text-align:left;white-space:inherit}
+.t2-hover{display:none;position:absolute;bottom:100%;left:0;background:#13273d;color:#eaf6ff;border:1px solid #688cac;min-width:210px;max-width:300px;white-space:normal;padding:9px;border-radius:8px;z-index:35;box-shadow:0 9px 22px #0008}
+.t2-hover span{display:block;margin:4px 0}.t2-link:hover .t2-hover,.t2-link:focus-visible .t2-hover{display:block}
+.t2-notification-link{background:transparent;border:0;color:#9dd4ff;text-decoration:underline;cursor:pointer;font:inherit}
+.t2-selection-pop,.t2-chooser,.t2-pdf-menu{position:fixed;z-index:100;background:#18374f;border:1px solid #658aa7;border-radius:8px;padding:7px;box-shadow:0 8px 20px #0007}
+.t2-selection-pop{transform:translateX(-50%)}
+.t2-chooser,.t2-pdf-menu{display:flex;flex-direction:column;gap:4px;max-width:250px}
+.t2-chooser button,.t2-pdf-menu button{background:transparent;border:0;color:#d5ebff;padding:6px;text-align:left;cursor:pointer}
+.t2-compose-actions{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:5px}
+.t2-compose-actions .primary{margin-left:auto}
+.t2-composer textarea,.t2-finish textarea,.t2-settings input{width:100%;background:#11263a;color:#ecf5ff;border:1px solid #54738e;border-radius:7px;padding:10px;font:inherit}
+.t2-finish,.t2-settings{display:flex;flex-direction:column;gap:10px;padding:10px}
+.t2-settings label{display:flex;flex-direction:column;gap:5px}
+.t2-settings blockquote{border-left:3px solid #5a8aaa;margin:0;padding:8px;white-space:pre-wrap}
+.t2-pdf-highlight{position:absolute;background:rgba(88,184,143,.22);border:0;border-radius:2px;cursor:pointer;z-index:4;padding:0}
+.t2-pdf-highlight:hover{background:rgba(78,185,149,.42);outline:1px solid #58b893}
