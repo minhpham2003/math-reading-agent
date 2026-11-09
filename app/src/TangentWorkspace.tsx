@@ -136,7 +136,9 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    // Keep the selection for scroll-back; only hide the floating control.
    const popup=selectionPopRef.current;
    if(popup){
-     popup.style.left=(rect.left+rect.width/2)+'px';
+     const half=popup.getBoundingClientRect().width/2;
+     const safeLeft=Math.max(box.left+half+8,Math.min(rect.left+rect.width/2,box.right-half-8));
+     popup.style.left=Math.max(half+8,Math.min(safeLeft,window.innerWidth-half-8))+'px';
      popup.style.top=(rect.top-8)+'px';
      popup.style.visibility=visible?'visible':'hidden';
      popup.style.pointerEvents=visible?'auto':'none';
@@ -147,6 +149,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    selectedRangeRef.current=null;setSelection(null);
   };
   const container=conversationRef.current;
+  update();
   container?.addEventListener('scroll',update,{passive:true});
   window.addEventListener('resize',update);
   document.addEventListener('pointerdown',dismiss,true);
