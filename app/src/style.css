@@ -871,3 +871,16 @@ html[data-theme="light"] .workspace .sources-drawer .secondary{
 /* Temporary marker for exact quoted passage in rendered PDF text. */
 .pdf-cited-passage{background:rgba(255,194,67,.45)!important;border-radius:2px;box-shadow:0 0 0 2px rgba(236,151,21,.32);transition:background-color .2s}
 .pdf-dark-mode .pdf-cited-passage{background:rgba(255,199,63,.62)!important}
+
+/* Clear contrast for the selection popover's primary Create Tangent action. */
+.t2-selection-pop .primary,
+.t2-chooser .primary,
+.t2-selection-pop button.primary,
+.t2-chooser button.primary{color:#fff!important;-webkit-text-fill-color:#fff}
+html[data-theme="light"] .t2-selection-pop .primary,
+html[data-theme="light"] .t2-chooser .primary{color:#fff!important;-webkit-text-fill-color:#fff}
+/* Completed reading units: green labels and page ranges in light mode. */
+html[data-theme="light"] .reading-nav-item.is-completed .reading-nav-link,
+html[data-theme="light"] .reading-nav-item.is-completed .reading-nav-link span,
+html[data-theme="light"] .reading-nav-item.is-completed .reading-nav-link small,
+html[data-theme="light"] .reading-nav-item.is-completed .reading-unit-description{color:#217b58!important}
