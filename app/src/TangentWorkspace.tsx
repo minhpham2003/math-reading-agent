@@ -15,6 +15,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  const [summary,setSummary]=useState('');
  const [chooser,setChooser]=useState<{ids:string[];x:number;y:number}|null>(null);
  const [breadOpen,setBreadOpen]=useState(false);
+ const [hoverPreview,setHoverPreview]=useState<{ids:string[];x:number;y:number}|null>(null);
  const [error,setError]=useState('');
  const dropdownRef=useRef<HTMLDivElement>(null);
  const conversationRef=useRef<HTMLDivElement>(null);
@@ -29,7 +30,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  function esc(e:KeyboardEvent){if(e.key==='Escape'){setBranchesOpen(false);setChooser(null);setSelection(null);setBreadOpen(false);}}
  document.addEventListener('mousedown',onDown);document.addEventListener('keydown',esc);return()=>{document.removeEventListener('mousedown',onDown);document.removeEventListener('keydown',esc);};},[]);
  useEffect(()=>{if(conversationRef.current)conversationRef.current.scrollTop=savedScroll.current[branch.id]??0;},[branch.id,settings]);
- function go(id:string){if(!data.threads.some(t=>t.id===id))return;if(conversationRef.current)savedScroll.current[branch.id]=conversationRef.current.scrollTop;persist({...data,activeId:id});setSelection(null);setChooser(null);setSettings(false);setFinish(false);setBranchesOpen(false);setBreadOpen(false);}
+ function go(id:string){setHoverPreview(null);if(!data.threads.some(t=>t.id===id))return;if(conversationRef.current)savedScroll.current[branch.id]=conversationRef.current.scrollTop;persist({...data,activeId:id});setSelection(null);setChooser(null);setSettings(false);setFinish(false);setBranchesOpen(false);setBreadOpen(false);}
  function saveNote(event:FormEvent){event.preventDefault();if(!draft.trim())return;const entry:Entry={id:crypto.randomUUID(),role:'user',text:draft.trim(),createdAt:new Date().toISOString()};
  persist({...data,threads:data.threads.map(t=>t.id===branch.id?{...t,messages:[...t.messages,entry],status:'in-progress'}:t)});
  setDraft('');requestAnimationFrame(()=>{if(conversationRef.current)conversationRef.current.scrollTop=conversationRef.current.scrollHeight;});}
@@ -53,7 +54,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
   const edges=[...points].sort((a,b)=>a-b);
   return <span data-message-content>{edges.slice(0,-1).map((start,i)=>{const end=edges[i+1],slice=message.text.slice(start,end);const matches=references.filter(a=>a.start!<end&&a.end!>start);if(!matches.length)return <span key={i}>{slice}</span>;
    const names=matches.map(a=>data.threads.find(t=>t.id===a.branchId)).filter((t):t is Thread=>!!t);
-   return <button key={i} type="button" className="t2-link" onClick={e=>openAnchors(matches.map(a=>a.id),e)} title={names.map(t=>t.title+' · '+t.status).join('\n')}>{slice}<span className="t2-hover">{names.map(t=><span key={t.id}>{t.title} · {t.status==='completed'?'✓ Completed':'● In progress'}</span>)}</span></button>;
+   return <button key={i} type="button" className="t2-link" onClick={e=>openAnchors(matches.map(a=>a.id),e)} onMouseEnter={e=>{const rect=e.currentTarget.getBoundingClientRect();setHoverPreview({ids:matches.map(a=>a.id),x:Math.max(12,Math.min(rect.left,window.innerWidth-260)),y:rect.top>120?rect.top-9:rect.bottom+9});}} onMouseLeave={()=>setHoverPreview(null)} onFocus={e=>{const rect=e.currentTarget.getBoundingClientRect();setHoverPreview({ids:matches.map(a=>a.id),x:Math.max(12,Math.min(rect.left,window.innerWidth-260)),y:rect.top>120?rect.top-9:rect.bottom+9});}} onBlur={()=>setHoverPreview(null)}>{slice}</button>;
   })}</span>;
  }
  function renderTree(id:string,depth:number):React.ReactNode{
@@ -98,6 +99,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
     {!branch.messages.length&&!branch.contextText&&<p className="muted">Start the discussion whenever you're ready.</p>}
    </div>
    {selection&&<div className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>↗ Create Tangent</button></div>}
+   {hoverPreview&&<div className="t2-viewport-preview" role="tooltip" style={{left:hoverPreview.x,top:hoverPreview.y,transform:hoverPreview.y>120?'translateY(-100%)':'none'}}>{hoverPreview.ids.map(id=>{const anchor=data.anchors.find(a=>a.id===id);const t=data.threads.find(x=>x.id===anchor?.branchId);return t?<div key={id}><strong>{t.title}</strong><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></div>:null;})}</div>}
    {chooser&&<div className="t2-chooser" style={{left:Math.min(window.innerWidth-265,chooser.x),top:Math.min(window.innerHeight-180,chooser.y)}}><strong>Related tangents</strong>{chooser.ids.map(id=>{const a=data.anchors.find(x=>x.id===id);const t=data.threads.find(x=>x.id===a?.branchId);return t?<button key={id} onClick={()=>go(t.id)}>{t.title} · {t.status}</button>:null;})}<button onClick={()=>setChooser(null)}>Close</button></div>}
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
     <form className="t2-composer" onSubmit={saveNote}><textarea rows={3} value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Ask a question or write a note…" aria-label="Reading note"/><div className="t2-compose-actions">{branch.id!=='main'&&<button type="button" className="secondary" onClick={saveSummary}>✓ Finish tangent & return</button>}<button type="submit" className="primary" disabled={!draft.trim()}>Save note</button></div></form>}
