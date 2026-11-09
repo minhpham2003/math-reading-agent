@@ -3,7 +3,7 @@ import { loadSessions, saveSessions, type ReadingSession } from './storage';
 import { PdfReader, deleteSavedPdf, importSessionPdf } from './PdfReader';
 import { ReadingFlow } from './ReadingFlow';
 import {deletePdfIndex} from './pdfIndex';
-import {getDocument,GlobalWorkerOptions} from 'pdfjs-dist';
+import {getDocument,GlobalWorkerOptions,type PDFDocumentProxy} from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 GlobalWorkerOptions.workerSrc=workerUrl;
 
@@ -52,7 +52,7 @@ export function App() {
     setNewPdf(file);setPdfPageCount(null);setFormError('');
     if(!file)return;
     setCheckingPdf(true);
-    let doc:Awaited<ReturnType<ReturnType<typeof getDocument>['promise']['then']>>|undefined;
+    let doc:PDFDocumentProxy|undefined;
     try{
       const task=getDocument({data:new Uint8Array(await file.arrayBuffer())});
       doc=await task.promise;
