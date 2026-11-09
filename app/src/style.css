@@ -413,3 +413,8 @@
  .reader-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
  .reader-toolbar-slot{max-width:100%;overflow:visible}
 }
+
+.pdf-zoom-form{display:inline-flex;align-items:center;gap:2px;white-space:nowrap;color:#c8d7ee}
+.pdf-zoom-form input{width:51px;min-width:0;text-align:right;background:transparent;border:1px solid transparent;border-radius:5px;color:inherit;padding:3px 2px;font:inherit;font-size:12px;appearance:textfield;-moz-appearance:textfield}
+.pdf-zoom-form input:focus{border-color:#7e9fcb;background:#192b40;outline:1px solid #7e9fcb}
+.pdf-zoom-form input::-webkit-inner-spin-button,.pdf-zoom-form input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
