@@ -270,3 +270,29 @@
 .reading-nav-item.is-completed .reading-nav-link,
 .reading-nav-item.is-completed .reading-nav-link small,
 .reading-nav-item.is-completed .reading-unit-description{color:#74d9ad}
+
+/* Local tangent conversation & branch navigation */
+.tangent-workspace{display:flex;flex-direction:column;gap:13px;flex:1;min-height:250px;border-top:1px solid #34516b;padding-top:15px;font-size:15px}
+.tangent-nav,.tangent-title-line,.tangent-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tangent-nav{justify-content:space-between}
+.tangent-breadcrumbs{flex:1;overflow-wrap:anywhere}
+.tangent-breadcrumbs button,.tangent-inline-summary button,.tangent-tree-link{background:transparent;border:0;color:#b7dafa;font:inherit;cursor:pointer}
+.tangent-breadcrumbs button.active{color:#ecf4ff;font-weight:700}
+.tangent-tree,.tangent-detail,.tangent-finish,.tangent-source-context{border:1px solid #47617d;border-radius:9px;padding:12px;background:#172c43}
+.tangent-tree label{display:flex;align-items:center;gap:7px;margin-top:9px}
+.tangent-tree input[type=checkbox]{width:auto}
+.tangent-tree-link{display:block;text-align:left;padding:6px 2px}
+.tangent-tree-link.active{color:#72dcb5}
+.tangent-detail label{display:block;margin:9px 0}
+.tangent-workspace input:not([type=checkbox]),.tangent-workspace textarea{width:100%;border:1px solid #496784;border-radius:8px;background:#102136;color:#e6f0ff;padding:10px;font:inherit}
+.tangent-messages{flex:1;min-height:80px;display:flex;flex-direction:column;gap:9px}
+.tangent-message{position:relative;align-self:flex-end;max-width:96%;min-width:120px;background:#284769;border-radius:10px;padding:12px 44px 12px 12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.tangent-create{position:absolute;right:8px;top:7px;border:1px solid #7290ae;border-radius:6px;background:#345776;color:#e6f0ff;cursor:pointer}
+.tangent-inline-summary{margin-top:10px;padding:10px;border:1px solid #6690b0;background:#1a3147;border-radius:8px}
+.tangent-inline-summary button{margin-left:9px;text-decoration:underline}
+.tangent-compose,.tangent-finish{display:flex;flex-direction:column;gap:8px}
+.tangent-compose .primary{margin-left:auto}
+.tangent-selection-editor{border:1px solid #597492;border-radius:7px;padding:10px;display:flex;flex-direction:column;gap:7px}
+.tangent-selection-editor label{display:flex;gap:8px;align-items:flex-start}
+.tangent-selection-editor input[type=checkbox]{width:auto}
+.tangent-workspace blockquote{margin:8px 0;padding-left:10px;border-left:3px solid #6083a8;white-space:pre-wrap}
