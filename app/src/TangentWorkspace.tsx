@@ -86,7 +86,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
   </header>
 
   {settings?<div className="t2-settings">
-    <button className="secondary" onClick={()=>setSettings(false)}>← Back to tangent</button><h3>Tangent settings</h3>
+    <h3>Tangent settings</h3>
     <label>Title<input value={nameDraft} onChange={e=>setNameDraft(e.target.value)}/></label>
     <h4>Starting point</h4><p className="muted">{data.anchors.find(a=>a.id===branch.originId)?.kind==='pdf'?'PDF passage':'Conversation excerpt'}</p>
     <blockquote>{data.anchors.find(a=>a.id===branch.originId)?.text}</blockquote>
