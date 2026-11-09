@@ -102,7 +102,7 @@ export function App() {
   }, [deleteId, newSessionOpen, creating]);
 
   return <div className="app-shell">
-    {!active && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label="Toggle light or dark mode">{theme==='dark'?'☀ Light mode':'☾ Dark mode'}</button></header>}
+    {!active && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button></header>}
     {storageError && <div role="alert" className="alert">{storageError}</div>}
     {!active ? <main className="dashboard">
       <div className="breadcrumb">← Library / Projects / Hatcher</div>
