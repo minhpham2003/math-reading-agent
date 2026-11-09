@@ -207,21 +207,12 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
 
   useEffect(() => {
     if (!scrollRoot) return;
-    // ResizeObserver fires on every frame of the agent-pane animation.
-    // Debounce the expensive PDF.js rerender until the pane has settled.
-    let timer:ReturnType<typeof setTimeout>|undefined;
-    const measure = () => {
-      window.clearTimeout(timer);
-      timer=window.setTimeout(()=>{
-        const width=Math.max(100,scrollRoot.clientWidth-8);
-        setAvailableWidth(previous=>Math.abs(previous-width)<2?previous:width);
-      },380);
-    };
-    const initial=Math.max(100,scrollRoot.clientWidth-8);
-    setAvailableWidth(initial);
-    const observer = new ResizeObserver(measure);
+    // Immediate fit-width update when Hide/Show agent changes the viewport.
+    const measure=()=>setAvailableWidth(Math.max(100,scrollRoot.clientWidth-8));
+    measure();
+    const observer=new ResizeObserver(measure);
     observer.observe(scrollRoot);
-    return () => {observer.disconnect();window.clearTimeout(timer);};
+    return ()=>observer.disconnect();
   }, [scrollRoot]);
 
   useEffect(() => {
