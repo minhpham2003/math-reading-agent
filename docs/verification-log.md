@@ -104,3 +104,12 @@
 - **Expected:** PDF text appears somewhat whiter and yellow tangent highlights a little lighter, while navy workspace and behavior remain unchanged.
 - **Observed:** GitHub CSS readback confirmed new pastel yellow/hover styles and commit SHA. CI run [42548397036](https://github.com/minhpham2003/math-reading-agent/actions/runs/42548397036) was in progress at first check.
 - **Pending:** Confirm build/deployment; inspect PDF dark mode visually and test highlight hover/citation interactions in a browser. Source changes alone do not establish visual verification.
+
+## V-020 — Implementation 2 basic conversation + branch-tree connectors (2026-11-09)
+
+- **Branch:** [implementation/02-ai-chat](https://github.com/minhpham2003/math-reading-agent/tree/implementation/02-ai-chat).
+- **Source changes:** New `server/index.mjs`/README, `app/src/aiChat.ts`, React tangent chat calling the backend and persisting `assistant` messages, and a nested tree with CSS vertical/horizontal connector guides.
+- **Readback observation:** Connector CSS rules and nested `t2-tree-children` markup confirmed on feature branch. Preview workflow is configured for an isolated `previews/ai-chat/` path.
+- **Not tested:** TypeScript production build, Node runtime response, secured backend deployment, AI roundtrip, nested tree rendered screenshot, mobile behavior, and existing branch controls. The Implementation 1 preview is not being overwritten by this branch's workflow.
+- **Expected manual browser check:** Open Branches dropdown, expand main and a child branch, verify lines and elbow connectors across two levels; collapse/re-expand, navigate through branch rows, and verify status indicators remain correct.
+- **Status:** Implemented/committed; not browser-verified. No claim of running AI until backend is configured.
