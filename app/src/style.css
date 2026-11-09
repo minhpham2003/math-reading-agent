@@ -863,3 +863,7 @@ html[data-theme="light"] .workspace .sources-drawer .secondary{
  background:#cad6e3;
  color:#23384f;
 }
+
+/* Saved PDF citations: regular-weight title and actions. */
+.sources-drawer .source-entry-link strong,
+.sources-drawer .source-entry .secondary{font-weight:400}
