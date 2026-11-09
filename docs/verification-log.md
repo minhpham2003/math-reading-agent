@@ -97,3 +97,10 @@
 - Verification: TypeScript/Vite build succeeded in GitHub Actions run 42543370662 (prior to cleanup-only App.tsx change); deployment succeeded. Later cleanup commit must be separately checked.
 - Gaps requiring subsequent work: full browser end-to-end testing; precise conversation selection spanning *multiple messages*; actual hover popup rather than browser title in some PDF highlight cases; exact scroll restoration within PDF and parent conversation across full reload; breadcrumb responsive width collapsing (currently collapse by ancestry length); user-editable attached sources; AI-created title/summary/context understanding. Current PDF text selection inherits known PDF.js selection limitations.
 - Prototype v1 stored notes remain in their original localStorage namespace, inaccessible in v2 by design. Users should not expect their prototype notes to appear in rebuilt tangents. 
+
+## V-016 — Lighter dark PDF text and yellow highlights (2026-11-09)
+
+- **Implementation:** [dc4a30d](https://github.com/minhpham2003/math-reading-agent/commit/dc4a30d2ee4363f3ca966a8ba2c404e6b5915402).
+- **Expected:** PDF text appears somewhat whiter and yellow tangent highlights a little lighter, while navy workspace and behavior remain unchanged.
+- **Observed:** GitHub CSS readback confirmed new pastel yellow/hover styles and commit SHA. CI run [42548397036](https://github.com/minhpham2003/math-reading-agent/actions/runs/42548397036) was in progress at first check.
+- **Pending:** Confirm build/deployment; inspect PDF dark mode visually and test highlight hover/citation interactions in a browser. Source changes alone do not establish visual verification.
