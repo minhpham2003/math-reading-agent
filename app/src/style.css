@@ -337,3 +337,9 @@
 .t2-settings blockquote{border-left:3px solid #5a8aaa;margin:0;padding:8px;white-space:pre-wrap}
 .t2-pdf-highlight{position:absolute;background:rgba(88,184,143,.22);border:0;border-radius:2px;cursor:pointer;z-index:4;padding:0}
 .t2-pdf-highlight:hover{background:rgba(78,185,149,.42);outline:1px solid #58b893}
+
+/* Viewport-anchored tooltip: avoids clipping in scrollable conversation panels */
+.t2-viewport-preview{position:fixed;z-index:1000;width:min(240px,calc(100vw - 24px));max-height:min(240px,45vh);overflow:auto;background:#13273d;color:#eaf6ff;border:1px solid #688cac;padding:10px 12px;border-radius:8px;box-shadow:0 9px 22px #0009;pointer-events:none;white-space:normal}
+.t2-viewport-preview div+div{border-top:1px solid #466480;margin-top:7px;padding-top:7px}
+.t2-viewport-preview strong,.t2-viewport-preview small{display:block;overflow-wrap:anywhere}
+.t2-viewport-preview small{color:#b4d8ef;margin-top:4px}
