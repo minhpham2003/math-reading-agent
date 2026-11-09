@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useState } from 'react';
+import { TangentWorkspace } from './TangentWorkspace';
 
 export type ReadingUnit = {id:string; title:string; page:number; endPage?:number; description:string; done:boolean};
 
@@ -16,26 +17,7 @@ export function ReadingMode({sessionId,title,units,onNavigate,onToggle,onSetup}:
  const [listOpen,setListOpen]=useState(true);
  const [selectedId,setSelectedId]=useState<string|null>(null);
  const [detailsId,setDetailsId]=useState<string|null>(null);
- const navigatorRef=useRef<HTMLElement>(null);
- useEffect(()=>{
-  if(!detailsId)return;
-  const dismiss=(event:PointerEvent)=>{
-   if(event.target instanceof Element && !event.target.closest('.reading-nav-item'))setDetailsId(null);
-  };
-  document.addEventListener('pointerdown',dismiss);
-  return ()=>document.removeEventListener('pointerdown',dismiss);
- },[detailsId]);
- const [notes,setNotes]=useState<string[]>(()=>loadNotes(sessionId));
- const [draft,setDraft]=useState('');
- const [error,setError]=useState('');
  const selected=units.find(u=>u.id===selectedId)??units.find(u=>!u.done)??units[0];
- function addNote(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();
-  const value=draft.trim();if(!value)return;
-  const next=[...notes,value];
-  try{localStorage.setItem(notesKey(sessionId),JSON.stringify(next));setNotes(next);setDraft('');setError('');}
-  catch{setError('Unable to save your note in this browser.');}
- }
  return <div className="reading-mode">
   <div className="eyebrow">Reading mode · Mock agent (AI not connected)</div>
   <div className="reading-mode-top"><h2>{title}</h2><button className="secondary" onClick={onSetup}>⚙ Session setup</button></div>
@@ -47,12 +29,6 @@ export function ReadingMode({sessionId,title,units,onNavigate,onToggle,onSetup}:
     <button className={'secondary unit-completed-toggle'+(unit.done?' is-completed':'')} aria-pressed={unit.done} onClick={()=>onToggle(unit.id)}>{unit.done?'✓ Completed':'Completed'}</button>
    </div>)}</div>}
   </section>
-  <section className="reading-conversation">
-   <p className="muted">This is the conversation layout preview. No AI replies yet—questions and observations are saved as local notes.</p>
-   <div className="reading-note-list">{notes.length===0?<p className="muted">No notes yet. Add a question or observation as you read.</p>:notes.map((note,i)=><div className="reading-note" key={i}>{note}</div>)}</div>
-   <form onSubmit={addNote}><textarea rows={3} aria-label="Question or reading note" placeholder="Ask a question or write a note…" value={draft} onChange={e=>setDraft(e.target.value)}/>
-    <button className="primary" type="submit" disabled={!draft.trim()}>Save note</button></form>
-   {error&&<p role="alert">{error}</p>}
-  </section>
+  <TangentWorkspace key={sessionId} sessionId={sessionId} onNavigate={onNavigate} />
  </div>;
 }
