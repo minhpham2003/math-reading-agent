@@ -39,7 +39,7 @@ export function MarkdownMath({text,onPdfNavigate,allowedPages}:{text:string;onPd
      if(page!==null && onPdfNavigate && allowedPages?.includes(page)){
        let quote:string|undefined;
        try{quote=match?.[2]?decodeURIComponent(match[2]):undefined;}catch{quote=undefined;}
-       return <button type="button" className="t2-pdf-citation" onClick={()=>onPdfNavigate(page,quote)} title={'Go to PDF '+(quote?'passage':'page')+' '+page}>{children} ↗</button>;
+       return <button type="button" className="t2-pdf-citation" onClick={()=>onPdfNavigate(page,quote||(/\\b(?:Theorem|Definition|Lemma|Proposition|Corollary|Example)\\s+\\d/i.test(label)?label:undefined))} title={'Go to PDF '+(quote?'passage':'page')+' '+page}>{children} ↗</button>;
      }
      // Unsupported, unverified, or external links are text only. In
      // particular, an empty href must not navigate to this web app.
