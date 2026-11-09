@@ -24,3 +24,5 @@ export function MathText({text}:{text:string}){
  if(last<text.length)parts.push(text.slice(last));
  return <>{parts.length?parts:text}</>;
 }
+
+export function containsLatex(text:string):boolean{mathPattern.lastIndex=0;return mathPattern.test(text);}
