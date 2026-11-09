@@ -455,3 +455,13 @@
 }
 .pdf-dark-mode .continuous-pdf-page{background:#1c293a}
 .pdf-dark-mode .pdf-canvas-scroll{background:#172434}
+
+/* Fill the agent panel vertically: when the reading plan collapses, the
+   transcript takes the freed space and the composer stays at the bottom. */
+.workspace .agent-panel{display:flex;flex-direction:column;min-height:0}
+.workspace .agent-panel>.reading-flow,.workspace .agent-panel>.reading-mode{flex:1;min-height:0}
+.reading-mode{height:100%;min-height:0}
+.reading-mode>.reading-navigator{flex:none}
+.reading-mode>.t2-workspace{flex:1;min-height:0}
+.t2-workspace>.t2-conversation{flex:1;min-height:0;max-height:none}
+.t2-workspace>.t2-composer{flex:none}
