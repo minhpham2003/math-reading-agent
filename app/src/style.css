@@ -527,3 +527,18 @@
 .t2-rich-text code{font-size:.9em}
 .t2-rich-text blockquote{border-left:3px solid #6589ac;padding-left:12px;margin:12px 0}
 .t2-rich-text .katex-display{overflow-x:auto;overflow-y:hidden;padding:6px 0}
+
+/* Smooth Hide/Show agent: preserve both mounted panes and animate a single
+   grid track change so the PDF never recenters as a new grid item. */
+@media(min-width:761px){
+ .workspace .work-grid.split-enabled{transition:grid-template-columns 320ms ease-in-out}
+ .workspace .work-grid.agent-collapsed .agent-panel{visibility:hidden;pointer-events:none;padding-left:0;padding-right:0;border-left:0;border-right:0;overflow:hidden}
+ .workspace .work-grid.agent-collapsed .pane-resizer{visibility:hidden;pointer-events:none}
+ .workspace .work-grid.split-enabled .agent-panel{min-width:0}
+}
+@media(prefers-reduced-motion:reduce){
+ .workspace .work-grid.split-enabled{transition:none}
+}
+@media(max-width:760px){
+ .workspace .work-grid.agent-collapsed .agent-panel{display:none}
+}
