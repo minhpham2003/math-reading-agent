@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mathematical Reading Agent — Hatcher</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;color:#19283b;background:#f5f7fb}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}header{background:#13243c;color:white;padding:18px max(24px,calc((100vw - 1080px)/2));display:flex;align-items:center;justify-content:space-between}.brand{font-size:15px;font-weight:800;letter-spacing:.02em}.label{font-size:12px;color:#6d7d90;text-transform:uppercase;letter-spacing:.12em;font-weight:700}.wrap{max-width:1080px;margin:40px auto;padding:0 24px}.back{color:#51647c;font-size:14px}.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:22px 0 30px}h1{font-size:36px;letter-spacing:-.05em;margin:7px 0 6px}p{color:#66758a;margin:8px 0;line-height:1.55}.btn{border:0;border-radius:10px;background:#2663c4;color:white;padding:13px 18px;font-weight:700}.btn:hover{background:#174fa8}.ghost{background:#eaf0fa;color:#244b85}.grid{display:grid;grid-template-columns:1.45fr 1fr;gap:20px}.card{background:white;border:1px solid #e2e7ef;border-radius:15px;padding:24px;box-shadow:0 4px 20px #163d6a08}.card h2{margin:0 0 15px;font-size:18px}.session{padding:16px 0;border-top:1px solid #eef1f6;display:flex;justify-content:space-between;gap:12px}.session strong{display:block;margin-bottom:4px}.meta{font-size:13px;color:#728198}.badge{align-self:flex-start;background:#edf5fc;color:#245b8e;border-radius:30px;padding:5px 9px;font-size:12px}.bar{height:9px;background:#e6edf7;border-radius:20px;overflow:hidden;margin:15px 0}.fill{height:100%;background:#4678cf;width:0}.stat{font-size:28px;font-weight:800}.source{padding:14px;background:#f5f8fd;border-radius:10px}.source strong{display:block}.muted{font-size:13px;color:#728198}.notice{margin:18px 0;padding:12px 15px;border-radius:9px;background:#fff8e7;color:#75601b;font-size:13px}.overlay{position:fixed;inset:0;background:#0c1a2d88;display:flex;align-items:center;justify-content:center;padding:18px}.dialog{background:white;border-radius:15px;padding:27px;width:min(100%,490px);box-shadow:0 22px 60px #0004}.dialog h2{margin-top:0}.field{margin-top:17px}.field label{display:block;font-size:13px;font-weight:750;margin-bottom:7px}.field input,.field select{width:100%;border:1px solid #cad5e3;border-radius:8px;padding:11px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}.empty{padding:18px 0;color:#728198}footer{margin:30px 0;color:#8b97a7;font-size:12px}@media(max-width:720px){.grid{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}h1{font-size:30px}}
+.workspace{max-width:1280px;margin:22px auto;padding:0 24px}.workspace-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.work-grid{display:grid;grid-template-columns:minmax(300px,1fr) minmax(350px,1.22fr);gap:18px;height:calc(100vh - 180px);min-height:510px}.work-panel{background:#fff;border:1px solid #dfe6ef;border-radius:14px;overflow:auto;padding:24px}.work-panel h2{margin:0 0 12px}.pdf-page{min-height:440px;max-width:530px;background:#fff;border:1px solid #e0e5ec;box-shadow:0 5px 20px #253f5a18;padding:40px;margin:26px auto;text-align:center}.chat-placeholder{background:#f4f8ff;border-radius:12px;padding:18px;margin:20px 0}.plan-summary{display:flex;align-items:center;justify-content:space-between;margin:15px 0 10px}.plan-summary button{border:1px solid #cad6e7;background:white;border-radius:8px;padding:8px 12px;color:#284f80}.plan-body{background:#f7f9fc;border-radius:10px;padding:14px}.plan-body ol{margin:7px 0;padding-left:20px}.plan-body li{margin:10px 0}.info-note{font-size:13px;color:#697b92}.back-button{border:0;background:none;color:#2d609e;font-size:14px;padding:8px 0}@media(max-width:760px){.work-grid{grid-template-columns:1fr;height:auto}.work-panel{min-height:350px}} 
+/* The hidden attribute must override .overlay display:flex. */
+[hidden] { display: none !important; }
+
+/* Dark visual system */
+:root{color-scheme:dark;color:#e7edf7;background:#0b111b}
+body{background:#0b111b;color:#e7edf7}
+header{background:#0d1624;border-bottom:1px solid #263449}
+.back,.back-button{color:#9fb8e5}
+p,.meta,.muted,.info-note{color:#a6b4c9}
+.label{color:#8c9fb8}
+h1,h2,.session strong{color:#eef4ff}
+.card,.work-panel,.dialog{background:#131e2d;border-color:#2a3b52;box-shadow:none;color:#e7edf7}
+.session{border-top-color:#2a3b52}
+.source,.plan-body,.chat-placeholder{background:#1b2a3d;color:#e7edf7}
+.badge{background:#203c5a;color:#b5d3fa}
+.bar{background:#263a54}
+.btn{background:#366dcc;color:white}
+.btn:hover{background:#4b84e4}
+.btn.ghost{background:#263750;color:#d7e6fd}
+.field input,.field select{background:#18263a;color:#eef4ff;border-color:#40536c}
+.field input::placeholder{color:#8495ad}
+.notice{background:#25251b;color:#ead39e;border:1px solid #504632}
+.overlay{background:#060d19c9}
+.plan-summary button{background:#23364f;border-color:#405a7b;color:#d8e8ff}
+.pdf-page{background:#1a2535;border-color:#354760;box-shadow:0 8px 28px #0004}
+.workspace{max-width:none;width:100%;margin:0;padding:10px 12px 12px}
+.workspace-top{margin-bottom:9px;min-height:48px}
+.workspace-top h1{font-size:23px!important}
+.workspace-top p{font-size:13px;margin:2px 0}
+.work-grid{grid-template-columns:minmax(310px,1fr) minmax(400px,1.18fr);gap:10px;height:calc(100dvh - 137px);min-height:440px}
+.work-panel{padding:22px;border-radius:12px}
+.work-panel .pdf-page{max-width:620px;min-height:70%;margin:16px auto}
+@media(max-width:760px){.workspace{padding:10px}.work-grid{grid-template-columns:1fr;height:auto;min-height:0}.work-panel{min-height:360px}}
+
+
+.session-actions{position:relative;display:flex;align-items:flex-start;gap:10px}
+.session-menu-button{border:1px solid #40536c;background:#1b2a3d;color:#d7e6fd;border-radius:9px;width:35px;height:35px;font-size:23px;line-height:1}
+.session-menu{position:absolute;right:0;top:41px;z-index:5;background:#1b2a3d;border:1px solid #40536c;border-radius:9px;padding:5px;min-width:140px;box-shadow:0 12px 28px #0007}
+.session-menu button{width:100%;border:0;background:transparent;color:#ffb5b5;text-align:left;padding:10px;border-radius:6px}
+.session-menu button:hover,.session-menu button:focus-visible{background:#503038}
+.session-menu-button:focus-visible,.session-menu button:focus-visible{outline:2px solid #9fb8e5;outline-offset:2px}
+.delete-confirm{position:fixed;inset:0;z-index:100;background:#060d19ce;display:flex;align-items:center;justify-content:center;padding:20px}
+.delete-card{width:min(100%,420px);background:#131e2d;color:#e7edf7;border:1px solid #40536c;border-radius:14px;padding:24px;box-shadow:0 20px 50px #0008}
+.delete-card h2{margin:0 0 12px}.delete-card p{overflow-wrap:anywhere}
+.danger-btn{background:#9c3943;color:#fff}.danger-btn:hover{background:#b44b56}
+.concept-units{padding-left:22px;margin:8px 0}.concept-units li{margin:0 0 18px}.concept-units li strong{color:#f1f5ff}.concept-units li p{margin:6px 0 0;font-size:14px;line-height:1.5}
+.pdf-excerpt{text-align:left;background:#192538;color:#e7edf7;font-family:Georgia,'Times New Roman',serif;max-width:640px;min-height:0;padding:34px 38px}.pdf-excerpt p{color:#dce5f3;font-size:16px;line-height:1.6;text-align:justify;margin:18px 0}.pdf-excerpt .info-note{color:#a8b9cf;font:12px system-ui,sans-serif;text-align:left}.pdf-book-header{display:flex;justify-content:space-between;border-top:2px solid #61758f;padding:8px 0 14px;margin-top:12px;font-size:13px}.pdf-excerpt h3{color:#edf4ff;border-bottom:1px solid #62758c;font-size:22px;padding-bottom:6px}.math-line{text-align:center;white-space:normal;margin:16px 0;font-size:17px}
+.concept-link{border:1px solid transparent;background:transparent;color:inherit;text-align:left;padding:10px;border-radius:9px;width:100%;font:inherit;cursor:pointer}.concept-link:hover,.concept-link:focus-visible{background:#253952;border-color:#56729b}.concept-link.active{background:#223c59;border-color:#5a90bd}.concept-link p{pointer-events:none}.excerpt-focus{background:#3d493d;border-left:4px solid #d6c77b;padding:12px;margin:12px -12px;border-radius:5px;animation:focusIn .4s ease}.pdf-excerpt .excerpt-focus p{margin:6px 0}@keyframes focusIn{from{background:#6a5e2c}to{background:#3d493d}}
+.plan-controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.plan-controls button,.unit-editor button{border:1px solid #49617f;background:#243a55;color:#e3eeff;border-radius:8px;padding:8px 10px;font:13px system-ui;cursor:pointer}.plan-controls button:hover,.unit-editor button:hover{background:#325273}.plan-controls #acceptPlan{background:#3265ad}.unit-editor{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}.unit-editor input{min-width:150px;flex:1;background:#15283d;color:#ecf3ff;border:1px solid #55708e;border-radius:6px;padding:7px}.unit-editor button{padding:6px 8px}#revisionPrompt label{display:block;margin-top:12px;font-size:13px}#revisionRequest{width:100%;background:#16283d;color:#ecf3ff;border:1px solid #55708e;border-radius:8px;padding:10px;margin-top:7px}
+.concept-units li[draggable="true"]{cursor:grab;transition:transform .18s ease,background .18s ease,opacity .18s ease;border-radius:10px}.concept-units li.dragging{opacity:.55;background:#304a68;cursor:grabbing;box-shadow:0 6px 18px #0005}.drag-handle{color:#aac3e7;font:13px system-ui;white-space:nowrap;cursor:grab;user-select:none}.concept-units li[draggable="true"] .concept-link{cursor:grab}
+.scope-assessment{display:grid;grid-template-columns:minmax(130px,36%) 1fr;gap:11px 14px;margin:16px 0}.scope-assessment dt{font-weight:750;color:#e6f0ff}.scope-assessment dd{margin:0;color:#adbed4;line-height:1.5}@media(max-width:600px){.scope-assessment{grid-template-columns:1fr;gap:3px}.scope-assessment dd{margin-bottom:12px}}
+.assumption-chat{margin-top:14px;border-top:1px solid #435a73;padding-top:12px}.assumption-chat textarea{display:block;width:100%;background:#16283d;color:#e7edf7;padding:8px;border:1px solid #55708e;border-radius:8px}.assumption-chat button{margin-top:8px;background:#315f98;color:white;border:0;border-radius:8px;padding:9px}.assumption-chat #correctionReply{margin-top:10px;line-height:1.5;color:#c8dcf6}
+.stage-confirm{margin-top:14px;padding:11px 16px;border:0;border-radius:9px;background:#376aa4;color:#fff;font-weight:700;cursor:pointer}#planStage[hidden]{display:none!important}#agentAssessment[hidden]{display:none!important}
+
+/* S23-S25 tangent interactive prototype */
+.tangent-demo{margin-top:22px;border-top:1px solid #40536c;padding-top:16px}
+.tangent-demo button{border:1px solid #49617f;background:#20344d;color:#e8f2ff;border-radius:8px;padding:7px 10px}
+.tangent-demo button:hover{background:#345376}
+.tangent-demo .primary-t{background:#3268b0;border-color:#477cc4}
+.tangent-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.tangent-note{font-size:12px;color:#a9bad0}
+.tangent-demo .tangent-tree{border:1px solid #364a62;padding:9px;border-radius:10px;margin:8px 0}
+.tangent-tree button{border:0;background:transparent;text-align:left;display:block;width:100%;padding:5px 7px}
+.tangent-tree .selected-t{background:#2d4765}
+.tangent-chat{max-height:320px;overflow:auto;border:1px solid #344a62;padding:10px;border-radius:10px;background:#111d2d}
+.tangent-message{border-bottom:1px solid #293d56;padding:9px 4px}
+.tangent-message strong{color:#bbd4ff}
+.tangent-message p{margin:5px 0;font-size:13px;white-space:pre-wrap}
+.tangent-message .message-actions{display:flex;gap:6px;justify-content:flex-end}
+.tangent-message .message-actions button{font-size:12px;padding:3px 7px}
+.tangent-summary{background:#172b41;border:1px solid #4b698b;border-radius:10px;padding:12px;margin:9px 0}
+.tangent-summary p{font-size:13px}
+.tangent-summary .historical{margin-top:9px;border-top:1px solid #415571;padding-top:5px}
+.tangent-summary .historical .tangent-message{opacity:.86}
+.tangent-compose{display:flex;gap:7px;margin-top:9px}
+.tangent-compose input,.tangent-compose textarea,.tangent-demo input[type=text]{min-width:0;flex:1;background:#111d2d;color:#eaf3ff;border:1px solid #526780;padding:9px;border-radius:7px}
+.tangent-compose button{white-space:nowrap}
+.tangent-demo .edit-t{border:1px solid #536b87;padding:10px;margin-top:8px;border-radius:9px}
+.tangent-demo .edit-t label{display:block;padding:4px}
+.tangent-demo .edit-t textarea{width:100%;min-height:90px}
+.tangent-demo .tag-t{border-radius:20px;background:#263e59;padding:3px 7px;font-size:11px}
+
+</style>
+</head>
+<body>
+<header><span class="brand">∑ &nbsp; Mathematical Reading Agent</span><span style="font-size:13px;opacity:.8">Prototype · S02 + S07 simulation</span></header>
+<main class="wrap"><div class="back">← Library / Projects / Hatcher</div>
+<div class="hero"><div><div class="label">Book project</div><h1>Algebraic Topology</h1><p>Allen Hatcher · Your reading workspace</p></div><button class="btn" id="newSession">+ New Session</button></div>
+<div class="grid"><section class="card"><h2>Reading sessions</h2><div id="sessions"></div></section>
+<div><section class="card"><div class="label">Your progress</div><div class="stat" id="count">0</div><p>sessions created in this prototype</p><div class="bar"><div class="fill" id="progress"></div></div><div class="muted">Prototype activity · not book completion</div></section>
+<section class="card" style="margin-top:20px"><h2>Project sources</h2><div class="source"><strong>Algebraic Topology — Hatcher</strong><span class="muted">Primary text · PDF not yet connected</span></div><p class="muted">Source management and exact PDF ranges will be implemented later.</p></section></div></div>
+<div class="notice">Design prototype: sessions are saved only in this browser (localStorage). No PDF, AI agent, or cloud database is connected yet.</div>
+<footer>S02 interaction prototype · Dashboard-first project opening</footer></main>
+<div class="overlay" id="overlay" hidden><form class="dialog" id="sessionForm"><h2>New reading session</h2><p>Choose your scope and time. We'll refine planning with S07.</p>
+<div class="field"><label for="title">Session title</label><input id="title" required maxlength="120" placeholder="e.g. Homotopy equivalence"></div>
+<div class="field"><label for="section">Section or reading target</label><input id="section" required placeholder="e.g. Chapter 0, §0.17"></div>
+<div class="row"><div class="field"><label for="first">First printed page</label><input id="first" type="number" min="1" required></div><div class="field"><label for="last">Last printed page</label><input id="last" type="number" min="1" required></div></div>
+<div class="field"><label for="duration">Available time</label><select id="duration"><option value="30">30 minutes</option><option value="60" selected>60 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></div>
+<div class="actions"><button class="btn ghost" type="button" id="cancel">Cancel</button><button class="btn" type="submit">Create session</button></div></form></div>
+<section id="workspace" class="workspace" hidden><div class="workspace-top"><div><button class="back-button" id="backToProject">← Back to Hatcher dashboard</button><h1 id="workTitle" style="font-size:27px;margin:2px 0"></h1><p id="workMeta"></p></div><span class="badge">Session setup</span></div><div class="work-grid"><article class="work-panel"><div class="label">Reading agent · left panel</div><h2 style="margin-top:10px">Your session</h2><div class="chat-placeholder" role="status" aria-label="Simulated reading agent"><div class="label" style="margin-bottom:10px">Simulated agent · scripted preview (not AI)</div><strong>Let’s plan your reading session</strong><p id="agentIntro"></p><div id="agentAssessment"><p>I’ve reviewed the example selection from <strong>Hatcher Chapter 3</strong>, printed pages <strong>186–189</strong>.</p><dl class="scope-assessment"><dt>Scope</dt><dd>Reasonable as a proposed 60-minute session.</dd><dt>Conceptual structure</dt><dd>Three related units: motivation for cup products, cochains on graphs, and local versus global obstructions.</dd><dt>Difficulty</dt><dd>Moderate, depending on familiarity with homology.</dd><dt>Dependencies</dt><dd>Boundary maps and chain complexes; some familiarity with homology is helpful.</dd><dt>Estimated reading time</dt><dd>Roughly 45–60 minutes, with substantial variation depending on proof work and prior knowledge.</dd><dt>Recommendation</dt><dd>Review the proposed plan below before beginning.</dd></dl><div class="assumption-chat"><label for="assumptionCorrection">Correct the assessment</label><textarea id="assumptionCorrection" rows="2" placeholder="What did the agent get wrong?"></textarea><button type="button" id="sendCorrection">Send correction</button><div id="correctionReply" role="status" hidden></div></div><button type="button" id="confirmAssessment" class="stage-confirm">Agree with assessment · Continue to plan →</button></div><div class="info-note">Example response grounded in our reference PDF; this page has not analyzed your chosen range. An actual AI agent is not connected.</div></div>
+<section class="tangent-demo" id="tangentDemo">
+<div class="label">S23–S25 · interactive tangent prototype · no AI connected</div>
+<p class="tangent-note">Explore branches, collapse history, edit a finish summary, and return. Chat commands use a few scripted patterns, not a language model.</p>
+<div class="tangent-toolbar"><span id="tangentCrumbs"></span><button id="tangentTreeToggle" type="button">Branches ▾</button><button id="tangentNew" type="button" title="Create a tangent here">↗ Tangent</button></div>
+<div class="tangent-tree" id="tangentTree" hidden></div>
+<div id="tangentTitle" style="font-size:14px;font-weight:bold;margin:8px 0"></div>
+<div class="tangent-toolbar"><button id="tangentRename">Rename</button><button id="tangentEditSelection">Edit message selection</button><button id="tangentFinish" class="primary-t">Finish tangent &amp; return</button><button id="tangentArchive">Archive</button><button id="tangentDelete">Delete</button></div>
+<div class="tangent-chat" id="tangentChat" aria-label="Tangent conversation prototype"></div>
+<form class="tangent-compose" id="tangentForm"><input id="tangentInput" aria-label="Message or tangent command" placeholder="Ask, or type: make this a tangent…" autocomplete="off"><button type="submit">Send</button></form>
+<div class="edit-t" id="tangentEditor" hidden></div>
+<div class="tangent-note" id="tangentFeedback" role="status" style="margin-top:7px"></div>
+<button id="tangentReset" type="button" style="margin-top:10px">Reset tangent demo</button>
+</section><div id="planStage" hidden><div class="plan-summary"><strong>Reading plan (draft)</strong><button id="togglePlan" type="button" aria-expanded="true">Collapse ▴</button></div><div class="plan-body" id="planBody"><div class="info-note" style="margin-bottom:12px">Scripted example · Hatcher, Chapter 3 · PDF pages 2–5 (printed 186–189). Not generated from your selected range.</div><ol class="concept-units"><li><button type="button" class="concept-link" data-unit="0"><strong>Why cohomology has a product</strong><div class="info-note">PDF p. 2 · printed p. 186</div><p>See how contravariance makes the diagonal map available for defining the cup product.</p></button></li><li><button type="button" class="concept-link" data-unit="1"><strong>Cochains on graphs</strong><div class="info-note">PDF pp. 2–3 · printed pp. 186–187</div><p>Interpret coboundaries as differences of vertex values along oriented edges.</p></button></li><li><button type="button" class="concept-link" data-unit="2"><strong>Local conditions and global obstructions</strong><div class="info-note">PDF pp. 3–5 · printed pp. 187–189</div><p>Compare local cocycle conditions with obstructions to finding a global potential.</p></button></li></ol><div class="info-note">Prototype plan · direct edits and scripted agent revision; no real AI connected.</div><div class="plan-controls"><button type="button" id="editPlan">Edit plan</button><button type="button" id="agentRevise">Ask simulated agent to revise</button><button type="button" id="acceptPlan">Accept plan</button></div><div id="planFeedback" class="info-note" role="status" aria-live="polite">Review or revise this draft before accepting it.</div><div id="revisionPrompt" hidden><label for="revisionRequest">What would you like to change?</label><textarea id="revisionRequest" rows="2" placeholder="e.g. Focus more on cochains on graphs"></textarea><div class="plan-controls"><button type="button" id="simulateRevision">Propose revision</button><button type="button" id="cancelRevision">Cancel</button></div></div></div><p class="info-note" style="margin-top:22px">You can review or revise the plan before beginning. Agent chat is not yet implemented.</p></div></article><article class="work-panel"><div class="label">Primary source · right panel</div><h2 style="margin-top:10px">Hatcher — Algebraic Topology</h2><div class="info-note" id="pdfRange"></div><div class="pdf-page pdf-excerpt" id="pdfExcerpt"><div class="info-note">Source excerpt preview · Hatcher, Chapter 3 · PDF p. 2 / printed p. 186</div><div class="pdf-book-header"><span>186</span><span>Chapter 3 &nbsp; Cohomology</span></div><p>With cohomology, however, the situation is better. One still has a cross product constructed in much the same way as in homology, so one can again take X = Y and get the first half of a product.</p><div class="math-line">H<sup>i</sup>(X) × H<sup>j</sup>(X) → H<sup>i+j</sup>(X × X) → H<sup>i+j</sup>(X)</div><p>But now by contravariance the second map would be induced by a map X → X × X, and there is an obvious candidate for this map, the diagonal map Δ(x) = (x, x). This turns out to work very nicely, giving a well-behaved product in cohomology, the cup product.</p><h3>The Idea of Cohomology</h3><p>Let us look at a few low-dimensional examples to get an idea of how one might be led naturally to consider cohomology groups, and to see what properties of a space they might be measuring.</p><p>For a fixed abelian group G, the set of all functions from vertices of X to G also forms an abelian group, which we denote by Δ<sup>0</sup>(X; G). Similarly the set of all functions assigning an element of G to each edge of X forms an abelian group Δ<sup>1</sup>(X; G).</p><div class="info-note">Static excerpt simulation · click a conceptual unit to view its passage. Full PDF rendering is not connected.</div></div></article></div></section>
+<div id="deleteConfirm" class="delete-confirm" hidden role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><div class="delete-card"><h2 id="deleteTitle">Delete session?</h2><p id="deleteMessage"></p><p class="info-note">This removes the session from this browser and cannot be undone.</p><div class="actions"><button class="btn ghost" type="button" id="deleteCancel">Cancel</button><button class="btn danger-btn" type="button" id="deleteApprove">Delete session</button></div></div></div>
+<script>
+(function(){
+const key='math-reading-agent:s02:sessions';
+let sessions=[];
+let pendingDelete=null;
+try { const parsed=JSON.parse(localStorage.getItem(key)||'[]'); if(Array.isArray(parsed)) sessions=parsed; } catch(e) { /* ignore invalid local data */ }
+const el=id=>document.getElementById(id), overlay=el('overlay'), form=el('sessionForm');
+function showDashboard(){el('workspace').hidden=true;document.querySelector('main').hidden=false;history.replaceState(null,'',location.pathname);render();}
+function showSession(s){el('planStage').hidden=true;el('agentAssessment').hidden=false;el('acceptPlan').textContent='Accept Plan';el('correctionReply').hidden=true;el('assumptionCorrection').value='';el('workspace').hidden=false;document.querySelector('main').hidden=true;el('workTitle').textContent=s.title;el('workMeta').textContent=s.section+' · pp. '+s.first+'–'+s.last+' · '+s.duration+' min';el('pdfRange').textContent='Selected printed pages: '+s.first+'–'+s.last;el('agentIntro').textContent='You selected '+s.section+' (pages '+s.first+'–'+s.last+') with '+s.duration+' minutes available.';history.replaceState(null,'','#session-'+encodeURIComponent(s.id));window.scrollTo(0,0);}
+const excerpt=el('pdfExcerpt');
+const unitPages=[
+{pdf:2,printed:186,title:'Why cohomology has a product',body:'With cohomology, contravariance allows the diagonal map Δ(x) = (x, x) to induce a map on cohomology. Combined with the cross product, this produces the cup product.'},
+{pdf:3,printed:187,title:'Cochains on graphs',body:'For an oriented edge [v₀, v₁], the coboundary of a vertex function is δφ([v₀, v₁]) = φ(v₁) − φ(v₀). This measures a change in the function along the edge, as in elevation or voltage examples.'},
+{pdf:4,printed:188,title:'Local conditions and global obstructions',body:'For a 2-simplex, δψ([v₀, v₁, v₂]) = ψ([v₀, v₁]) + ψ([v₁, v₂]) − ψ([v₀, v₂]). The equation δψ = 0 is a local condition, while the cohomology class of ψ records a potential global obstruction to writing ψ = δφ.'}
+];
+let focusTimer;
+document.querySelectorAll('.concept-link').forEach(button=>button.addEventListener('click',()=>{
+  const unit=unitPages[Number(button.dataset.unit)];
+  document.querySelectorAll('.concept-link').forEach(b=>b.classList.toggle('active',b===button));
+  excerpt.innerHTML='<div class="info-note">Simulated navigation · Hatcher Chapter 3 · PDF p. '+unit.pdf+' / printed p. '+unit.printed+'</div><div class="pdf-book-header"><span>'+unit.printed+'</span><span>Chapter 3 &nbsp; Cohomology</span></div><h3>'+unit.title+'</h3><div class="excerpt-focus" id="activePassage"><p>'+unit.body+'</p></div><div class="info-note">Highlighted source-based summary for prototype interaction. This is not a rendered or selectable PDF page.</div>';
+  excerpt.scrollIntoView({behavior:'smooth',block:'nearest'});
+  clearTimeout(focusTimer);
+  focusTimer=setTimeout(()=>{const p=el('activePassage');if(p)p.classList.remove('excerpt-focus');},3500);
+}));
+el('sendCorrection').onclick=()=>{const value=el('assumptionCorrection').value.trim();const reply=el('correctionReply');reply.hidden=false;reply.textContent=value?'Simulated agent: Thanks for the clarification. I would reconsider the difficulty, time estimate, and plan to reflect your background. This is a scripted response.':'Please enter a correction first.';};
+el('confirmAssessment').onclick=()=>{el('agentAssessment').hidden=true;el('planStage').hidden=false;el('agentIntro').textContent='Assessment agreed. Here is your proposed reading plan. Review or revise it before accepting.';};
+let editingPlan=false,draggedUnit=null;
+const planItems=el('planBody').querySelector('.concept-units');
+planItems.addEventListener('dragstart',e=>{const li=e.target.closest('li');if(!editingPlan||!li)return;draggedUnit=li;li.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','reorder');});
+planItems.addEventListener('dragover',e=>{if(!draggedUnit)return;e.preventDefault();const target=e.target.closest('li');if(!target||target===draggedUnit)return;const bounds=target.getBoundingClientRect();const before=e.clientY<bounds.top+bounds.height/2;planItems.insertBefore(draggedUnit,before?target:target.nextSibling);});
+planItems.addEventListener('drop',e=>{if(draggedUnit){e.preventDefault();el('planFeedback').textContent='Order updated. Review before accepting.';}});
+planItems.addEventListener('dragend',()=>{if(draggedUnit)draggedUnit.classList.remove('dragging');draggedUnit=null;});
+el('editPlan').onclick=()=>{
+ editingPlan=!editingPlan;el('editPlan').textContent=editingPlan?'Finish editing':'Edit plan';
+ planItems.querySelectorAll('li').forEach(li=>{li.draggable=editingPlan;const previous=li.querySelector('.unit-editor');if(previous)previous.remove();if(!editingPlan)return;
+ const editor=document.createElement('div');editor.className='unit-editor';const handle=document.createElement('span');handle.textContent='⠿ Drag to reorder';handle.className='drag-handle';handle.title='Drag this unit to reorder';
+ const input=document.createElement('input');input.setAttribute('aria-label','Edit unit title');input.value=li.querySelector('strong').textContent;
+ input.addEventListener('input',()=>{li.querySelector('strong').textContent=input.value;el('planFeedback').textContent='Draft edited. Review before accepting.';});
+ const del=document.createElement('button');del.textContent='Remove';del.onclick=()=>li.remove();
+ editor.append(handle,input,del);li.append(editor);
+ });
+};
+el('agentRevise').onclick=()=>{el('revisionPrompt').hidden=false;el('revisionRequest').focus();};
+el('cancelRevision').onclick=()=>{el('revisionPrompt').hidden=true;};
+el('simulateRevision').onclick=()=>{
+ const request=el('revisionRequest').value.trim();
+ if(!request){el('planFeedback').textContent='Describe the change you want the simulated agent to make.';return;}
+ el('planFeedback').textContent='Simulated agent: I would give cochains on graphs more attention and keep the local/global obstruction discussion as a separate unit. Please review this proposal before accepting.';
+ el('revisionPrompt').hidden=true;
+ const cochains=planItems.querySelector('[data-unit="1"] p');if(cochains)cochains.textContent='Spend additional attention on the graph model: vertex functions, edge differences, and why cycles constrain potential functions.';
+ el('acceptPlan').textContent='Accept revised plan';
+};
+el('acceptPlan').onclick=()=>{
+ el('planFeedback').textContent='Plan accepted · opening first unit (simulated).';
+ el('acceptPlan').textContent='Accepted ✓';
+ const first=planItems.querySelector('.concept-link');
+ if(first)first.click();
+ const title=first?.querySelector('strong')?.textContent||'the first conceptual unit';
+ el('agentAssessment').hidden=true;
+ const intro=el('agentIntro');
+ intro.replaceChildren(document.createTextNode('Your plan is accepted. We’ll begin with '));const topic=document.createElement('strong');topic.textContent=title;intro.append(topic,document.createTextNode('. Read the highlighted passage, paying attention to the mathematical question motivating this unit. Explore it first; let me know when you are ready to discuss it.'));
+};
+el('backToProject').onclick=showDashboard;
+el('togglePlan').onclick=()=>{let v=el('planBody').hidden;el('planBody').hidden=!v;el('togglePlan').setAttribute('aria-expanded',String(v));el('togglePlan').textContent=v?'Collapse ▴':'Expand ▾';};
+function render(){
+el('count').textContent=sessions.length;
+el('progress').style.width=(sessions.length?Math.min(sessions.length*12,100):0)+'%';
+const root=el('sessions');root.replaceChildren();
+if(!sessions.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No reading sessions yet. Create your first one to get started.';root.append(empty);return;}
+sessions.slice().reverse().forEach(s=>{
+const row=document.createElement('div');row.className='session';
+const info=document.createElement('div'), title=document.createElement('strong'), meta=document.createElement('div'), badge=document.createElement('span');
+title.textContent=s.title;meta.className='meta';meta.textContent=s.section+' · pp. '+s.first+'–'+s.last+' · '+s.duration+' min';
+badge.className='badge';badge.textContent='Not started';const open=document.createElement('button');open.className='back-button';open.textContent='Open →';open.onclick=()=>showSession(s);info.append(title,meta,open);
+const actions=document.createElement('div');actions.className='session-actions';
+const more=document.createElement('button');more.type='button';more.className='session-menu-button';more.textContent='⋯';more.setAttribute('aria-label','Actions for '+s.title);more.setAttribute('aria-expanded','false');
+const menu=document.createElement('div');menu.className='session-menu';menu.hidden=true;
+const remove=document.createElement('button');remove.type='button';remove.textContent='Delete session';
+remove.onclick=()=>{pendingDelete=s.id;el('deleteMessage').textContent='Are you sure you want to delete "'+s.title+'"?';el('deleteConfirm').hidden=false;el('deleteCancel').focus();};
+menu.append(remove);
+more.onclick=()=>{const willOpen=menu.hidden;document.querySelectorAll('.session-menu').forEach(m=>m.hidden=true);document.querySelectorAll('.session-menu-button').forEach(b=>b.setAttribute('aria-expanded','false'));menu.hidden=!willOpen;more.setAttribute('aria-expanded',String(willOpen));};
+actions.append(badge,more,menu);row.append(info,actions);root.append(row);
+});
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.session-actions')){document.querySelectorAll('.session-menu').forEach(m=>m.hidden=true);document.querySelectorAll('.session-menu-button').forEach(b=>b.setAttribute('aria-expanded','false'));}});
+function closeDelete(){el('deleteConfirm').hidden=true;pendingDelete=null;}
+el('deleteCancel').onclick=closeDelete;
+el('deleteApprove').onclick=()=>{if(pendingDelete===null)return;const updated=sessions.filter(item=>item.id!==pendingDelete);try{localStorage.setItem(key,JSON.stringify(updated));}catch(err){el('deleteMessage').textContent='Unable to save deletion. Please check browser storage permissions.';return;}sessions=updated;closeDelete();render();};
+el('deleteConfirm').addEventListener('click',e=>{if(e.target===el('deleteConfirm'))closeDelete();});
+function close(){overlay.hidden=true;overlay.style.setProperty('display','none','important');form.reset();el('newSession').focus();}
+el('newSession').onclick=()=>{overlay.style.removeProperty('display');overlay.hidden=false;el('title').focus();};
+el('cancel').addEventListener('click',close);overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!el('deleteConfirm').hidden)closeDelete();else if(!overlay.hidden)close();}});
+form.addEventListener('submit',e=>{
+e.preventDefault();const first=Number(el('first').value),last=Number(el('last').value);
+if(!Number.isInteger(first)||!Number.isInteger(last)||first<1||last<first){el('last').setCustomValidity('The ending page must be at least the starting page.');el('last').reportValidity();return;}
+el('last').setCustomValidity('');
+const session={id:crypto.randomUUID?.()||String(Date.now()),title:el('title').value.trim(),section:el('section').value.trim(),first,last,duration:Number(el('duration').value),createdAt:new Date().toISOString()};sessions.push(session);
+try{localStorage.setItem(key,JSON.stringify(sessions));}catch(err){alert('Unable to save locally. Check browser storage permissions.');}
+close();render();showSession(session);
+});
+el('last').addEventListener('input',()=>el('last').setCustomValidity(''));
+render();if(location.hash.startsWith('#session-')){const id=decodeURIComponent(location.hash.slice(9));const match=sessions.find(s=>s.id===id);if(match)showSession(match);}
+})();
+</script><script>
+(function(){
+const root=document.getElementById('tangentDemo'),chat=document.getElementById('tangentChat'),editor=document.getElementById('tangentEditor'),feedback=document.getElementById('tangentFeedback');
+const $=id=>document.getElementById(id),storage='math-reading-agent:tangent-demo:v1';
+const seed=()=>({current:'main',next:7,branches:{main:{id:'main',title:'Main reading',parent:null,status:'In progress',messages:[
+{id:1,who:'Reader',text:'I am reading Hatcher on cohomology.'},
+{id:2,who:'Agent · scripted',text:'We are looking at how cohomology yields a cup product.'},
+{id:3,who:'Reader',text:'Wait, I forgot the definition of the coboundary operator.'},
+{id:4,who:'Agent · scripted',text:'For a cochain φ, the coboundary is δφ = φ ∘ ∂, with the conventional degree shift.'},
+{id:5,who:'Reader',text:'Can we examine why δ² = 0?'},
+{id:6,who:'Agent · scripted',text:'That follows from ∂² = 0; a detailed investigation may deserve a tangent.'}
+],extracts:[]}}});
+let state;try{state=JSON.parse(localStorage.getItem(storage))||seed()}catch(e){state=seed()}
+const save=()=>{try{localStorage.setItem(storage,JSON.stringify(state))}catch(e){}};
+const branch=()=>state.branches[state.current],esc=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const visible=b=>b.messages.filter(m=>!b.extracts.some(t=>t.ids.includes(m.id)));
+const msgHtml=(m,readonly=false)=>'<div class="tangent-message"><strong>'+esc(m.who)+'</strong><p>'+esc(m.text)+'</p>'+(readonly?'':'<div class="message-actions"><button type="button" data-from="'+m.id+'" title="Create tangent from message">↗ Tangent</button></div>')+'</div>';
+function allAncestors(id){let a=[];while(id&&state.branches[id]){a.unshift(state.branches[id]);id=state.branches[id].parent}return a}
+function navigate(id){if(!state.branches[id])return;state.current=id;editor.hidden=true;feedback.textContent='';save();render()}
+function render(){
+const b=branch();$('tangentTitle').textContent=b.title+' · '+(b.status||'In progress');$('tangentCrumbs').replaceChildren();
+allAncestors(b.id).forEach((part,i)=>{if(i)$('tangentCrumbs').append(' › ');let x=document.createElement('button');x.textContent=part.title;x.onclick=()=>navigate(part.id);$('tangentCrumbs').append(x)});
+$('tangentTree').replaceChildren();
+function tree(id,depth){const x=state.branches[id];if(!x||x.status==='Archived')return;const button=document.createElement('button');button.textContent='　'.repeat(depth)+(id===b.id?'● ':'○ ')+x.title+' · '+(x.status||'In progress');button.className=id===b.id?'selected-t':'';button.onclick=()=>navigate(id);$('tangentTree').append(button);Object.values(state.branches).filter(c=>c.parent===id).forEach(c=>tree(c.id,depth+1))}
+tree('main',0);
+chat.replaceChildren();
+const hiddenIds=new Set(b.extracts.flatMap(x=>x.ids));
+for(const m of b.messages){
+ const extraction=b.extracts.find(x=>x.ids[0]===m.id);
+ if(extraction){const child=state.branches[extraction.child];if(child){let box=document.createElement('div');box.className='tangent-summary';
+const details=document.createElement('details');details.open=!!extraction.expanded;
+const title=document.createElement('summary');title.textContent='↗ '+child.title+' · '+child.status;details.append(title);
+const summary=document.createElement('p');summary.textContent=extraction.summary;box.append(details);
+const link=document.createElement('button');link.textContent='Open tangent ↗';link.onclick=()=>navigate(child.id);
+details.append(summary,link);
+const history=document.createElement('div');history.className='historical';history.innerHTML=b.messages.filter(x=>extraction.ids.includes(x.id)).map(x=>msgHtml(x,true)).join('');details.append(history);
+details.addEventListener('toggle',()=>{extraction.expanded=details.open;save()});
+chat.append(box)}}
+ if(!hiddenIds.has(m.id)){let item=document.createElement('div');item.innerHTML=msgHtml(m);chat.append(item.firstElementChild)}
+}
+chat.querySelectorAll('[data-from]').forEach(btn=>btn.onclick=()=>createTangent(Number(btn.dataset.from)));
+$('tangentFinish').hidden=b.id==='main';$('tangentArchive').hidden=b.id==='main';$('tangentDelete').hidden=b.id==='main';$('tangentEditSelection').hidden=b.id==='main';
+save();
+}
+function createTangent(start,title){
+const parent=branch(),candidates=parent.messages.filter(m=>!parent.extracts.some(e=>e.ids.includes(m.id)));
+if(!candidates.length){feedback.textContent='No unassigned messages available.';return}
+const ix=start?candidates.findIndex(m=>m.id===start):Math.max(0,candidates.length-4);
+const selected=candidates.slice(ix<0?0:ix);if(!selected.length)return;
+const id='t'+state.next++;
+const t={id,title:title||'Coboundary review',parent:parent.id,status:'In progress',messages:selected.map(m=>({...m})),extracts:[]};
+state.branches[id]=t;parent.extracts.push({child:id,ids:selected.map(x=>x.id),summary:'Discussed '+t.title+'. Open the tangent for further exploration.',expanded:false});
+navigate(id);feedback.textContent='Tangent created (scripted selection). Use Edit message selection to revise.';
+}
+function findExtraction(b){return state.branches[b.parent]?.extracts.find(e=>e.child===b.id)}
+function showFinish(){
+const b=branch(),e=findExtraction(b);if(!e)return;
+editor.hidden=false;editor.replaceChildren();
+let title=document.createElement('strong');title.textContent='Review and edit summary';let area=document.createElement('textarea');area.value='Reviewed '+b.title+'. Main points discussed: '+b.messages.filter(m=>m.who==='Reader').map(m=>m.text).slice(-3).join(' ');
+let saveBtn=document.createElement('button');saveBtn.textContent='Save summary & return';saveBtn.className='primary-t';saveBtn.onclick=()=>{e.summary=area.value;b.status='Completed';navigate(b.parent)};
+let cancel=document.createElement('button');cancel.textContent='Cancel';cancel.onclick=()=>editor.hidden=true;editor.append(title,area,saveBtn,cancel);
+}
+function editSelection(){
+const b=branch(),parent=state.branches[b.parent],e=findExtraction(b);if(!e)return;
+editor.hidden=false;editor.replaceChildren();let h=document.createElement('strong');h.textContent='Choose parent messages · preview then Apply';editor.append(h);
+let selected=new Set(e.ids);
+parent.messages.forEach(m=>{let l=document.createElement('label'),cb=document.createElement('input');cb.type='checkbox';cb.checked=selected.has(m.id);cb.disabled=parent.extracts.some(x=>x!==e&&x.ids.includes(m.id));cb.onchange=()=>cb.checked?selected.add(m.id):selected.delete(m.id);l.append(cb,document.createTextNode(' '+m.who+': '+m.text.slice(0,65)));editor.append(l)});
+let apply=document.createElement('button');apply.textContent='Apply changes';apply.onclick=()=>{
+const others=b.messages.filter(m=>!e.ids.includes(m.id));const items=parent.messages.filter(m=>selected.has(m.id));
+e.ids=items.map(x=>x.id);b.messages=[...items.map(x=>({...x})),...others];editor.hidden=true;feedback.textContent='Selection applied.';render();
+};
+editor.append(apply);
+}
+$('tangentForm').addEventListener('submit',ev=>{
+ev.preventDefault();let input=$('tangentInput'),value=input.value.trim();if(!value)return;input.value='';
+if(/(?:make|create|start).*(?:tangent|branch)|(?:tangent|branch).*(?:make|create)/i.test(value)){let named=value.match(/(?:called|named)\s+["“]?([^"”]+)$/i);createTangent(null,named?named[1]:'Prerequisite review');return}
+if(/(?:finish|done|return).*(?:tangent|main|parent)|(?:summari[sz]e.*return)/i.test(value)&&branch().id!=='main'){showFinish();return}
+const b=branch();b.messages.push({id:state.next++,who:'Reader',text:value});b.status='In progress';
+b.messages.push({id:state.next++,who:'Agent · scripted',text:'This preview stores your message but does not produce an AI answer. You can create a tangent, switch branches, or finish with an editable summary.'});
+render();chat.scrollTop=chat.scrollHeight;
+});
+$('tangentNew').onclick=()=>createTangent();$('tangentTreeToggle').onclick=()=>{$('tangentTree').hidden=!$('tangentTree').hidden};$('tangentFinish').onclick=showFinish;$('tangentEditSelection').onclick=editSelection;
+$('tangentRename').onclick=()=>{let title=prompt('Tangent name',branch().title);if(title?.trim()){branch().title=title.trim();render()}};
+$('tangentArchive').onclick=()=>{let b=branch();if(b.id==='main')return;b.status='Archived';navigate(b.parent)};
+$('tangentDelete').onclick=()=>{let b=branch();if(b.id==='main'||!confirm('Delete this tangent? Tangent-only discussion will be lost, and child tangents will be preserved.'))return;
+const parent=state.branches[b.parent];parent.extracts=parent.extracts.filter(x=>x.child!==b.id);Object.values(state.branches).filter(x=>x.parent===b.id).forEach(x=>{x.parent=parent.id});delete state.branches[b.id];navigate(parent.id)};
+$('tangentReset').onclick=()=>{if(!confirm('Reset only the tangent demonstration?'))return;state=seed();navigate('main')};
+render();
+})();
+</script></body></html>
