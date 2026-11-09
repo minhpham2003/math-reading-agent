@@ -164,8 +164,8 @@ function ContinuousPage({ pdf, number, scale, root, citations, tangentAnchors, o
 // approximate reserved height with its actual ratio when it becomes visible.
 let pdfPageWidth = 612;
 
-type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void; toolbarHostId?: string; pageJump?: {page:number;seq:number}|null };
-export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId, pageJump }: Props) {
+type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void; toolbarHostId?: string; actionsHostId?:string; pageJump?: {page:number;seq:number}|null };
+export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId, actionsHostId, pageJump }: Props) {
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [filename, setFilename] = useState('');
   const [pageNumber, setPageNumber] = useState(initialPage);
@@ -174,6 +174,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   const [fitWidth, setFitWidth] = useState(true);
   const [availableWidth, setAvailableWidth] = useState(700);
   const [toolbarHost, setToolbarHost] = useState<HTMLElement | null>(null);
+  const [actionsHost,setActionsHost]=useState<HTMLElement|null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [citations, setCitations] = useState<Citation[]>(() => readRefs(sessionId));
@@ -198,7 +199,8 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   function createPdfTangent(){if(!pending)return;try{createTangent(sessionId,{kind:'pdf',targetId:filename,page:pending.page,filename:pending.filename,text:pending.text,boxes:pending.boxes});setPending(null);setSelectionPoint(null);setVisualSelection(null);window.getSelection()?.removeAllRanges();}catch{setMessage('Could not create tangent. Check local browser storage.');}}
   useEffect(() => {
     setToolbarHost(toolbarHostId ? window.document.getElementById(toolbarHostId) : null);
-  }, [toolbarHostId]);
+    setActionsHost(actionsHostId ? window.document.getElementById(actionsHostId) : null);
+  }, [toolbarHostId,actionsHostId]);
 
   useEffect(() => {
     if (!scrollRoot) return;
@@ -535,13 +537,14 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     } finally { setBusy(false); }
   }
 
-  const controls = <div className="pdf-toolbar">
-    <button className="secondary" onClick={() => setShowCitations(v => !v)}>Sources ({citations.length})</button>
+  const actions=<div className="pdf-header-actions">    <button className="secondary" onClick={() => setShowCitations(v => !v)}>Sources ({citations.length})</button>
     {pdf && <label className="secondary pdf-import">Replace PDF
       <input type="file" accept=".pdf,application/pdf" disabled={busy} onChange={e => {
         const file = e.target.files?.[0]; if (file) void importFile(file); e.target.value = '';
       }} />
     </label>}
+  </div>;
+  const controls = <div className="pdf-toolbar">
     {filename && <span className="pdf-filename" title={filename}>{filename}</span>}
     {pdf && <>
       <div className="pdf-control-group pdf-navigation-group">
@@ -565,6 +568,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
 
   return <div className={visualSelection ? "pdf-reader has-visual-selection" : "pdf-reader"}>
     {toolbarHost ? createPortal(controls, toolbarHost) : (!toolbarHostId ? controls : null)}
+    {actionsHost ? createPortal(actions,actionsHost) : (!actionsHostId ? actions : null)}
     {message && <p role="alert" className="pdf-error">{message}</p>}
     {busy && <p className="muted">Importing PDF…</p>}
     {showCitations && <aside className="sources-drawer" aria-label="Saved source references">
