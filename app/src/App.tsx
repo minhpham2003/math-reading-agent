@@ -3,6 +3,7 @@ import { loadSessions, saveSessions, type ReadingSession } from './storage';
 import { PdfReader, deleteSavedPdf, importSessionPdf } from './PdfReader';
 import { ReadingFlow } from './ReadingFlow';
 import {deletePdfIndex} from './pdfIndex';
+import {buildCommit} from './tangentStore';
 import {getDocument,GlobalWorkerOptions,type PDFDocumentProxy} from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 GlobalWorkerOptions.workerSrc=workerUrl;
@@ -146,7 +147,7 @@ export function App() {
     {storageError && <div role="alert" className="alert">{storageError}</div>}
     {!active ? <main className="dashboard">
       <div className="breadcrumb">← Library / Projects / Hatcher</div>
-      <div className="hero"><div><div className="eyebrow">Book project</div><h1>Algebraic Topology</h1><p>Allen Hatcher · Your reading workspace</p></div>
+      <div className="hero"><div><div className="eyebrow">Book project</div><h1>Algebraic Topology <span className="project-build-id" title="GitHub build commit">{buildCommit}</span></h1><p>Allen Hatcher · Your reading workspace</p></div>
         <button className="primary" onClick={() => setNewSessionOpen(true)}>+ New Session</button>
       </div>
       <div className="dashboard-grid">
