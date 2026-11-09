@@ -17,14 +17,6 @@ export function stripLegacySourceList(text:string):string{
  return text.replace(/\n\nPDF sources:\s*(?:\[p\.\s*\d+\]\(pdf-page:\d+\)(?:\s*·\s*)?){1,3}\s*$/,'');
 }
 
-function normalized(text:string):string{
- return text.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
-}
-function validQuote(quote:string,excerpt:string):boolean{
- const q=normalized(quote);
- return q.length>=5 && normalized(excerpt).includes(q);
-}
-
 function anchorForLabel(label:string,excerpt:string):string|undefined{
  const result=/\b(theorem|definition|lemma|proposition|corollary|example)\s+(\d+(?:\.\d+)*)\b/i.exec(label);
  if(!result)return;
