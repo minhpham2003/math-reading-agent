@@ -911,3 +911,7 @@ html[data-theme="light"] .dialog .dialog-actions .danger{font-weight:400}
 @media(max-width:760px){.reader-header .reader-session-name,.reader-header .reader-session-section,.reader-session-dot{font-size:11px}}
 /* Primary save action must have white text in both themes. */
 .t2-finish button.primary,html[data-theme="light"] .t2-finish button.primary{color:#fff!important;-webkit-text-fill-color:#fff}
+
+/* Compact selection action positioned just above the referenced text. */
+.t2-selection-pop{transform:translate(-50%,-100%);padding:4px;border-radius:7px}
+.t2-selection-pop button.primary{font-size:12px;line-height:1.2;padding:7px 11px;border-radius:6px;font-weight:400;white-space:nowrap}
