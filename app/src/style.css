@@ -808,3 +808,18 @@ html[data-theme="light"] .t2-settings input{background:#eef1f5;color:#25394f;bor
 .new-session-dialog .dialog-actions{margin-top:12px;gap:8px}
 .new-session-dialog .dialog-actions button{font-size:13px;padding:8px 12px}
 @media(max-height:650px){.new-session-dialog{padding:13px 18px}.new-session-dialog h2{margin-bottom:7px}.new-session-dialog label{margin:6px 0}.new-session-dialog input,.new-session-dialog select{padding:6px 9px}}
+
+/* New Session dialog: ~10% larger than the compact baseline. */
+.new-session-dialog{width:min(100%,550px);padding:20px 24px;font-size:15.5px}
+.new-session-dialog h2{font-size:23px;margin-bottom:13px}
+.new-session-dialog label{font-size:14.5px;margin:10px 0}
+.new-session-dialog input,.new-session-dialog select{font-size:15.5px;padding:9px 11px;margin-top:5px}
+.new-session-dialog input::placeholder{font-size:15.5px}
+.new-session-dialog .new-session-pdf-field{padding:10px 12px;margin:10px 0}
+.new-session-dialog .new-session-pdf-field input[type="file"]{font-size:14px;padding:7px}
+.new-session-dialog .new-session-pdf-field small{font-size:13px;margin-top:6px}
+.new-session-dialog .new-session-pdf-field .required-marker{font-size:13px}
+.new-session-dialog .form-row{gap:11px}
+.new-session-dialog .dialog-actions{margin-top:13px;gap:9px}
+.new-session-dialog .dialog-actions button{font-size:14.5px;padding:9px 13px}
+@media(max-height:650px){.new-session-dialog{padding:14px 20px}.new-session-dialog label{margin:7px 0}.new-session-dialog input,.new-session-dialog select{padding:7px 10px}}
