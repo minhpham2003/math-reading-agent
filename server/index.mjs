@@ -1,7 +1,11 @@
 import {createServer} from 'node:http';
+import {timingSafeEqual} from 'node:crypto';
+function safeEqual(a,b){return timingSafeEqual(Buffer.from(a),Buffer.from(b));}
 
 const port=Number(process.env.PORT||8787);
 const apiKey=process.env.OPENAI_API_KEY;
+const accessToken=process.env.CHAT_ACCESS_TOKEN;
+const limits=new Map();
 const model=process.env.OPENAI_MODEL||'gpt-4.1-mini';
 const allowedOrigins=(process.env.ALLOWED_ORIGINS||'http://localhost:5173').split(',').map(s=>s.trim()).filter(Boolean);
 const systemInstruction='You are a careful mathematical reading discussion partner. Follow the student\'s reasoning, answer the precise question, and do not reveal unsolicited hints, proof tricks, or solutions. Distinguish uncertainty from established facts. You have NOT been given the user\'s PDF unless its content is explicitly in the conversation. Keep responses concise by default.';
@@ -16,11 +20,20 @@ const server=createServer(async(req,res)=>{
  const permitted=origin&&allowedOrigins.includes(origin)?origin:undefined;
  if(origin&&!permitted){respond(res,403,{error:'Origin not allowed'});return;}
  if(req.method==='OPTIONS'){
-  res.writeHead(204,{...(permitted?{'Access-Control-Allow-Origin':permitted,'Vary':'Origin'}:{}),'Access-Control-Allow-Methods':'POST, GET, OPTIONS','Access-Control-Allow-Headers':'Content-Type'});res.end();return;
+  res.writeHead(204,{...(permitted?{'Access-Control-Allow-Origin':permitted,'Vary':'Origin'}:{}),'Access-Control-Allow-Methods':'POST, GET, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization'});res.end();return;
  }
  if(req.url==='/health'&&req.method==='GET'){respond(res,200,{status:'ok',configured:!!apiKey},permitted);return;}
  if(req.url!=='/api/chat'||req.method!=='POST'){respond(res,404,{error:'Not found'},permitted);return;}
- if(!apiKey){respond(res,503,{error:'AI backend is not configured.'},permitted);return;}
+ if(!apiKey||!accessToken){respond(res,503,{error:'AI backend is not fully configured.'},permitted);return;}
+ const provided=(req.headers.authorization||'').replace(/^Bearer /i,'');
+ // Avoid accepting a public endpoint without an independent server-only access token.
+ if(!provided||provided.length!==accessToken.length||!safeEqual(provided,accessToken)){respond(res,401,{error:'Access token required or invalid.'},permitted);return;}
+ const now=Date.now(),client=req.socket.remoteAddress||'unknown';
+ const slot=limits.get(client)||{start:now,count:0};
+ if(now-slot.start>60*60*1000){slot.start=now;slot.count=0;}
+ if(++slot.count>40){respond(res,429,{error:'Hourly request limit reached.'},permitted);return;}
+ limits.set(client,slot);
+ if(limits.size>10000)for(const [ip,record] of limits)if(now-record.start>60*60*1000)limits.delete(ip);
  try{
   let raw='';
   for await(const chunk of req){raw+=chunk;if(raw.length>100_000){respond(res,413,{error:'Request too large'},permitted);return;}}
