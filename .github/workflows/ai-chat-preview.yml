@@ -30,6 +30,7 @@ jobs:
         working-directory: app
         env:
           VITE_AI_API_URL: https://higher-math-chat-api-oil4.onrender.com
+          VITE_COMMIT_SHA: ${{ github.sha }}
         run: npm run build
       - name: Publish isolated preview
         uses: peaceiris/actions-gh-pages@v4
