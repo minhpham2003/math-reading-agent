@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState,type FormEvent,type MouseEvent as ReactMouseEvent} from 'react';
 import {read,write,createTangent,CHANGED_EVENT,type TangentData,type Thread,type Entry} from './tangentStore';
-import {aiConfigured,requestAiReply} from './aiChat';
+import {aiConfigured,requestAiReply,getAccessToken,setAccessToken} from './aiChat';
 
 type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number};
 const ancestorsOf=(thread:Thread,data:TangentData)=>{const result:Thread[]=[];let node:Thread|undefined=thread;while(node){result.unshift(node);node=node.parentId?data.threads.find(t=>t.id===node!.parentId):undefined;}return result;};
@@ -9,6 +9,8 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  const [data,setData]=useState<TangentData>(()=>read(sessionId));
  const [draft,setDraft]=useState('');
  const [sendingThread,setSendingThread]=useState<string|null>(null);
+ const [accessDraft,setAccessDraft]=useState('');
+ const [accessReady,setAccessReady]=useState(()=>!!getAccessToken());
  const [selection,setSelection]=useState<SelectState|null>(null);
  const [branchesOpen,setBranchesOpen]=useState(false);
  const [treeExpanded,setTreeExpanded]=useState<string[]>(['main']);
@@ -128,6 +130,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
     <form className="t2-composer" onSubmit={saveNote}><div className="t2-input-wrap"><textarea ref={inputRef} rows={1} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form?.requestSubmit();}}} placeholder="Ask a question or write a note…" aria-label="Reading note"/><button type="submit" className="t2-send-button" disabled={!draft.trim()||!!sendingThread} aria-label="Send message" title="Send message"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20V4M5 11l7-7 7 7"/></svg></button></div>{branch.id!=='main'&&<div className="t2-compose-actions"><button type="button" className="secondary" onClick={saveSummary}>✓ Finish tangent & return</button></div>}</form>}
   </>}
+  {!branchesOpen&&aiConfigured()&&!accessReady&&<form className="t2-access-form" onSubmit={e=>{e.preventDefault();if(accessDraft.trim()){setAccessToken(accessDraft);setAccessReady(true);setAccessDraft('');setError('');}}}><label htmlFor="chatAccessKey">Private chat access token</label><input id="chatAccessKey" type="password" value={accessDraft} onChange={e=>setAccessDraft(e.target.value)} autoComplete="off" placeholder="Enter access token" /><button type="submit" className="secondary" disabled={!accessDraft.trim()}>Unlock AI</button></form>}
   {!branchesOpen&&!aiConfigured()&&<p className="muted" role="status">AI backend not connected — messages are saved as notes.</p>}
   {error&&<p role="alert">{error}</p>}
  </section>;
