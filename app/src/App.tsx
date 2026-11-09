@@ -124,7 +124,7 @@ export function App() {
       <div className={agentOpen ? "work-grid" : "work-grid agent-collapsed"}>
         {agentOpen && <article className="work-panel agent-panel">
           <ReadingFlow key={active.id} sessionId={active.id} title={active.target}
-            firstPage={active.firstPage} lastPage={active.lastPage} duration={active.durationMinutes}
+            firstPage={active.firstPage} lastPage={active.lastPage} duration={active.durationMinutes} currentPdfPage={active.pdfPage}
             onNavigate={page => setPageJump(old=>({page,seq:(old?.seq??0)+1}))}/>
         </article>}
         <article className="work-panel pdf-panel">
