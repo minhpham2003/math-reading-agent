@@ -1,6 +1,6 @@
 export type RectBox={x:number;y:number;w:number;h:number};
 export type Anchor={id:string;branchId:string;kind:'chat'|'pdf';targetId:string;start?:number;end?:number;page?:number;filename?:string;boxes?:RectBox[];text:string;createdAt:string};
-export type Entry={id:string;role:'user'|'assistant'|'system';text:string;createdAt:string;anchorId?:string};
+export type Entry={id:string;role:'user'|'assistant'|'system';text:string;createdAt:string;anchorId?:string;citationPages?:number[]};
 export type Thread={id:string;parentId:string|null;title:string;status:'in-progress'|'completed';messages:Entry[];summary:string;originId?:string;originPage?:number;contextText?:string;sourceIds:string[]};
 export type TangentData={version:2;activeId:string;threads:Thread[];anchors:Anchor[];expandedIds:string[]};
 export const TANGENT_EVENT='higher-math:tangent-created';
