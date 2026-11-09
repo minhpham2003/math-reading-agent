@@ -312,7 +312,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     scrollRoot.querySelectorAll('.pdf-cited-passage').forEach(el=>el.classList.remove('pdf-cited-passage'));
     const quote=pageJump.quote?.trim();
     if(!quote)return;
-    const normalize=(value:string)=>value.toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
+    const normalize=(value:string)=>value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
     const needle=normalize(quote).slice(0,160);
     if(needle.length<5)return;
     let retries=0,timer:ReturnType<typeof setTimeout>;
