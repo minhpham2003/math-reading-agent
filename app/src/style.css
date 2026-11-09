@@ -884,3 +884,18 @@ html[data-theme="light"] .reading-nav-item.is-completed .reading-nav-link,
 html[data-theme="light"] .reading-nav-item.is-completed .reading-nav-link span,
 html[data-theme="light"] .reading-nav-item.is-completed .reading-nav-link small,
 html[data-theme="light"] .reading-nav-item.is-completed .reading-unit-description{color:#217b58!important}
+
+/* Reading plan and session setup refinements. */
+.reading-plan-tools{display:flex;justify-content:flex-end;align-items:center;margin-bottom:3px}
+.reading-plan-settings{border:0;background:transparent;color:inherit;border-radius:7px;padding:4px 9px;font-size:19px;font-weight:400;cursor:pointer}
+.reading-plan-settings:hover,.reading-plan-settings:focus-visible{background:rgba(112,145,175,.16)}
+.session-setup-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.session-setup-title-row .session-setup-heading{margin-bottom:0}
+.reading-navigator .reading-nav-list{margin-top:0}
+/* The dashboard's session rows should not be darker boxed cards in light mode. */
+html[data-theme="light"] .dashboard .session-row{background:transparent;border-color:#c8d5e5}
+/* Regular weight for delete confirmation, navigation buttons and editable unit titles. */
+.dialog .dialog-actions .secondary,.dialog .dialog-actions .danger,
+.flow-unit-title input,.flow-unit-location strong{font-weight:400}
+html[data-theme="light"] .dialog .dialog-actions .secondary,
+html[data-theme="light"] .dialog .dialog-actions .danger{font-weight:400}
