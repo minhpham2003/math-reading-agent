@@ -555,7 +555,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       </div>
       <div className="pdf-control-group pdf-zoom-group">
       <button className="secondary" onClick={() => changeZoom(-1)} aria-label="Zoom out">−</button>
-      <span className="page-indicator">{fitWidth ? 'Fit width' : Math.round(zoom * 100) + '%'}</span>
+      <span className="page-indicator">{Math.round(scale * 100) + '%'}</span>
       <button className="secondary" onClick={() => changeZoom(1)} aria-label="Zoom in">+</button>
       <button className="secondary" onClick={fitPageWidth} aria-label="Fit PDF to available width">↔</button>
       </div>
