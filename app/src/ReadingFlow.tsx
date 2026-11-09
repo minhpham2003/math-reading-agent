@@ -49,7 +49,7 @@ const fields:{id:keyof Assessment;label:string;placeholder:string}[]=[
  {id:'recommendation',label:'Recommendation',placeholder:'How should the reader approach this range?'}
 ];
 export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavigate,currentPdfPage}:
- {sessionId:string;title:string;firstPage:number;lastPage:number;duration:number;currentPdfPage?:number;onNavigate:(page:number)=>void}) {
+ {sessionId:string;title:string;firstPage:number;lastPage:number;duration:number;currentPdfPage?:number;onNavigate:(page:number,quote?:string)=>void}) {
  const [state,setState]=useState<State>(()=>load(sessionId,title,firstPage,lastPage,duration));
  const [expanded,setExpanded]=useState(!state.planApproved);
  const [setupMode,setSetupMode]=useState(!(state.assessmentApproved&&state.planApproved));
