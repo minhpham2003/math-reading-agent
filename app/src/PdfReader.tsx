@@ -538,11 +538,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   }
 
   const actions=<div className="pdf-header-actions">    <button className="secondary" onClick={() => setShowCitations(v => !v)}>Sources ({citations.length})</button>
-    {pdf && <label className="secondary pdf-import">Replace PDF
-      <input type="file" accept=".pdf,application/pdf" disabled={busy} onChange={e => {
-        const file = e.target.files?.[0]; if (file) void importFile(file); e.target.value = '';
-      }} />
-    </label>}
+
   </div>;
   const controls = <div className="pdf-toolbar">
     {filename && <span className="pdf-filename" title={filename}>{filename}</span>}
