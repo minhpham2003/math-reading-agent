@@ -191,6 +191,10 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   const [pending, setPending] = useState<Omit<Citation,'id'> | null>(null);
   const [selectionPoint, setSelectionPoint] = useState<{x:number;y:number} | null>(null);
   const citationActionRef=useRef<HTMLDivElement>(null);
+  const [visualSelection, setVisualSelection] = useState<{page:number;boxes:Box[]} | null>(null);
+  const [showCitations, setShowCitations] = useState(false);
+  const sourcesRef = useRef<HTMLElement>(null);
+  const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
   useLayoutEffect(()=>{
     const popup=citationActionRef.current;
     if(!popup||!selectionPoint||!scrollRoot)return;
@@ -198,10 +202,6 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     const rightBound=scrollRoot.scrollLeft+scrollRoot.clientWidth-popup.offsetWidth-8;
     popup.style.left=Math.max(leftBound,Math.min(selectionPoint.x,Math.max(leftBound,rightBound)))+'px';
   },[selectionPoint,scrollRoot]);
-  const [visualSelection, setVisualSelection] = useState<{page:number;boxes:Box[]} | null>(null);
-  const [showCitations, setShowCitations] = useState(false);
-  const sourcesRef = useRef<HTMLElement>(null);
-  const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
   const onChangeRef = useRef(onPageChange);
   onChangeRef.current = onPageChange;
   const lastPageRef = useRef(initialPage);
