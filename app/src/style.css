@@ -1076,3 +1076,10 @@ html[data-theme="light"] .t2-composer-citation{background:#d2dce7;color:#245781}
 }
 .reader-header .reader-plan-toggle.plan-complete:hover,
 :root[data-theme="light"] .reader-header .reader-plan-toggle.plan-complete:hover{background:#43a780}
+
+/* Branch settings: primary save action uses readable white text in both themes. */
+.t2-settings button.primary,
+html[data-theme="light"] .t2-settings button.primary{
+ color:#fff!important;
+ -webkit-text-fill-color:#fff!important;
+}
