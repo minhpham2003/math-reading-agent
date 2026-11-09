@@ -4,6 +4,7 @@ import {aiConfigured,requestAiReply,verifyAccessToken,getAccessToken,setAccessTo
 import {MathText} from './MathText';
 import {MarkdownMath} from './MarkdownMath';
 import {retrievePdfContext} from './pdfIndex';
+import {citationExcerptsFromContext,preparePdfCitations,stripLegacySourceList} from './pdfCitations';
 
 type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number};
 const ancestorsOf=(thread:Thread,data:TangentData)=>{const result:Thread[]=[];let node:Thread|undefined=thread;while(node){result.unshift(node);node=node.parentId?data.threads.find(t=>t.id===node!.parentId):undefined;}return result;};
@@ -56,14 +57,11 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    const thread=updated.threads.find(t=>t.id===threadId)!;
    const messages=thread.messages.filter(m=>m.role==='user'||m.role==='assistant').map(m=>({role:m.role as 'user'|'assistant',content:m.text}));
    const context=await retrievePdfContext(sessionId,entry.text,currentPdfPage).catch(()=>undefined);
-   const citationPages=context?[...context.matchAll(/\[PDF page (\d+)\]/g)].map(match=>Number(match[1])):[];
+   const citationPages=[...citationExcerptsFromContext(context).keys()];
    const reply=await requestAiReply(messages,context);
+   const citedReply=preparePdfCitations(reply,context);
    // Read the latest stored state so branch navigation and PDF tangent updates are preserved.
    const latest=read(sessionId);
-   const hasSourceLink=[...reply.matchAll(/\]\(pdf-page:(\d+)\)/g)].some(match=>citationPages.includes(Number(match[1])));
-   const citedReply=!hasSourceLink&&citationPages.length
-    ? reply+'\n\nPDF sources: '+citationPages.slice(0,3).map(page=>'[p. '+page+'](pdf-page:'+page+')').join(' · ')
-    : reply;
    const assistant:Entry={id:crypto.randomUUID(),role:'assistant',text:citedReply,citationPages,createdAt:new Date().toISOString()};
    persist({...latest,threads:latest.threads.map(t=>t.id===threadId?{...t,messages:[...t.messages,assistant]}:t)});
    requestAnimationFrame(()=>{if(conversationRef.current&&read(sessionId).activeId===threadId)conversationRef.current.scrollTop=conversationRef.current.scrollHeight;});
@@ -90,7 +88,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
  function openAnchors(ids:string[],event:ReactMouseEvent){event.preventDefault();event.stopPropagation();if(ids.length===1)go(data.anchors.find(a=>a.id===ids[0])!.branchId);else setChooser({ids,x:event.clientX,y:event.clientY});}
  function linkedText(message:Entry){
   const references=anchorsFor(message.id).filter(a=>a.start!==undefined&&a.end!==undefined&&a.end>a.start);
-  if(!references.length)return <div data-message-content>{message.role==='assistant'?<MarkdownMath text={message.text} onPdfNavigate={onNavigate} allowedPages={message.citationPages}/>:<MathText text={message.text}/>}</div>;
+  if(!references.length)return <div data-message-content>{message.role==='assistant'?<MarkdownMath text={stripLegacySourceList(message.text)} onPdfNavigate={onNavigate} allowedPages={message.citationPages}/>:<MathText text={message.text}/>}</div>;
   const points=new Set<number>([0,message.text.length]);references.forEach(a=>{points.add(Math.min(message.text.length,a.start!));points.add(Math.min(message.text.length,a.end!));});
   const edges=[...points].sort((a,b)=>a-b);
   return <span data-message-content>{edges.slice(0,-1).map((start,i)=>{const end=edges[i+1],slice=message.text.slice(start,end);const matches=references.filter(a=>a.start!<end&&a.end!>start);if(!matches.length)return <span key={i}><MathText text={slice}/></span>;
