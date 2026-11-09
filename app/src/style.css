@@ -903,3 +903,11 @@ html[data-theme="light"] .dialog .dialog-actions .danger{font-weight:400}
 /* Heading in the expanded Reading plan, alongside its setup gear. */
 .reading-plan-tools{justify-content:space-between;margin-bottom:10px}
 .reading-plan-heading{font-size:17px;font-weight:500;color:inherit}
+
+/* Reading plan heading and reader session identity typography. */
+.reading-plan-heading{font-weight:700}
+.reader-header .reader-session-name,.reader-header .reader-session-section{font-size:13px;font-weight:700;color:inherit}
+.reader-session-dot{font-size:13px;font-weight:700;flex:none;color:inherit}
+@media(max-width:760px){.reader-header .reader-session-name,.reader-header .reader-session-section,.reader-session-dot{font-size:11px}}
+/* Primary save action must have white text in both themes. */
+.t2-finish button.primary,html[data-theme="light"] .t2-finish button.primary{color:#fff!important;-webkit-text-fill-color:#fff}
