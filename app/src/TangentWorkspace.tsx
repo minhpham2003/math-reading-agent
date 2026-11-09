@@ -48,7 +48,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
  window.addEventListener(CHANGED_EVENT,sync);return()=>window.removeEventListener(CHANGED_EVENT,sync);},[sessionId]);
  useEffect(()=>{function esc(e:KeyboardEvent){if(e.key==='Escape'){setBranchesOpen(false);setChooser(null);setSelection(null);setBreadOpen(false);}}document.addEventListener('keydown',esc);return()=>document.removeEventListener('keydown',esc);},[]);
  useEffect(()=>{if(conversationRef.current)conversationRef.current.scrollTop=savedScroll.current[branch.id]??0;},[branch.id,settings]);
- function go(id:string){setHoverPreview(null);if(!data.threads.some(t=>t.id===id))return;if(conversationRef.current)savedScroll.current[branch.id]=conversationRef.current.scrollTop;persist({...data,activeId:id});setSelection(null);setChooser(null);setSettings(false);setFinish(false);setBranchesOpen(false);setBreadOpen(false);}
+ function go(id:string){setHoverPreview(null);if(!data.threads.some(t=>t.id===id))return;const url=new URL(window.location.href);if(url.searchParams.has('chatCitation')){url.searchParams.delete('chatCitation');window.history.replaceState(null,'',url.pathname+url.search+url.hash);}window.getSelection()?.removeAllRanges();if(conversationRef.current)savedScroll.current[branch.id]=conversationRef.current.scrollTop;persist({...data,activeId:id});setSelection(null);setChooser(null);setSettings(false);setFinish(false);setBranchesOpen(false);setBreadOpen(false);}
 
  function composerValue(node:Node):string{
   if(node instanceof HTMLElement&&node.dataset.citationMarkdown)return node.dataset.citationMarkdown;
