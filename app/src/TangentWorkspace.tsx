@@ -1,4 +1,4 @@
-import {useEffect,useRef,useState,type FormEvent,type MouseEvent as ReactMouseEvent} from 'react';
+import {useEffect,useRef,useState,type FormEvent,type MouseEvent as ReactMouseEvent,type ClipboardEvent} from 'react';
 import {read,write,createTangent,CHANGED_EVENT,type TangentData,type Thread,type Entry} from './tangentStore';
 import {aiConfigured,requestAiReply,verifyAccessToken,getAccessToken,setAccessToken} from './aiChat';
 import {MathText} from './MathText';
@@ -35,7 +35,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
  const [error,setError]=useState('');
  const [citationNavigation,setCitationNavigation]=useState(0);
  const conversationRef=useRef<HTMLDivElement>(null);
- const inputRef=useRef<HTMLTextAreaElement>(null);
+ const inputRef=useRef<HTMLDivElement>(null);
  const selectedRangeRef=useRef<Range|null>(null);
  const selectionPopRef=useRef<HTMLDivElement>(null);
  const savedScroll=useRef<Record<string,number>>({});
@@ -49,13 +49,48 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
  useEffect(()=>{function esc(e:KeyboardEvent){if(e.key==='Escape'){setBranchesOpen(false);setChooser(null);setSelection(null);setBreadOpen(false);}}document.addEventListener('keydown',esc);return()=>document.removeEventListener('keydown',esc);},[]);
  useEffect(()=>{if(conversationRef.current)conversationRef.current.scrollTop=savedScroll.current[branch.id]??0;},[branch.id,settings]);
  function go(id:string){setHoverPreview(null);if(!data.threads.some(t=>t.id===id))return;if(conversationRef.current)savedScroll.current[branch.id]=conversationRef.current.scrollTop;persist({...data,activeId:id});setSelection(null);setChooser(null);setSettings(false);setFinish(false);setBranchesOpen(false);setBreadOpen(false);}
- useEffect(()=>{const el=inputRef.current;if(!el)return;el.style.height='auto';el.style.height=Math.min(el.scrollHeight,180)+'px';},[draft,settings,finish]);
+
+ function composerValue(node:Node):string{
+  if(node instanceof HTMLElement&&node.dataset.citationMarkdown)return node.dataset.citationMarkdown;
+  if(node.nodeType===Node.TEXT_NODE)return node.textContent??'';
+  if(node instanceof HTMLBRElement)return '\n';
+  let result=Array.from(node.childNodes).map(composerValue).join('');
+  if(node instanceof HTMLElement&&/^(DIV|P)$/.test(node.tagName)&&node.nextSibling)result+='\n';
+  return result;
+ }
+ function syncComposer(){if(inputRef.current)setDraft(composerValue(inputRef.current));}
+ function pasteComposer(event:ClipboardEvent<HTMLDivElement>){
+  const text=event.clipboardData.getData('text/plain');
+  const pattern=/\[([^\]\n]+)\]\(((?:pdf|chat)-citation:[a-zA-Z0-9-]+)\)/g;
+  if(!pattern.test(text))return;
+  event.preventDefault();pattern.lastIndex=0;
+  const fragment=document.createDocumentFragment();
+  let last=0;
+  for(const match of text.matchAll(pattern)){
+   fragment.append(document.createTextNode(text.slice(last,match.index)));
+   const chip=document.createElement('span');
+   chip.className='t2-composer-citation';
+   chip.contentEditable='false';
+   chip.dataset.citationMarkdown=match[0];
+   chip.textContent=match[1]+' ↗';
+   fragment.append(chip);fragment.append(document.createTextNode(' '));
+   last=(match.index??0)+match[0].length;
+  }
+  fragment.append(document.createTextNode(text.slice(last)));
+  const sel=window.getSelection();
+  if(!sel?.rangeCount)return;
+  const range=sel.getRangeAt(0);range.deleteContents();
+  const lastNode=fragment.lastChild;
+  range.insertNode(fragment);
+  if(lastNode){range.setStartAfter(lastNode);range.collapse(true);sel.removeAllRanges();sel.addRange(range);}
+  syncComposer();
+ }
  async function saveNote(event:FormEvent){
   event.preventDefault();if(!draft.trim()||sendingThread)return;
   const threadId=branch.id;
   const entry:Entry={id:crypto.randomUUID(),role:'user',text:draft.trim(),createdAt:new Date().toISOString()};
   const updated={...data,threads:data.threads.map(t=>t.id===threadId?{...t,messages:[...t.messages,entry],status:'in-progress' as const}:t)};
-  persist(updated);setDraft('');
+  persist(updated);setDraft('');if(inputRef.current)inputRef.current.textContent='';
   requestAnimationFrame(()=>{if(conversationRef.current)conversationRef.current.scrollTop=conversationRef.current.scrollHeight;});
   if(!aiConfigured())return;
   setSendingThread(threadId);
@@ -214,7 +249,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    {hoverPreview&&<div className="t2-viewport-preview" role="tooltip" style={{left:hoverPreview.x,top:hoverPreview.y,transform:hoverPreview.y>120?'translateY(-100%)':'none'}}>{hoverPreview.ids.map(id=>{const anchor=data.anchors.find(a=>a.id===id);const t=data.threads.find(x=>x.id===anchor?.branchId);return t?<div key={id}><strong>{t.title}</strong><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></div>:null;})}</div>}
    {chooser&&chooser.visible&&<div ref={chooserRef} className="t2-chooser" style={{left:chooser.x,top:Math.min(window.innerHeight-180,chooser.y)}}><strong>Related tangents</strong>{chooser.ids.map(id=>{const a=data.anchors.find(x=>x.id===id);const t=data.threads.find(x=>x.id===a?.branchId);return t?<button key={id} onClick={()=>go(t.id)}>{t.title} · {t.status}</button>:null;})}</div>}
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
-    <form className="t2-composer" onSubmit={saveNote}><div className="t2-input-wrap"><textarea ref={inputRef} rows={1} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form?.requestSubmit();}}} placeholder="Ask a question or write a note…" aria-label="Reading note"/><button type="submit" className="t2-send-button" disabled={!draft.trim()||!!sendingThread} aria-label="Send message" title="Send message"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20V4M5 11l7-7 7 7"/></svg></button></div>{branch.id!=='main'&&<div className="t2-compose-actions"><button type="button" className="secondary" onClick={saveSummary}>✓ Finish tangent & return</button></div>}</form>}
+    <form className="t2-composer" onSubmit={saveNote}><div className="t2-input-wrap"><div ref={inputRef} className="t2-rich-composer" role="textbox" aria-multiline="true" contentEditable suppressContentEditableWarning data-placeholder="Ask a question or write a note…" aria-label="Reading note" onInput={syncComposer} onPaste={pasteComposer} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.closest('form')?.requestSubmit();}}}/><button type="submit" className="t2-send-button" disabled={!draft.trim()||!!sendingThread} aria-label="Send message" title="Send message"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20V4M5 11l7-7 7 7"/></svg></button></div>{branch.id!=='main'&&<div className="t2-compose-actions"><button type="button" className="secondary" onClick={saveSummary}>✓ Finish tangent & return</button></div>}</form>}
   </>}
   {!branchesOpen&&aiConfigured()&&!accessReady&&<form className="t2-access-form" onSubmit={async e=>{e.preventDefault();if(!accessDraft.trim()||verifyingAccess)return;setVerifyingAccess(true);setError('');try{await verifyAccessToken(accessDraft.trim());setAccessToken(accessDraft);setAccessReady(true);setAccessDraft('');}catch(err){setAccessReady(false);setError(err instanceof Error?err.message:'Could not verify access token.');}finally{setVerifyingAccess(false);}}}><label htmlFor="chatAccessKey">Private chat access token</label><input id="chatAccessKey" type="password" value={accessDraft} onChange={e=>setAccessDraft(e.target.value)} autoComplete="off" placeholder="Enter access token" /><button type="submit" className="secondary" disabled={!accessDraft.trim()||verifyingAccess}>{verifyingAccess?"Verifying…":"Unlock AI"}</button></form>}
   {!branchesOpen&&!aiConfigured()&&<p className="muted" role="status">AI backend not connected — messages are saved as notes.</p>}
