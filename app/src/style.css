@@ -576,3 +576,6 @@
 :root[data-theme="light"] .pane-resizer{background:#d1deec}
 :root[data-theme="light"] .pane-resizer::after{background:#7897b8}
 :root[data-theme="light"] .pdf-dark-mode .pdf-canvas-scroll{background:#172434}
+
+/* Keep reading-plan and theme actions aligned with the other header buttons. */
+.reader-header .reader-plan-toggle,.reader-header .reader-theme-toggle{height:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;padding-top:0;padding-bottom:0}
