@@ -128,15 +128,15 @@ export function App() {
         <div id="reader-toolbar-slot" className="reader-toolbar-slot" aria-label="PDF controls"></div>
         <div className="reader-header-right"><div id="reader-actions-slot" className="reader-actions-slot" aria-label="Document actions"></div><button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button></div>
       </div>
-      <div ref={gridRef} className={agentOpen ? "work-grid split-enabled" : "work-grid agent-collapsed"} style={agentOpen?{gridTemplateColumns:`minmax(0, ${1-agentFraction}fr) 8px minmax(0, ${agentFraction}fr)`}:undefined}>
+      <div ref={gridRef} className={agentOpen ? "work-grid split-enabled" : "work-grid split-enabled agent-collapsed"} style={{gridTemplateColumns:agentOpen?`minmax(0, ${1-agentFraction}fr) 8px minmax(0, ${agentFraction}fr)`:'minmax(0, 1fr) 0px minmax(0, 0fr)'}}> 
         <article className="work-panel pdf-panel">
           <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} toolbarHostId="reader-toolbar-slot" actionsHostId="reader-actions-slot" pageJump={pageJump} />
         </article>
-        {agentOpen && <div className="pane-resizer" role="separator" aria-label="Resize PDF and agent panels" aria-orientation="vertical" aria-valuenow={Math.round((1-agentFraction)*100)} tabIndex={0} onPointerDown={resizeStart} onPointerMove={resizeMove} onPointerUp={resizeEnd} onPointerCancel={resizeEnd} onKeyDown={e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();const next=Math.min(.75,Math.max(.25,agentFraction+(e.key==="ArrowRight"?-.03:.03)));setAgentFraction(next);localStorage.setItem("higher-math:agent-pane-fraction",String(next));}}}/>}        {agentOpen && <article className="work-panel agent-panel">
+        <div className="pane-resizer" role="separator" aria-label="Resize PDF and agent panels" aria-orientation="vertical" aria-valuenow={Math.round((1-agentFraction)*100)} tabIndex={0} onPointerDown={resizeStart} onPointerMove={resizeMove} onPointerUp={resizeEnd} onPointerCancel={resizeEnd} onKeyDown={e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();const next=Math.min(.75,Math.max(.25,agentFraction+(e.key==="ArrowRight"?-.03:.03)));setAgentFraction(next);localStorage.setItem("higher-math:agent-pane-fraction",String(next));}}}/>        <article className="work-panel agent-panel" aria-hidden={!agentOpen} inert={!agentOpen}>
           <ReadingFlow key={active.id} sessionId={active.id} title={active.target}
             firstPage={active.firstPage} lastPage={active.lastPage} duration={active.durationMinutes} currentPdfPage={active.pdfPage}
             onNavigate={page => setPageJump(old=>({page,seq:(old?.seq??0)+1}))}/>
-        </article>}
+        </article>
       </div>
     </section>}
     {newSessionOpen && <div className="overlay" role="presentation" onMouseDown={e => {if (e.target === e.currentTarget && !creating) setNewSessionOpen(false);}}>
