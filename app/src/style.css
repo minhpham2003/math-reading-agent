@@ -469,3 +469,7 @@
 /* Warm, high-visibility tangent anchors on navy PDF pages. */
 .pdf-dark-mode .t2-pdf-highlight{background:rgba(255,233,157,.30);outline:1px solid rgba(255,226,136,.44)}
 .pdf-dark-mode .t2-pdf-highlight:hover{background:rgba(255,237,172,.46);outline:1px solid #ffe69b}
+
+/* Basic AI conversation: distinguish model replies from reader notes. */
+.t2-message.assistant{background:#1c3043;border-left:2px solid #719cc4;padding:11px 13px;border-radius:8px;white-space:pre-wrap;line-height:1.55}
+.t2-message.user{white-space:pre-wrap}
