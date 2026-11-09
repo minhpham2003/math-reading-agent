@@ -446,3 +446,12 @@
 /* Keep long drafts scrollable without displaying a scrollbar in the composer. */
 .t2-input-wrap textarea{scrollbar-width:none;-ms-overflow-style:none}
 .t2-input-wrap textarea::-webkit-scrollbar{display:none;width:0;height:0}
+
+/* Softer PDF night palette: remap inverted white pages to theme navy,
+   and soften black ink to pale blue-gray instead of hard white on black. */
+.pdf-dark-mode .continuous-pdf-page canvas,
+.pdf-dark-mode .continuous-pdf-page .textLayer{
+  filter:invert(1) hue-rotate(180deg) brightness(.80) contrast(.78) sepia(.10);
+}
+.pdf-dark-mode .continuous-pdf-page{background:#1c293a}
+.pdf-dark-mode .pdf-canvas-scroll{background:#172434}
