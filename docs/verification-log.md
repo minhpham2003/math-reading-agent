@@ -80,3 +80,10 @@
 - **Honesty:** No language-model calls or automatic assessments/plans exist. The user prepares the assessment and units manually. Source location is physical PDF page number only; no automatic excerpt highlighting or semantic section detection yet.
 - **Build/deployment:** [GitHub Actions run 42533995621](https://github.com/minhpham2003/math-reading-agent/actions/runs/42533995621) succeeded, gh-pages bundle present.
 - **Still unverified:** Browser interaction of approvals, edits, plan navigation, cross-reload persistence, regression of PDF toolbars/selection/citations and responsive rendering.
+
+## V-018 — Tangent reading branches, initial local implementation (2026-11-09)
+
+- **Implemented:** `app/src/TangentWorkspace.tsx` integrated in Reading Mode. Branches stored per session in browser localStorage; creation from an individual note or the + Tangent control; nested parent IDs, breadcrumbs, collapsible tree and status; per-branch notes; inherited read-only context; selectable referenced parent messages; parent-visible linked summary with expandable original text; free navigation; explicit editable completion summary and Save summary & return; reopen; archive (with show archived), delete (confirmation + reparent descendants), and PDF page anchor on return.
+- **Build/deployment:** [GitHub Actions run 42538819746](https://github.com/minhpham2003/math-reading-agent/actions/runs/42538819746) succeeded and deployed.
+- **Important limits:** No AI suggestion, no automatic topic detection, no AI summarization, and no text-level source grounding. Title and summary are heuristic/manual placeholders. Selection editor uses individually selectable parent notes, not full start/end boundaries or transactional preview. Tangents record PDF page, not exact scroll coordinates or conversation scroll. Existing legacy notes in the prior local notes key are not migrated. Delete/reparent and archival correctness require browser verification. This is a first functional mock, not full S23–S25 completion.
+- **Still unverified:** User-level browser operations, nested return, status changes, local persistence, branch summary provenance, narrow layouts.
