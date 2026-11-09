@@ -309,13 +309,15 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   useEffect(() => {
     if(!pdf||!scrollRoot||!pageJump)return;
     jump(pageJump.page);
-    scrollRoot.querySelectorAll('.pdf-cited-passage').forEach(el=>el.classList.remove('pdf-cited-passage'));
+    scrollRoot.querySelectorAll('.pdf-cited-passage').forEach(el=>el.classList.remove('pdf-cited-passage','pdf-cited-passage-fading'));
     const quote=pageJump.quote?.trim();
     if(!quote)return;
     const normalize=(value:string)=>value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
     const needle=normalize(quote).slice(0,160);
     if(needle.length<5)return;
     let retries=0,timer:ReturnType<typeof setTimeout>;
+    let fadeTimer:ReturnType<typeof setTimeout>|undefined;
+    let clearTimer:ReturnType<typeof setTimeout>|undefined;
     const locate=()=>{
       const layer=scrollRoot.querySelector<HTMLElement>('[data-pdf-page="'+pageJump.page+'"] .textLayer');
       const spans=layer?Array.from(layer.querySelectorAll<HTMLElement>('span')).filter(el=>el.textContent?.trim()):[];
@@ -341,11 +343,17 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
           if(pos<end&&pos+matched.length>offset){spans[i].classList.add('pdf-cited-passage');first??=spans[i];}
           offset=end+1;
         }
-        if(first){const rect=first.getBoundingClientRect(),rootRect=scrollRoot.getBoundingClientRect();scrollRoot.scrollTop+=rect.top-rootRect.top-90;}
+        if(first){
+          const rect=first.getBoundingClientRect(),rootRect=scrollRoot.getBoundingClientRect();
+          scrollRoot.scrollTop+=rect.top-rootRect.top-90;
+          // Hold the citation glow, fade it, then remove temporary styling.
+          fadeTimer=window.setTimeout(()=>scrollRoot.querySelectorAll('.pdf-cited-passage').forEach(el=>el.classList.add('pdf-cited-passage-fading')),2400);
+          clearTimer=window.setTimeout(()=>scrollRoot.querySelectorAll('.pdf-cited-passage').forEach(el=>el.classList.remove('pdf-cited-passage','pdf-cited-passage-fading')),4200);
+        }
       }else if(retries++<15){timer=window.setTimeout(locate,180);}
     };
     timer=window.setTimeout(locate,250);
-    return()=>{window.clearTimeout(timer);scrollRoot.querySelectorAll('.pdf-cited-passage').forEach(el=>el.classList.remove('pdf-cited-passage'));};
+    return()=>{window.clearTimeout(timer);if(fadeTimer)window.clearTimeout(fadeTimer);if(clearTimer)window.clearTimeout(clearTimer);scrollRoot.querySelectorAll('.pdf-cited-passage').forEach(el=>el.classList.remove('pdf-cited-passage'));};
   }, [pageJump?.seq, pdf, scrollRoot]);
 
   function onScroll() {
