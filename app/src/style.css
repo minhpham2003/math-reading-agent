@@ -1141,3 +1141,8 @@ html[data-theme="light"] .floating-citation-action button.primary:hover,
 html[data-theme="light"] .t2-selection-pop button.primary:hover{
  background:rgba(67,88,110,.1)!important;
 }
+
+/* Compact unlock control, with breathing room after the access token field. */
+.t2-access-form{column-gap:14px;align-items:center}
+.t2-access-form input{margin-right:8px}
+.t2-access-form button[type="submit"]{align-self:center;height:36px;min-height:0;padding:5px 13px;line-height:1.25}
