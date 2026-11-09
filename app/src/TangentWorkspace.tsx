@@ -33,6 +33,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
  const breadcrumbMeasureRef=useRef<HTMLDivElement>(null);
  const [hoverPreview,setHoverPreview]=useState<{ids:string[];x:number;y:number}|null>(null);
  const [error,setError]=useState('');
+ const [citationNavigation,setCitationNavigation]=useState(0);
  const conversationRef=useRef<HTMLDivElement>(null);
  const inputRef=useRef<HTMLTextAreaElement>(null);
  const selectedRangeRef=useRef<Range|null>(null);
@@ -121,6 +122,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
   saveChatCitation({id:crypto.randomUUID(),sessionId,threadId:branch.id,messageId:selection.messageId,text:selection.text,start:selection.start,end:selection.end});
   selectedRangeRef.current=null;setSelection(null);window.getSelection()?.removeAllRanges();
  }
+ useEffect(()=>{const open=(event:Event)=>{if((event as CustomEvent<{sessionId:string}>).detail?.sessionId===sessionId)setCitationNavigation(n=>n+1);};window.addEventListener('higher-math:open-chat-citation',open);return()=>window.removeEventListener('higher-math:open-chat-citation',open);},[sessionId]);
  useEffect(()=>{
   const id=new URLSearchParams(window.location.search).get('chatCitation');
   if(!id)return;
@@ -153,7 +155,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    if(first&&last){const range=document.createRange();range.setStart(first,start);range.setEnd(last,end);const sel=window.getSelection();sel?.removeAllRanges();sel?.addRange(range);window.setTimeout(()=>{if(sel?.rangeCount&&sel.getRangeAt(0)===range)sel.removeAllRanges();},4200);}
   },220);
   return()=>{cancelled=true;window.clearTimeout(timer);};
- },[sessionId,data.activeId,data.threads.length]);
+ },[sessionId,data.activeId,data.threads.length,citationNavigation]);
  function makeTangent(){if(!selection)return;selectedRangeRef.current=null;createTangent(sessionId,{kind:'chat',targetId:selection.messageId,start:selection.start,end:selection.end,text:selection.text});setSelection(null);window.getSelection()?.removeAllRanges();}
  function openAnchors(ids:string[],event:ReactMouseEvent){event.preventDefault();event.stopPropagation();if(ids.length===1)go(data.anchors.find(a=>a.id===ids[0])!.branchId);else {chooserAnchorRef.current=event.currentTarget as HTMLElement;const rect=chooserAnchorRef.current.getBoundingClientRect();setChooser({ids,x:rect.left,y:rect.bottom+8,visible:true});}}
  useEffect(()=>{if(!chooser)return;const reposition=()=>{const anchor=chooserAnchorRef.current,container=conversationRef.current;if(!anchor||!container||!anchor.isConnected){setChooser(null);return;}const rect=anchor.getBoundingClientRect(),box=container.getBoundingClientRect();setChooser(prev=>prev?{...prev,x:Math.max(8,Math.min(rect.left,window.innerWidth-265)),y:rect.bottom+8,visible:rect.bottom>=box.top&&rect.top<=box.bottom}:null);};const outside=(e:PointerEvent)=>{if(chooserRef.current?.contains(e.target as Node)||chooserAnchorRef.current?.contains(e.target as Node))return;setChooser(null);chooserAnchorRef.current=null;};const container=conversationRef.current;container?.addEventListener('scroll',reposition,{passive:true});window.addEventListener('resize',reposition);document.addEventListener('pointerdown',outside,true);reposition();return()=>{container?.removeEventListener('scroll',reposition);window.removeEventListener('resize',reposition);document.removeEventListener('pointerdown',outside,true);};},[chooser?.ids.join('|')]);
