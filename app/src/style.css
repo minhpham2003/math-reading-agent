@@ -717,3 +717,12 @@ html[data-theme="light"] .pdf-toolbar input[type="number"]:focus-visible{
 /* Give the AI access label breathing room before its input. */
 .t2-access-form{column-gap:12px;gap:12px}
 .t2-access-form label{margin-right:8px}
+
+/* New Session form: calm, regular-weight labels and upload copy. */
+.dialog label,
+.dialog .new-session-pdf-field,
+.dialog .new-session-pdf-field *,
+.dialog label input,
+.dialog label select,
+.dialog input::placeholder,
+.dialog textarea::placeholder{font-weight:400}
