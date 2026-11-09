@@ -50,6 +50,12 @@ const fields:{id:keyof Assessment;label:string;placeholder:string}[]=[
  {id:'minutes',label:'Estimated reading time (minutes)',placeholder:'Time available'},
  {id:'recommendation',label:'Recommendation',placeholder:'How should the reader approach this range?'}
 ];
+function assessmentBullets(value:string):string[]{
+ const items=value.split(/(?:\n\s*[-•*]\s*|\n\s*\d+[.)]\s*|\n+)/).map(s=>s.trim()).filter(Boolean);
+ if(items.length>1)return items;
+ // Preserve the source's wording while breaking long paragraphs at sentence boundaries.
+ return (value.match(/[^.!?]+(?:[.!?]+(?=\s|$)|$)/g)??[value]).map(s=>s.trim()).filter(Boolean);
+}
 export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavigate,currentPdfPage}:
  {sessionId:string;title:string;firstPage:number;lastPage:number;duration:number;currentPdfPage?:number;onNavigate:(page:number,quote?:string)=>void}) {
  const [state,setState]=useState<State>(()=>load(sessionId,title,firstPage,lastPage,duration));
@@ -139,7 +145,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
    </label>)}
   </div>}
   {assessmentOpen && !editingAssessment&&<div className="assessment-summary">
-    {fields.map(field=><p key={field.id}><strong>{field.label}:</strong> {state.assessment[field.id]}</p>)}
+    {fields.map(field=><section className="assessment-summary-section" key={field.id}><h3>{field.label}</h3><ul>{assessmentBullets(state.assessment[field.id]).map((point,i)=><li key={i}>{point.replace(/^[-•*]\s*/,'')}</li>)}</ul></section>)}
   </div>}
   {assessmentOpen && <div className="flow-actions">
    <button className="secondary" onClick={()=>setEditingAssessment(v=>!v)}>{editingAssessment?'Done editing':'Edit'}</button>
