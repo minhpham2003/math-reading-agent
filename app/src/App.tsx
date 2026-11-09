@@ -22,7 +22,7 @@ export function App() {
   const [formError, setFormError] = useState('');
   const [storageError, setStorageError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [pageJump, setPageJump] = useState<{page:number;seq:number}|null>(null);
+  const [pageJump, setPageJump] = useState<{page:number;seq:number;quote?:string}|null>(null);
   const [agentOpen, setAgentOpen] = useState(true);
   const [theme,setTheme]=useState<'dark'|'light'>(()=>localStorage.getItem('higher-math:theme')==='light'?'light':'dark');
   useEffect(()=>{document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;localStorage.setItem('higher-math:theme',theme);},[theme]);
@@ -139,7 +139,7 @@ export function App() {
         <div className="pane-resizer" role="separator" aria-label="Resize PDF and agent panels" aria-orientation="vertical" aria-valuenow={Math.round((1-agentFraction)*100)} tabIndex={0} onPointerDown={resizeStart} onPointerMove={resizeMove} onPointerUp={resizeEnd} onPointerCancel={resizeEnd} onKeyDown={e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();const next=Math.min(.75,Math.max(.25,agentFraction+(e.key==="ArrowRight"?-.03:.03)));setAgentFraction(next);localStorage.setItem("higher-math:agent-pane-fraction",String(next));}}}/>        <article className="work-panel agent-panel" aria-hidden={!agentOpen} inert={!agentOpen}>
           <ReadingFlow key={active.id} sessionId={active.id} title={active.target}
             firstPage={active.firstPage} lastPage={active.lastPage} duration={active.durationMinutes} currentPdfPage={active.pdfPage}
-            onNavigate={page => setPageJump(old=>({page,seq:(old?.seq??0)+1}))}/>
+            onNavigate={(page,quote) => setPageJump(old=>({page,quote,seq:(old?.seq??0)+1}))}/>
         </article>
       </div>
     </section>}
