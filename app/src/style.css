@@ -608,3 +608,20 @@
 :root[data-theme="light"] .t2-conversation,
 :root[data-theme="light"] .t2-message.assistant,
 :root[data-theme="light"] .t2-rich-text{color:#25394f}
+
+/* One shared geometry for all right-side toolbar actions, including portaled controls. */
+.reader-header .reader-header-right button,
+.reader-header .reader-header-right .reader-plan-toggle,
+.reader-header .reader-header-right .reader-theme-toggle{
+ box-sizing:border-box;
+ height:32px;
+ min-height:32px;
+ max-height:32px;
+ padding-top:0;
+ padding-bottom:0;
+ line-height:1;
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ vertical-align:middle;
+}
