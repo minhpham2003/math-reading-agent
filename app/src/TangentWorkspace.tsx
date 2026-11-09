@@ -60,7 +60,11 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    const reply=await requestAiReply(messages,context);
    // Read the latest stored state so branch navigation and PDF tangent updates are preserved.
    const latest=read(sessionId);
-   const assistant:Entry={id:crypto.randomUUID(),role:'assistant',text:reply,citationPages,createdAt:new Date().toISOString()};
+   const hasSourceLink=/\]\(pdf-page:\d+\)/.test(reply);
+   const citedReply=!hasSourceLink&&citationPages.length
+    ? reply+'\n\nPDF sources: '+citationPages.slice(0,3).map(page=>'[p. '+page+'](pdf-page:'+page+')').join(' · ')
+    : reply;
+   const assistant:Entry={id:crypto.randomUUID(),role:'assistant',text:citedReply,citationPages,createdAt:new Date().toISOString()};
    persist({...latest,threads:latest.threads.map(t=>t.id===threadId?{...t,messages:[...t.messages,assistant]}:t)});
    requestAnimationFrame(()=>{if(conversationRef.current&&read(sessionId).activeId===threadId)conversationRef.current.scrollTop=conversationRef.current.scrollHeight;});
   }catch(e){
