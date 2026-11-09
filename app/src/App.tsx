@@ -81,7 +81,6 @@ export function App() {
       ...s, pdfPage: page, updatedAt: now, status: 'in-progress'
     } : s));
   }
-  useEffect(()=>{function dismissDetails(event:PointerEvent){const target=event.target;if(target instanceof Node && !document.querySelector('.reader-details')?.contains(target)){document.querySelector('details.reader-details')?.removeAttribute('open');}}document.addEventListener('pointerdown',dismissDetails);return()=>document.removeEventListener('pointerdown',dismissDetails);},[]);
   useEffect(() => {
     function handleKeys(event: KeyboardEvent) {
       if (event.key !== 'Escape') return;
@@ -118,7 +117,7 @@ export function App() {
         <div className="reader-header-identity">
           <button className="reader-back" onClick={() => navigate(null)} aria-label="Back to Hatcher dashboard" title="Back to dashboard">←</button>
           <span className="reader-session-name" title={active.title}>{active.title}</span><span className="reader-session-section" title={active.target}>{active.target}</span>
-          <details className="reader-details"><summary title="Session details" aria-label="Session details">⋯</summary><div className="reader-details-pop"><strong>{active.title}</strong><p>{active.target}</p><p>Printed pp. {active.firstPage}–{active.lastPage} · {active.durationMinutes} min</p><p>PDF page numbers may differ from printed pages.</p><button type="button" className="secondary reader-setup-link" onClick={()=>{document.querySelector("details.reader-details")?.removeAttribute("open");window.dispatchEvent(new Event("higher-math:open-session-setup"));setAgentOpen(true);}}>⚙ Session setup</button></div></details>
+          <button type="button" className="reader-setup-gear" title="Session setup" aria-label="Session setup" onClick={()=>{setAgentOpen(true);window.setTimeout(()=>window.dispatchEvent(new Event('higher-math:open-session-setup')),0);}}>⚙</button>
         </div>
         <div id="reader-toolbar-slot" className="reader-toolbar-slot" aria-label="PDF controls"></div>
         <button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button>
