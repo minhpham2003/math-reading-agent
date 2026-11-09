@@ -385,3 +385,20 @@
 
 .reader-setup-gear{flex:none;padding:4px 7px;background:transparent;color:#b9cde3;border:0;border-radius:6px;font-size:18px;font-weight:400;line-height:1;cursor:pointer}
 .reader-setup-gear:hover,.reader-setup-gear:focus-visible{background:#263c54;color:#fff}
+
+/* Independent top-bar zones: centered PDF controls and right-aligned source actions. */
+.reader-header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center}
+.reader-header-identity{min-width:0;max-width:none;flex:none;justify-self:start}
+.reader-toolbar-slot{min-width:0;flex:none;justify-self:center;display:flex;justify-content:center}
+.reader-header-right{justify-self:end;display:flex;align-items:center;gap:10px;min-width:0}
+.reader-actions-slot,.pdf-header-actions{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.reader-header .pdf-header-actions .secondary{padding:5px 8px;font-size:12px;font-weight:400;white-space:nowrap}
+.reader-header .pdf-toolbar{width:max-content;display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:nowrap;white-space:nowrap}
+.reader-header .pdf-filename{max-width:155px}
+@media(max-width:1160px){
+ .reader-header{grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr);gap:5px}
+ .reader-toolbar-slot{justify-self:center;max-width:100%;overflow-x:auto}
+ .reader-header-right{gap:5px}
+ .reader-header .pdf-header-actions .secondary{padding:4px 6px}
+ .reader-header .pdf-filename{max-width:95px}
+}
