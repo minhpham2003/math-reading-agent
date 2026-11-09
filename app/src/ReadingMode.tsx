@@ -16,7 +16,7 @@ export function ReadingMode({sessionId,units,onNavigate,onToggle,currentPdfPage}
  const selected=units.find(u=>u.id===selectedId)??units.find(u=>!u.done)??units[0];
  const toolbarSlot=document.getElementById("reading-plan-toolbar-slot");
  return <div className="reading-mode">
-  {toolbarSlot&&createPortal(<button type="button" className="reader-plan-toggle" aria-expanded={listOpen} onClick={()=>{setListOpen(v=>!v);setDetailsId(null);}}>Reading plan · {units.filter(u=>u.done).length}/{units.length} {listOpen?"▴":"▾"}</button>,toolbarSlot)}
+  {toolbarSlot&&createPortal(<button type="button" className="reader-plan-toggle" aria-expanded={listOpen} onClick={()=>{setListOpen(v=>!v);setDetailsId(null);}}>Reading plan · {units.filter(u=>u.done).length}/{units.length}</button>,toolbarSlot)}
 
   {listOpen&&<section className="reading-navigator"><div className="reading-nav-list">{units.map((unit,i)=><div className={'reading-nav-item'+(selected?.id===unit.id?' is-current':'')+(unit.done?' is-completed':'')} key={unit.id}>
     <button className="reading-nav-link" aria-expanded={detailsId===unit.id} onClick={()=>{setSelectedId(unit.id);setDetailsId(current=>current===unit.id?null:unit.id);onNavigate(unit.page)}}><span>{unit.done?'✓':selected?.id===unit.id?'●':'○'} {i+1}. {unit.title}</span><small>{location(unit)}</small>{unit.description&&detailsId===unit.id&&<span className="reading-unit-description">{unit.description}</span>}</button>
