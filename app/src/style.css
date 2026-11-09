@@ -1213,3 +1213,9 @@ html[data-theme="light"] .reading-flow .assessment-summary-section li{color:#253
 .reading-flow .assessment-summary-section h3{font-size:19px;line-height:1.4}
 .reading-flow .assessment-summary-section li{font-size:18px;line-height:1.6;margin:7px 0}
 .reading-flow .assessment-summary-section{margin-bottom:22px}
+
+/* Phase 3.2: grounded reading-plan generation and review. */
+.plan-generation-panel{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin:0 0 15px;padding:12px;border:1px solid #6687a5;border-radius:9px}
+.plan-generation-panel .primary{color:#fff!important;-webkit-text-fill-color:#fff!important;font-weight:400}
+.plan-generation-panel p{margin:0;line-height:1.5}
+html[data-theme="light"] .plan-generation-panel{border-color:#b3c3d3;background:#e0e6ec}
