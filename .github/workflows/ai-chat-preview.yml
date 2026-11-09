@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         working-directory: app
         run: npm install
+      - name: Test PDF citation safety
+        working-directory: app
+        run: node --test tests/pdfCitations.test.mjs
       - name: Typecheck and build
         working-directory: app
         env:
