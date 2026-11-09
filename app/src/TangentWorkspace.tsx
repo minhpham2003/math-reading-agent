@@ -244,7 +244,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    <div className="t2-conversation" ref={conversationRef} onMouseUp={()=>window.setTimeout(captureSelection,0)} onKeyUp={()=>window.setTimeout(captureSelection,0)}>
     {branch.contextText&&<div className="t2-origin-compact"><span>From {data.threads.find(t=>t.id===branch.parentId)?.title??"parent"}:</span><p className="t2-origin-text">{branch.contextText}</p></div>}
     {branch.messages.map(message=><div className={'t2-message '+(message.role==='system'?'system':message.role==='assistant'?'assistant':'user')} data-chat-message={message.id} key={message.id}>
-     {message.role==='system'&&message.anchorId?<span>↗ Created branch: <button className="t2-notification-link" onClick={()=>{const anchor=data.anchors.find(a=>a.id===message.anchorId);if(anchor)go(anchor.branchId);}}>{data.threads.find(t=>t.originId===message.anchorId)?.title??'Tangent'}</button></span>:linkedText(message)}
+     {message.role==='system'&&message.anchorId?<span>↗ Created branch: <button className="t2-notification-link" onClick={()=>{const anchor=data.anchors.find(a=>a.id===message.anchorId);if(anchor)go(anchor.branchId);}}>{data.threads.find(t=>t.originId===message.anchorId)?.title??'Branch'}</button></span>:linkedText(message)}
     </div>)}
     {!branch.messages.length&&!branch.contextText&&<p className="muted">Start the discussion whenever you're ready.</p>}
     {sendingThread===branch.id&&<p className="muted" role="status">AI is responding…</p>}
