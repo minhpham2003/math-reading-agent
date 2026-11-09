@@ -1044,3 +1044,21 @@ html[data-theme="light"] .t2-selection-pop button.primary:hover{
  color:#192b3f!important;
  -webkit-text-fill-color:#192b3f!important;
 }
+
+/* Rich chat composer: show pasted citations as small inline linked chips. */
+.t2-input-wrap .t2-rich-composer{
+ display:block;width:100%;min-height:48px;max-height:180px;overflow-y:auto;
+ padding:12px 62px 12px 13px;box-sizing:border-box;line-height:24px;
+ white-space:pre-wrap;overflow-wrap:anywhere;
+ background:#11263a;color:#ecf5ff;border:1px solid #54738e;border-radius:7px;
+ outline:none;
+}
+.t2-input-wrap .t2-rich-composer:focus{border-color:#75a5e2}
+.t2-rich-composer:empty::before{content:attr(data-placeholder);color:#8499ad;pointer-events:none}
+.t2-composer-citation{display:inline-block;vertical-align:baseline;border-radius:5px;
+ padding:0 5px;margin:0 1px;background:#275687;color:#e6f3ff;
+ text-decoration:underline;text-underline-offset:3px;cursor:pointer;white-space:nowrap}
+html[data-theme="light"] .t2-input-wrap .t2-rich-composer{
+ background:#e6e9ed;color:#203044;border-color:#adc1d8
+}
+html[data-theme="light"] .t2-composer-citation{background:#d2dce7;color:#245781}
