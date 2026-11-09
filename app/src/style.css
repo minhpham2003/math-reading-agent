@@ -867,3 +867,7 @@ html[data-theme="light"] .workspace .sources-drawer .secondary{
 /* Saved PDF citations: regular-weight title and actions. */
 .sources-drawer .source-entry-link strong,
 .sources-drawer .source-entry .secondary{font-weight:400}
+
+/* Temporary marker for exact quoted passage in rendered PDF text. */
+.pdf-cited-passage{background:rgba(255,194,67,.45)!important;border-radius:2px;box-shadow:0 0 0 2px rgba(236,151,21,.32);transition:background-color .2s}
+.pdf-dark-mode .pdf-cited-passage{background:rgba(255,199,63,.62)!important}
