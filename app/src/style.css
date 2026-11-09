@@ -493,9 +493,7 @@
 
 /* Full-panel branch explorer, replacing the former floating dropdown. */
 .t2-branch-view{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;overflow:hidden}
-.t2-branch-view-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #36546e}
-.t2-branch-view-header h3{margin:0;font-size:1.1rem;color:#e3effb}
-.t2-branch-view-body{flex:1;min-height:0;overflow:auto;padding:18px 22px}
+.t2-branch-view-body{flex:1;min-height:0;overflow:auto;padding:8px 22px 18px}
 .t2-branch-view-body .t2-tree-row{min-height:42px}
 .t2-branch-view-body .t2-tree-title{font-size:1rem;min-width:0}
 .t2-branch-view-body .t2-tree-children>.t2-tree-node::before{top:21px}
