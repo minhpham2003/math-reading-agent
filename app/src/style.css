@@ -969,3 +969,18 @@ html[data-theme="light"] .sources-drawer .source-entry-page,
 html[data-theme="light"] .sources-drawer .source-entry-excerpt{color:#263b52}
 /* Match the chat selection controls to the pair of blue PDF actions. */
 .t2-selection-pop button.primary{font-size:12px;line-height:1.2;padding:8px 12px;border-radius:6px;font-weight:400;color:#fff!important;-webkit-text-fill-color:#fff}
+
+/* Reading plan overlays older messages instead of resizing or shifting chat.
+   Transcript and composer retain their full-height layout and scroll position. */
+.reading-mode{position:relative;isolation:isolate}
+.reading-mode>.reading-navigator{
+ position:absolute;
+ top:0;
+ left:0;
+ right:0;
+ z-index:30;
+ max-height:min(65dvh,calc(100% - 100px));
+ overflow-y:auto;
+ box-shadow:0 10px 25px rgba(18,36,58,.18);
+}
+.reading-mode>.t2-workspace{min-height:0;height:100%;flex:1}
