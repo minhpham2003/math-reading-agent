@@ -127,10 +127,10 @@ export function App() {
         <div className="reader-header-identity">
           <button className="reader-back" onClick={() => navigate(null)} aria-label="Back to Hatcher dashboard" title="Back to dashboard">←</button>
           <span className="reader-session-name" title={active.title}>{active.title}</span><span className="reader-session-section" title={active.target}>{active.target}</span>
-          <button type="button" className="reader-setup-gear" title="Session setup" aria-label="Session setup" onClick={()=>{setAgentOpen(true);window.setTimeout(()=>window.dispatchEvent(new Event('higher-math:open-session-setup')),0);}}>⚙</button>
+
         </div>
         <div id="reader-toolbar-slot" className="reader-toolbar-slot" aria-label="PDF controls"></div>
-        <div className="reader-header-right"><div id="reading-plan-toolbar-slot" className="reading-plan-toolbar-slot"/><div id="reader-actions-slot" className="reader-actions-slot" aria-label="Document actions"></div><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button><button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button></div>
+        <div className="reader-header-right"><div id="reading-plan-toolbar-slot" className="reading-plan-toolbar-slot"/><div id="reader-actions-slot" className="reader-actions-slot" aria-label="Document actions"></div><button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button></div>
       </div>
       <div ref={gridRef} className={agentOpen ? "work-grid split-enabled" : "work-grid split-enabled agent-collapsed"} style={{gridTemplateColumns:agentOpen?`minmax(0, ${1-agentFraction}fr) 8px minmax(0, ${agentFraction}fr)`:'minmax(0, 1fr) 0px minmax(0, 0fr)'}}> 
         <article className="work-panel pdf-panel">
@@ -153,7 +153,7 @@ export function App() {
         <label>Session title<input autoFocus required maxLength={120} placeholder="e.g. Homotopy equivalence" value={form.title} onChange={e => setForm({...form,title:e.target.value})}/></label>
         <label>Section or reading target<input required placeholder="e.g. Chapter 3, §3.1" value={form.target} onChange={e => setForm({...form,target:e.target.value})}/></label>
         <div className="form-row"><label>First printed page<input type="number" min="1" required value={form.firstPage} onChange={e => setForm({...form,firstPage:e.target.value})}/></label><label>Last printed page<input type="number" min="1" required value={form.lastPage} onChange={e => setForm({...form,lastPage:e.target.value})}/></label></div>
-        <label>Available time<select value={form.durationMinutes} onChange={e => setForm({...form,durationMinutes:e.target.value})}><option value="30">30 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></label>
+        <label>Session duration<select value={form.durationMinutes} onChange={e => setForm({...form,durationMinutes:e.target.value})}><option value="30">30 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></label>
         {formError && <p role="alert" className="form-error">{formError}</p>}
         <div className="dialog-actions"><button className="secondary" type="button" disabled={creating} onClick={() => {setNewSessionOpen(false);setFormError('');setNewPdf(null);}}>Cancel</button><button className="primary" type="submit" disabled={creating}>{creating ? 'Importing PDF…' : 'Create session'}</button></div>
       </form></div>}
