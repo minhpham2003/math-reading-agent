@@ -7,10 +7,7 @@ import 'katex/dist/katex.min.css';
 // The model uses both TeX \(…\), \[…\] and Markdown $…$, $$…$$.
 // Convert TeX delimiters outside fenced and inline code to remark-math notation.
 function normalizeMath(input:string){
- // Models sometimes put display delimiters inline in Markdown blockquotes:
- // "> $ > formula > $". Restore paragraph boundaries before math parsing.
- const cleaned=input.replace(/>\s*\$\$\s*>/g,'>\n> $\n> ').replace(/\$\$\s*>/g,'$\n> ');
- return cleaned.split(/(```[\s\S]*?```|`[^`\n]*`)/g).map((segment,i)=>{
+ return input.split(/(```[\s\S]*?```|`[^`\n]*`)/g).map((segment,i)=>{
   if(i%2===1)return segment;
   return segment.replace(/\\\[([\s\S]*?)\\\]/g,(_all,tex:string)=>'\n\n$$'+tex+'$$\n\n')
     .replace(/\\\(([\s\S]*?)\\\)/g,(_all,tex:string)=>'$'+tex+'$');
