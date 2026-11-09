@@ -594,8 +594,12 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
 
   function saveCitation() {
     if (!pending) return;
-    const next = [...citations, {...pending,id:crypto.randomUUID()}];
+    const saved = {...pending,id:crypto.randomUUID()};
+    const next = [...citations,saved];
     try {localStorage.setItem(refsKey(sessionId),JSON.stringify(next));setCitations(next);
+      // Copy while handling the user's Cite click, before clearing the selection.
+      void copyLinkedCitation(sessionId,saved.id,'pdf','p. '+saved.page)
+        .catch(()=>setMessage('Citation saved, but clipboard access was denied. Use Copy in Citations.'));
       setPending(null);setSelectionPoint(null);setVisualSelection(null);window.getSelection()?.removeAllRanges();setShowCitations(true);}
     catch {setMessage('Could not save the citation in browser storage.');}
   }
