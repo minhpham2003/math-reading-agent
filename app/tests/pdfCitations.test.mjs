@@ -5,7 +5,7 @@ import ts from 'typescript';
 
 // Run the exact TypeScript helper without requiring another test runner.
 const source=readFileSync(new URL('../src/pdfCitations.ts',import.meta.url),'utf8');
-const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText;
+const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
 const exports={};
 new Function('exports',compiled)(exports);
 const {preparePdfCitations,stripLegacySourceList,citationExcerptsFromContext}=exports;
