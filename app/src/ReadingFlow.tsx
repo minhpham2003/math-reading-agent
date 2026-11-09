@@ -1,12 +1,13 @@
 import {useEffect,useState} from 'react';
 import {ReadingMode} from './ReadingMode';
+import {generatePdfAssessment} from './pdfAssessment';
 
 type Assessment = {
  scope:string; structure:string; difficulty:string; dependencies:string;
  minutes:string; recommendation:string;
 };
 type Unit = {id:string; title:string; page:number; endPage?:number; description:string; done:boolean};
-type State = {assessment:Assessment; assessmentApproved:boolean; planApproved:boolean; units:Unit[]; stage:'assessment'|'plan'|'reading'};
+type State = {assessment:Assessment; assessmentApproved:boolean; planApproved:boolean; units:Unit[]; stage:'assessment'|'plan'|'reading'; assessmentSource?:{kind:'ai';pages:number[];name:string;coverage:string}};
 const key=(id:string)=>'higher-math:reading-flow:v1:'+id;
 function mockAssessment(title:string,first:number,last:number,minutes:number):Assessment {
  return {
@@ -56,11 +57,22 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const [editingAssessment,setEditingAssessment]=useState(false);
  const [assessmentOpen,setAssessmentOpen]=useState(!state.assessmentApproved);
  const [error,setError]=useState('');
+ const [analyzing,setAnalyzing]=useState(false);
  useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(!load(sessionId,title,firstPage,lastPage,duration).assessmentApproved);setExpanded(!load(sessionId,title,firstPage,lastPage,duration).planApproved);setSetupMode(!(load(sessionId,title,firstPage,lastPage,duration).assessmentApproved&&load(sessionId,title,firstPage,lastPage,duration).planApproved));},[sessionId]);
  useEffect(()=>{const open=()=>{setSetupMode(v=>!v);setAssessmentOpen(false);setExpanded(false);};window.addEventListener('higher-math:open-session-setup',open);return()=>window.removeEventListener('higher-math:open-session-setup',open);},[]);
  function change(next:State) {
   try {localStorage.setItem(key(sessionId),JSON.stringify(next));setState(next);setError('');}
   catch{setError('Unable to save this session. Check browser storage.');}
+ }
+ async function analyzePdf(){
+  if(analyzing)return;
+  setAnalyzing(true);setError('');
+  try{
+   const result=await generatePdfAssessment(sessionId,title,title,firstPage,lastPage,duration);
+   change({...state,assessment:result.assessment,assessmentSource:{kind:'ai',pages:result.sourcePages,name:result.documentName,coverage:result.coverage},assessmentApproved:false,planApproved:false,stage:'assessment'});
+   setAssessmentOpen(true);setEditingAssessment(false);
+  }catch(e){setError(e instanceof Error?e.message:'Unable to analyze the selected PDF pages.');}
+  finally{setAnalyzing(false);}
  }
  function updateAssessment(field:keyof Assessment,value:string){
   change({...state,assessment:{...state.assessment,[field]:value},assessmentApproved:false,planApproved:false,stage:'assessment'});
@@ -101,7 +113,13 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
   
   <div className="assessment-toggle-row"><h2 className={state.assessmentApproved?"approved-heading":""}>Reading assessment {state.assessmentApproved&&<span aria-label="Approved">✓</span>}</h2><button className="secondary" aria-expanded={assessmentOpen} onClick={()=>setAssessmentOpen(v=>!v)}>{assessmentOpen?'Collapse ▴':'Expand ▾'}</button></div>
 
-  {assessmentOpen && <p className="muted">This is a sample assessment and sample plan—not an analysis of your PDF. Review, correct, and approve them to test how the future agent will work.</p>}
+  {assessmentOpen && <div className="assessment-source-panel">
+    <button className="primary" type="button" disabled={analyzing} onClick={()=>void analyzePdf()}>{analyzing?'Analyzing PDF…':state.assessmentSource?'Regenerate PDF assessment':'Generate assessment from PDF'}</button>
+    {state.assessmentSource?<div><p><strong>AI assessment from {state.assessmentSource.name}</strong></p>
+      <p className="muted">{state.assessmentSource.coverage} Text extraction may distort mathematical notation; verify all claims against the PDF before approving.</p>
+      <div className="assessment-evidence">Source pages: {state.assessmentSource.pages.map(p=><button key={p} type="button" className="secondary" onClick={()=>onNavigate(p)}>p. {p} ↗</button>)}</div>
+    </div>:<p className="muted">The assessment below is placeholder content, not a PDF analysis. Generate a source-grounded assessment before approving it.</p>}
+   </div>}
   {assessmentOpen && editingAssessment && <div className="assessment-fields">
    {fields.map(field=><label key={field.id}>{field.label}
     {field.id==='minutes'?<input type="number" min="1" value={state.assessment[field.id]} onChange={e=>updateAssessment(field.id,e.target.value)}/>:
@@ -113,8 +131,8 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
   </div>}
   {assessmentOpen && <div className="flow-actions">
    <button className="secondary" onClick={()=>setEditingAssessment(v=>!v)}>{editingAssessment?'Done editing':'Edit'}</button>
-   <button className="secondary" onClick={()=>{change(defaultState(title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(true);}}>Reset mock</button>
-   {!state.assessmentApproved&&<button className="primary" disabled={!canApprove} onClick={()=>{
+   <button className="secondary" onClick={()=>{change(defaultState(title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(true);}}>Reset assessment</button>
+   {!state.assessmentApproved&&<button className="primary" disabled={!canApprove||!state.assessmentSource||analyzing} onClick={()=>{
     change({...state,assessmentApproved:true,stage:'plan'});setEditingAssessment(false);setAssessmentOpen(false);
    }}>Agree to assessment →</button>}
   </div>}
