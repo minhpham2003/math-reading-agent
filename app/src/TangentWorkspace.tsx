@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState,type FormEvent,type MouseEvent as ReactMouseEvent} from 'react';
 import {read,write,createTangent,CHANGED_EVENT,type TangentData,type Thread,type Entry} from './tangentStore';
-import {aiConfigured,requestAiReply,getAccessToken,setAccessToken} from './aiChat';
+import {aiConfigured,requestAiReply,verifyAccessToken,getAccessToken,setAccessToken} from './aiChat';
 import {MathText} from './MathText';
 import {MarkdownMath} from './MarkdownMath';
 import {retrievePdfContext} from './pdfIndex';
@@ -14,6 +14,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
  const [sendingThread,setSendingThread]=useState<string|null>(null);
  const [accessDraft,setAccessDraft]=useState('');
  const [accessReady,setAccessReady]=useState(()=>!!getAccessToken());
+ const [verifyingAccess,setVerifyingAccess]=useState(false);
  const [selection,setSelection]=useState<SelectState|null>(null);
  const [branchesOpen,setBranchesOpen]=useState(false);
  const [treeExpanded,setTreeExpanded]=useState<string[]>(['main']);
@@ -61,7 +62,12 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    const assistant:Entry={id:crypto.randomUUID(),role:'assistant',text:reply,createdAt:new Date().toISOString()};
    persist({...latest,threads:latest.threads.map(t=>t.id===threadId?{...t,messages:[...t.messages,assistant]}:t)});
    requestAnimationFrame(()=>{if(conversationRef.current&&read(sessionId).activeId===threadId)conversationRef.current.scrollTop=conversationRef.current.scrollHeight;});
-  }catch(e){setError(e instanceof Error?e.message:'AI request failed.');}
+  }catch(e){
+   if(e instanceof Error && /access token required or invalid|invalid access token/i.test(e.message)){
+    setAccessToken('');setAccessReady(false);setAccessDraft('');
+    setError('Invalid access token. Please enter it again.');
+   }else setError(e instanceof Error?e.message:'AI request failed.');
+  }
   finally{setSendingThread(null);}
  }
  function captureSelection(){
@@ -134,7 +140,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
     <form className="t2-composer" onSubmit={saveNote}><div className="t2-input-wrap"><textarea ref={inputRef} rows={1} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form?.requestSubmit();}}} placeholder="Ask a question or write a note…" aria-label="Reading note"/><button type="submit" className="t2-send-button" disabled={!draft.trim()||!!sendingThread} aria-label="Send message" title="Send message"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20V4M5 11l7-7 7 7"/></svg></button></div>{branch.id!=='main'&&<div className="t2-compose-actions"><button type="button" className="secondary" onClick={saveSummary}>✓ Finish tangent & return</button></div>}</form>}
   </>}
-  {!branchesOpen&&aiConfigured()&&!accessReady&&<form className="t2-access-form" onSubmit={e=>{e.preventDefault();if(accessDraft.trim()){setAccessToken(accessDraft);setAccessReady(true);setAccessDraft('');setError('');}}}><label htmlFor="chatAccessKey">Private chat access token</label><input id="chatAccessKey" type="password" value={accessDraft} onChange={e=>setAccessDraft(e.target.value)} autoComplete="off" placeholder="Enter access token" /><button type="submit" className="secondary" disabled={!accessDraft.trim()}>Unlock AI</button></form>}
+  {!branchesOpen&&aiConfigured()&&!accessReady&&<form className="t2-access-form" onSubmit={async e=>{e.preventDefault();if(!accessDraft.trim()||verifyingAccess)return;setVerifyingAccess(true);setError('');try{await verifyAccessToken(accessDraft.trim());setAccessToken(accessDraft);setAccessReady(true);setAccessDraft('');}catch(err){setAccessReady(false);setError(err instanceof Error?err.message:'Could not verify access token.');}finally{setVerifyingAccess(false);}}}><label htmlFor="chatAccessKey">Private chat access token</label><input id="chatAccessKey" type="password" value={accessDraft} onChange={e=>setAccessDraft(e.target.value)} autoComplete="off" placeholder="Enter access token" /><button type="submit" className="secondary" disabled={!accessDraft.trim()||verifyingAccess}>{verifyingAccess?"Verifying…":"Unlock AI"}</button></form>}
   {!branchesOpen&&!aiConfigured()&&<p className="muted" role="status">AI backend not connected — messages are saved as notes.</p>}
   {error&&<p role="alert">{error}</p>}
  </section>;
