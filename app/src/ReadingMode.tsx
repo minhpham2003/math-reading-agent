@@ -48,7 +48,7 @@ export function ReadingMode({sessionId,title,units,onNavigate,onToggle,onSetup}:
    </div>)}</div>}
   </section>
   <section className="reading-conversation">
-   <h3>Reading agent</h3><p className="muted">This is the conversation layout preview. No AI replies yet—questions and observations are saved as local notes.</p>
+   <p className="muted">This is the conversation layout preview. No AI replies yet—questions and observations are saved as local notes.</p>
    <div className="reading-note-list">{notes.length===0?<p className="muted">No notes yet. Add a question or observation as you read.</p>:notes.map((note,i)=><div className="reading-note" key={i}>{note}</div>)}</div>
    <form onSubmit={addNote}><textarea rows={3} aria-label="Question or reading note" placeholder="Ask a question or write a note…" value={draft} onChange={e=>setDraft(e.target.value)}/>
     <button className="primary" type="submit" disabled={!draft.trim()}>Save note</button></form>
