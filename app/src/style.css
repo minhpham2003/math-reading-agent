@@ -626,3 +626,6 @@
  vertical-align:middle;
 }
 .reader-header .pdf-page-form input{display:block;line-height:normal}
+
+/* Match reading-plan text to the other toolbar action labels. */
+.reader-header .reader-plan-toggle{font-size:12px;font-weight:400}
