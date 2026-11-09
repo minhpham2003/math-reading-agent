@@ -1,6 +1,7 @@
 import {useEffect,useState} from 'react';
 import {ReadingMode} from './ReadingMode';
 import {generatePdfAssessment} from './pdfAssessment';
+import {generatePdfPlan} from './pdfPlan';
 import {getAccessToken,setAccessToken,verifyAccessToken} from './aiChat';
 
 type Assessment = {
@@ -8,7 +9,7 @@ type Assessment = {
  minutes:string; recommendation:string;
 };
 type Unit = {id:string; title:string; page:number; endPage?:number; description:string; done:boolean};
-type State = {assessment:Assessment; assessmentApproved:boolean; planApproved:boolean; units:Unit[]; stage:'assessment'|'plan'|'reading'; assessmentSource?:{kind:'ai';pages:number[];name:string;coverage:string}};
+type State = {assessment:Assessment; assessmentApproved:boolean; planApproved:boolean; units:Unit[]; stage:'assessment'|'plan'|'reading'; assessmentSource?:{kind:'ai';pages:number[];name:string;coverage:string}; planSource?:{kind:'ai';pages:number[];coverage:string}};
 const key=(id:string)=>'higher-math:reading-flow:v1:'+id;
 function mockAssessment(title:string,first:number,last:number,minutes:number):Assessment {
  return {
@@ -65,6 +66,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const [assessmentOpen,setAssessmentOpen]=useState(!state.assessmentApproved);
  const [error,setError]=useState('');
  const [analyzing,setAnalyzing]=useState(false);
+ const [generatingPlan,setGeneratingPlan]=useState(false);
  const [tokenDraft,setTokenDraft]=useState('');
  const [hasToken,setHasToken]=useState(!!getAccessToken());
  const [verifying,setVerifying]=useState(false);
@@ -94,6 +96,16 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  function updateAssessment(field:keyof Assessment,value:string){
   change({...state,assessment:{...state.assessment,[field]:value},assessmentApproved:false,planApproved:false,stage:'assessment'});
  }
+ async function generatePlan(){
+  if(generatingPlan||!state.assessmentApproved)return;
+  setGeneratingPlan(true);setError('');
+  try{
+   const result=await generatePdfPlan(sessionId,state.assessment,firstPage,lastPage,duration);
+   change({...state,units:result.units,planSource:{kind:'ai',pages:result.sourcePages,coverage:result.coverage},planApproved:false,stage:'plan'});
+   setExpanded(true);
+  }catch(e){const msg=e instanceof Error?e.message:'Could not generate reading plan.';setError(msg);if(/access token|unauthorized|invalid token/i.test(msg)){setAccessToken('');setHasToken(false);setAssessmentOpen(true);}}
+  finally{setGeneratingPlan(false);}
+ }
  function updateUnit(id:string,patch:Partial<Unit>){
   change({...state,units:state.units.map(unit=>unit.id===id?{...unit,...patch}:unit),planApproved:false,stage:'plan'});
  }
@@ -108,7 +120,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
   for(const [index,unit] of state.units.entries()){
    if(!unit.title.trim())return 'Unit '+(index+1)+' needs a title.';
    if(!Number.isInteger(unit.page)||unit.page<1)return 'Unit '+(index+1)+' needs a valid PDF start page.';
-   if(unit.endPage!==undefined&&(!Number.isInteger(unit.endPage)||unit.endPage<unit.page))
+   if(unit.endPage!==undefined&&(!Number.isInteger(unit.endPage)||unit.endPage<unit.page||unit.endPage>lastPage))
      return 'Unit '+(index+1)+' needs an end page at or after its start page.';
   }
   return null;
@@ -160,13 +172,16 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
   {expanded&&<div className="flow-plan">
    {!state.assessmentApproved?<p className="muted">Approve the assessment before constructing the reading plan.</p>:
    <>
-    <p className="muted">Suggested mock units are editable. Their PDF page ranges are placeholders, not verified source locations. Modify them before accepting.</p>
+    <div className="plan-generation-panel">
+      <button type="button" className="primary" disabled={generatingPlan||!hasToken} onClick={()=>void generatePlan()}>{generatingPlan?'Generating reading plan…':state.planSource?'Regenerate reading plan':'Generate reading plan from PDF'}</button>
+      {state.planSource?<p className="muted">{state.planSource.coverage} Review and edit the goals before accepting; referenced page locations are from extracted PDF text.</p>:<p className="muted">The goals below are placeholders, not an AI-generated plan. Generate a source-grounded plan to continue.</p>}
+    </div>
     {state.units.map((unit,i)=><div className="flow-unit" key={unit.id}>
       <div className="flow-unit-title"><span>{i+1}.</span><input placeholder="Unit title" autoFocus={unit.title===''&&i===state.units.length-1} aria-label={'Unit '+(i+1)+' title'} value={unit.title} onChange={e=>updateUnit(unit.id,{title:e.target.value})}/></div>
 
       <div className="flow-page-range">
-       <label>PDF start page<input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF start page'} value={unit.page||''} onChange={e=>updateUnit(unit.id,{page:e.target.value===''?0:Number(e.target.value)})}/></label>
-       <label>PDF end page <span className="muted">(optional)</span><input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF end page'} placeholder="Same page" value={unit.endPage===undefined?'':unit.endPage} onChange={e=>updateUnit(unit.id,{endPage:e.target.value===''?undefined:Number(e.target.value)})}/></label>
+       <label>PDF start page<input type="number" min={firstPage} max={lastPage} aria-label={'Unit '+(i+1)+' PDF start page'} value={unit.page||''} onChange={e=>updateUnit(unit.id,{page:e.target.value===''?0:Number(e.target.value)})}/></label>
+       <label>PDF end page <span className="muted">(optional)</span><input type="number" min="1" aria-label={'Unit '+(i+1)+' PDF end page'} placeholder="Same page" max={lastPage} value={unit.endPage===undefined?'':unit.endPage} onChange={e=>updateUnit(unit.id,{endPage:e.target.value===''?undefined:Number(e.target.value)})}/></label>
       </div>
       <label>Description<textarea rows={2} aria-label={'Unit '+(i+1)+' description'} value={unit.description} onChange={e=>updateUnit(unit.id,{description:e.target.value})}/></label>
       <div className="flow-actions">
@@ -179,6 +194,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
     </div>)}
     {!state.planApproved&&<button className="secondary add-unit-trigger" type="button" onClick={addUnit}>+ Add unit</button>}
     {!state.planApproved?<button className="primary" onClick={()=>{
+     if(!state.planSource){setError('Generate a PDF-grounded reading plan before accepting it.');return;}
      const problem=validatePlan();
      if(problem){setError(problem);return;}
      change({...state,planApproved:true,stage:'reading'});setExpanded(false);setSetupMode(false);onNavigate(state.units[0].page);
