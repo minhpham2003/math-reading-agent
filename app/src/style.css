@@ -823,3 +823,7 @@ html[data-theme="light"] .t2-settings input{background:#eef1f5;color:#25394f;bor
 .new-session-dialog .dialog-actions{margin-top:13px;gap:9px}
 .new-session-dialog .dialog-actions button{font-size:14.5px;padding:9px 13px}
 @media(max-height:650px){.new-session-dialog{padding:14px 20px}.new-session-dialog label{margin:7px 0}.new-session-dialog input,.new-session-dialog select{padding:7px 10px}}
+
+/* Keep session creation actions at regular font weight. */
+.dashboard .hero .primary,
+.new-session-dialog .dialog-actions button{font-weight:400}
