@@ -56,7 +56,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    const thread=updated.threads.find(t=>t.id===threadId)!;
    const messages=thread.messages.filter(m=>m.role==='user'||m.role==='assistant').map(m=>({role:m.role as 'user'|'assistant',content:m.text}));
    const context=await retrievePdfContext(sessionId,entry.text,currentPdfPage).catch(()=>undefined);
-   const citationPages=context?[...context.matchAll(/\\[PDF page (\\d+)\\]/g)].map(match=>Number(match[1])):[];
+   const citationPages=context?[...context.matchAll(/\[PDF page (\d+)\]/g)].map(match=>Number(match[1])):[];
    const reply=await requestAiReply(messages,context);
    // Read the latest stored state so branch navigation and PDF tangent updates are preserved.
    const latest=read(sessionId);
