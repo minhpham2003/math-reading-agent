@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import {readChatCitations,removeChatCitation,citationDeepLink,CHAT_CITATIONS_EVENT} from './chatCitations';
+import {copyLinkedCitation} from './citationClipboard';
 import { getDocument, GlobalWorkerOptions, TextLayer, type PDFDocumentProxy } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import 'pdfjs-dist/web/pdf_viewer.css';
@@ -596,7 +597,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     catch {setMessage('Could not delete citation.');}
   }
   function copyCitationLink(ref:Citation){
-    void navigator.clipboard.writeText(citationDeepLink(sessionId,ref.id,'pdf')).catch(()=>setMessage('Clipboard unavailable.'));
+    void copyLinkedCitation(sessionId,ref.id,'pdf','p. '+ref.page).catch(()=>setMessage('Clipboard unavailable.'));
   }
   function goCitation(ref:Citation) {
     if (ref.filename !== filename) {setMessage('This citation belongs to another imported PDF.');return;}
@@ -616,6 +617,16 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       elements?.forEach(el=>{el.classList.remove('source-highlight-flash');void el.offsetWidth;el.classList.add('source-highlight-flash');});
     },180);
   }
+  useEffect(()=>{
+    const open=(event:Event)=>{
+      const detail=(event as CustomEvent<{sessionId?:string;id:string}>).detail;
+      if(detail?.sessionId!==sessionId)return;
+      const ref=readRefs(sessionId).find(c=>c.id===detail.id);
+      if(ref)goCitation(ref);
+    };
+    window.addEventListener('higher-math:open-pdf-citation',open);
+    return()=>window.removeEventListener('higher-math:open-pdf-citation',open);
+  },[sessionId,filename,scrollRoot,pdf]);
   const openedCitationRef=useRef<string|null>(null);
   useEffect(()=>{
     if(!pdf||!scrollRoot)return;
@@ -676,7 +687,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
             window.dispatchEvent(new CustomEvent('higher-math:open-chat-citation',{detail:{sessionId,id:ref.id}}));
             setShowCitations(false);
           }}>Agent chat ↗</button>
-          <button className="secondary" onClick={()=>void navigator.clipboard.writeText(citationDeepLink(sessionId,ref.id,'chat')).catch(()=>setMessage('Clipboard unavailable.'))}>Copy</button>
+          <button className="secondary" onClick={()=>void copyLinkedCitation(sessionId,ref.id,'chat','Chat citation').catch(()=>setMessage('Clipboard unavailable.'))}>Copy</button>
           <button className="secondary" onClick={()=>removeChatCitation(sessionId,ref.id)}>Remove</button>
         </div>
         <span className="source-entry-excerpt" title={ref.text}>“{ref.text}”</span>
