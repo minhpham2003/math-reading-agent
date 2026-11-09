@@ -24,6 +24,8 @@ export function App() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [pageJump, setPageJump] = useState<{page:number;seq:number}|null>(null);
   const [agentOpen, setAgentOpen] = useState(true);
+  const [theme,setTheme]=useState<'dark'|'light'>(()=>localStorage.getItem('higher-math:theme')==='light'?'light':'dark');
+  useEffect(()=>{document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;localStorage.setItem('higher-math:theme',theme);},[theme]);
   const [agentFraction,setAgentFraction]=useState(()=>{const n=Number(localStorage.getItem('higher-math:agent-pane-fraction'));return n>=.25&&n<=.75?n:.46;});
   const gridRef=useRef<HTMLDivElement>(null);
   function resizeStart(e:ReactPointerEvent<HTMLDivElement>){if(e.button!==0)return;const grid=gridRef.current;if(!grid)return;e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);}
@@ -100,7 +102,7 @@ export function App() {
   }, [deleteId, newSessionOpen, creating]);
 
   return <div className="app-shell">
-    {!active && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><span className="topbar-tag">App foundation · no AI connected</span></header>}
+    {!active && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label="Toggle light or dark mode">{theme==='dark'?'☀ Light mode':'☾ Dark mode'}</button></header>}
     {storageError && <div role="alert" className="alert">{storageError}</div>}
     {!active ? <main className="dashboard">
       <div className="breadcrumb">← Library / Projects / Hatcher</div>
@@ -128,7 +130,7 @@ export function App() {
           <button type="button" className="reader-setup-gear" title="Session setup" aria-label="Session setup" onClick={()=>{setAgentOpen(true);window.setTimeout(()=>window.dispatchEvent(new Event('higher-math:open-session-setup')),0);}}>⚙</button>
         </div>
         <div id="reader-toolbar-slot" className="reader-toolbar-slot" aria-label="PDF controls"></div>
-        <div className="reader-header-right"><div id="reader-actions-slot" className="reader-actions-slot" aria-label="Document actions"></div><button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button></div>
+        <div className="reader-header-right"><div id="reading-plan-toolbar-slot" className="reading-plan-toolbar-slot"/><div id="reader-actions-slot" className="reader-actions-slot" aria-label="Document actions"></div><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button><button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button></div>
       </div>
       <div ref={gridRef} className={agentOpen ? "work-grid split-enabled" : "work-grid split-enabled agent-collapsed"} style={{gridTemplateColumns:agentOpen?`minmax(0, ${1-agentFraction}fr) 8px minmax(0, ${agentFraction}fr)`:'minmax(0, 1fr) 0px minmax(0, 0fr)'}}> 
         <article className="work-panel pdf-panel">
