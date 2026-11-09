@@ -25,6 +25,19 @@ function validQuote(quote:string,excerpt:string):boolean{
  return q.length>=5 && normalized(excerpt).includes(q);
 }
 
+function anchorForLabel(label:string,excerpt:string):string|undefined{
+ const result=/\\b(theorem|definition|lemma|proposition|corollary|example)\\s+(\\d+(?:\\.\\d+)*)\\b/i.exec(label);
+ if(!result)return;
+ const match=new RegExp('\\\\b'+result[1]+'\\\\s*'+result[2].replace(/\\./g,'\\\\s*\\\\.\\\\s*')+'\\\\b','i').exec(excerpt);
+ if(!match)return;
+ // Match a short, exact stretch from the extracted text, not a generated paraphrase.
+ return excerpt.slice(match.index,Math.min(excerpt.length,match.index+55)).trim();
+}
+function pageCitation(label:string,page:number,excerpt:string):string{
+ const quote=anchorForLabel(label,excerpt);
+ return '['+label+'](pdf-page:'+page+(quote?'?quote='+encodeURIComponent(quote).replace(/[()]/g,ch=>ch==='('?'%28':'%29'):'')+')';
+}
+
 export function preparePdfCitations(reply:string,context?:string):string{
  const excerpts=citationExcerptsFromContext(context);
  const clean=stripLegacySourceList(reply);
@@ -36,12 +49,12 @@ export function preparePdfCitations(reply:string,context?:string):string{
    if(internal[2]){
     let quote:string;
     try{quote=decodeURIComponent(internal[2]);}
-    catch{return '['+label+'](pdf-page:'+page+')';}
+    catch{return pageCitation(label,page,excerpt);}
     return validQuote(quote,excerpt)
      ? '['+label+'](pdf-page:'+page+'?quote='+encodeURIComponent(quote).replace(/[()]/g,char=>char==='('? '%28':'%29')+')'
-     : '['+label+'](pdf-page:'+page+')';
+     : pageCitation(label,page,excerpt);
    }
-   return '['+label+'](pdf-page:'+page+')';
+   return pageCitation(label,page,excerpt);
   }
   // A PDF page label can be rescued from a mistaken external link;
   // ordinary external links must never masquerade as source citations.
