@@ -343,3 +343,9 @@
 .t2-viewport-preview div+div{border-top:1px solid #466480;margin-top:7px;padding-top:7px}
 .t2-viewport-preview strong,.t2-viewport-preview small{display:block;overflow-wrap:anywhere}
 .t2-viewport-preview small{color:#b4d8ef;margin-top:4px}
+
+/* Measure the full breadcrumb trail without showing or clipping it. */
+.t2-breadcrumb-measure{position:absolute;visibility:hidden;pointer-events:none;white-space:nowrap;width:max-content;max-width:none;left:0;top:0;font:inherit}
+.t2-breadcrumb-measure span{padding:0 3px}
+.t2-breadcrumb>span{flex:none}
+.t2-breadcrumb>span button{max-width:none}
