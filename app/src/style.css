@@ -833,3 +833,33 @@ html[data-theme="light"] .t2-settings input{background:#eef1f5;color:#25394f;bor
 .t2-pdf-citation:hover,.t2-pdf-citation:focus-visible{color:#c1e2ff;text-decoration-thickness:2px}
 html[data-theme="light"] .t2-pdf-citation{color:#1c5c96}
 html[data-theme="light"] .t2-pdf-citation:hover,html[data-theme="light"] .t2-pdf-citation:focus-visible{color:#123e6c}
+
+/* Citation drawer lives above the agent pane, never underneath its controls.
+   Use a viewport overlay instead of positioning relative to the PDF reader. */
+.workspace .sources-drawer{
+ position:fixed;
+ top:58px;
+ right:12px;
+ z-index:1000;
+ max-height:calc(100dvh - 72px);
+ width:min(390px,calc(100vw - 24px));
+ overflow:auto;
+}
+html[data-theme="light"] .workspace .sources-drawer{
+ background:#e7ecf2;
+ border-color:#9eafc3;
+ color:#23384f;
+ box-shadow:0 12px 28px #25384b33;
+}
+html[data-theme="light"] .workspace .sources-drawer .source-entry{
+ border-color:#b6c5d5;
+}
+html[data-theme="light"] .workspace .sources-drawer .source-entry-link,
+html[data-theme="light"] .workspace .sources-drawer .source-entry-link strong,
+html[data-theme="light"] .workspace .sources-drawer .source-entry-link span{
+ color:#23384f;
+}
+html[data-theme="light"] .workspace .sources-drawer .secondary{
+ background:#cad6e3;
+ color:#23384f;
+}
