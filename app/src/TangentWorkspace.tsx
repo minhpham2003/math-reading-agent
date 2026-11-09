@@ -86,10 +86,10 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
   const node=data.threads.find(t=>t.id===id);if(!node)return null;
   const kids=data.threads.filter(t=>t.parentId===id);
   const expanded=data.expandedIds.includes(id);
-  return <div key={id} className="t2-tree-node" style={{paddingLeft:depth*13}}>
+  return <div key={id} className={'t2-tree-node'+(depth===0?' t2-tree-root':'')}>
    <div className="t2-tree-row">{kids.length?<button aria-label={(expanded?'Collapse ':'Expand ')+node.title} onClick={()=>persist({...data,expandedIds:expanded?data.expandedIds.filter(x=>x!==id):[...data.expandedIds,id]})}>{expanded?'▾':'▸'}</button>:<span className="t2-tree-spacer"/>}
     <button className={'t2-tree-title'+(id===branch.id?' current':'')} onClick={()=>go(id)}>{node.title}</button>{id!=='main'&&<span className={node.status==='completed'?'t2-done':'t2-pending'} title={node.status}>{node.status==='completed'?'✓':'●'}</span>}
-   </div>{expanded&&kids.map(k=>renderTree(k.id,depth+1))}</div>;
+   </div>{expanded&&kids.length>0&&<div className="t2-tree-children">{kids.map(k=>renderTree(k.id,depth+1))}</div>}</div>;
  }
  function saveSettings(){const value=nameDraft.trim()||branch.title;persist({...data,threads:data.threads.map(t=>t.id===branch.id?{...t,title:value}:t)});setSettings(false);}
  function finishSave(){const parent=branch.parentId;if(!parent)return;persist({...data,activeId:parent,threads:data.threads.map(t=>t.id===branch.id?{...t,status:'completed',summary:summary.trim()}:t)});setFinish(false);if(branch.originPage)onNavigate(branch.originPage);}
