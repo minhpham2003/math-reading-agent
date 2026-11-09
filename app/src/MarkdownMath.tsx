@@ -14,6 +14,6 @@ function normalizeMath(input:string){
  }).join('');
 }
 
-export function MarkdownMath({text}:{text:string}){
- return <div className="t2-rich-text"><Markdown remarkPlugins={[remarkGfm,remarkMath]} rehypePlugins={[[rehypeKatex,{trust:false,strict:'ignore'}]]}>{normalizeMath(text)}</Markdown></div>;
+export function MarkdownMath({text,onPdfNavigate,allowedPages}:{text:string;onPdfNavigate?:(page:number)=>void;allowedPages?:number[]}){
+ return <div className="t2-rich-text"><Markdown remarkPlugins={[remarkGfm,remarkMath]} rehypePlugins={[[rehypeKatex,{trust:false,strict:'ignore'}]]} components={{a:({href,children})=>{const match=/^pdf-page:(\\d+)$/.exec(href??'');if(match){const page=Number(match[1]);return onPdfNavigate&&allowedPages?.includes(page)?<button type="button" className="t2-pdf-citation" onClick={()=>onPdfNavigate(page)} title={'Go to PDF page '+page}>{children} ↗</button>:<span>{children}</span>;}return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;}}}>{normalizeMath(text)}</Markdown></div>;
 }
