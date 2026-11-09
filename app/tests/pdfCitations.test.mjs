@@ -27,11 +27,11 @@ test('unretrieved PDF page cannot be linked',()=>{
 test('bare supported page mention becomes internal citation',()=>{
  assert.equal(preparePdfCitations('Refer to PDF page 7.',context),'Refer to [PDF page 7](pdf-page:7).');
 });
-test('verified quote is preserved, fabricated quote is downgraded to page-only',()=>{
+test('passage quotes survive even when extracted PDF text differs',()=>{
  assert.equal(preparePdfCitations('[theorem](pdf-page:7?quote=the%20theorem%20on%20spectral%20sequences)',context),
    '[theorem](pdf-page:7?quote=the%20theorem%20on%20spectral%20sequences)');
  assert.equal(preparePdfCitations('[theorem](pdf-page:7?quote=not%20in%20the%20source)',context),
-   '[theorem](pdf-page:7)');
+   '[theorem](pdf-page:7?quote=not%20in%20the%20source)');
 });
 test('unrelated automatic PDF sources lists are removed, including from old replies',()=>{
  const message='A supported claim.\n\nPDF sources: [p. 7](pdf-page:7) · [p. 3](pdf-page:3)';
