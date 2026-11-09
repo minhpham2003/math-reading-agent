@@ -120,7 +120,7 @@ export function App() {
           <button type="button" className="reader-setup-gear" title="Session setup" aria-label="Session setup" onClick={()=>{setAgentOpen(true);window.setTimeout(()=>window.dispatchEvent(new Event('higher-math:open-session-setup')),0);}}>⚙</button>
         </div>
         <div id="reader-toolbar-slot" className="reader-toolbar-slot" aria-label="PDF controls"></div>
-        <button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button>
+        <div className="reader-header-right"><div id="reader-actions-slot" className="reader-actions-slot" aria-label="Document actions"></div><button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button></div>
       </div>
       <div className={agentOpen ? "work-grid" : "work-grid agent-collapsed"}>
         {agentOpen && <article className="work-panel agent-panel">
@@ -129,7 +129,7 @@ export function App() {
             onNavigate={page => setPageJump(old=>({page,seq:(old?.seq??0)+1}))}/>
         </article>}
         <article className="work-panel pdf-panel">
-          <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} toolbarHostId="reader-toolbar-slot" pageJump={pageJump} />
+          <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} toolbarHostId="reader-toolbar-slot" actionsHostId="reader-actions-slot" pageJump={pageJump} />
         </article>
       </div>
     </section>}
