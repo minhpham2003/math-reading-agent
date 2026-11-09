@@ -471,7 +471,7 @@
 .pdf-dark-mode .t2-pdf-highlight:hover{background:rgba(255,237,172,.46);outline:1px solid #ffe69b}
 
 /* Basic AI conversation: distinguish model replies from reader notes. */
-.t2-message.assistant{background:#1c3043;border-left:2px solid #719cc4;padding:11px 13px;border-radius:8px;white-space:pre-wrap;line-height:1.55}
+.t2-message.assistant{align-self:stretch;max-width:100%;background:transparent;border:0;padding:6px 2px;border-radius:0;white-space:pre-wrap;line-height:1.6}
 .t2-message.user{white-space:pre-wrap}
 
 /* Tangent branch hierarchy: nested tree guides and elbow connectors. */
