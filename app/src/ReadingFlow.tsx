@@ -57,6 +57,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const [assessmentOpen,setAssessmentOpen]=useState(!state.assessmentApproved);
  const [error,setError]=useState('');
  useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(!load(sessionId,title,firstPage,lastPage,duration).assessmentApproved);setExpanded(!load(sessionId,title,firstPage,lastPage,duration).planApproved);setSetupMode(!(load(sessionId,title,firstPage,lastPage,duration).assessmentApproved&&load(sessionId,title,firstPage,lastPage,duration).planApproved));},[sessionId]);
+ useEffect(()=>{const open=()=>{setSetupMode(true);setAssessmentOpen(false);setExpanded(false);};window.addEventListener('higher-math:open-session-setup',open);return()=>window.removeEventListener('higher-math:open-session-setup',open);},[]);
  function change(next:State) {
   try {localStorage.setItem(key(sessionId),JSON.stringify(next));setState(next);setError('');}
   catch{setError('Unable to save this session. Check browser storage.');}
@@ -93,7 +94,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  if(state.assessmentApproved&&state.planApproved&&!setupMode) {
   return <ReadingMode sessionId={sessionId} title={title} units={state.units} currentPdfPage={currentPdfPage}
     onNavigate={onNavigate} onToggle={id=>change({...state,units:state.units.map(u=>u.id===id?{...u,done:!u.done}:u)})}
-    onSetup={()=>{setSetupMode(true);setAssessmentOpen(false);setExpanded(false);}} />;
+    />;
  }
  return <div className="reading-flow">
   {state.assessmentApproved&&state.planApproved&&<button className="secondary return-reading" onClick={()=>setSetupMode(false)}>← Return to reading</button>}
