@@ -629,3 +629,10 @@
 
 /* Match reading-plan text to the other toolbar action labels. */
 .reader-header .reader-plan-toggle{font-size:12px;font-weight:400}
+
+/* Legible PDF pagination and zoom values in light mode. */
+:root[data-theme="light"] .reader-header .pdf-toolbar .page-indicator,
+:root[data-theme="light"] .reader-header .pdf-page-form,
+:root[data-theme="light"] .reader-header .pdf-zoom-form,
+:root[data-theme="light"] .reader-header .pdf-zoom-form input,
+:root[data-theme="light"] .reader-header .pdf-page-form input{color:#1f3854;opacity:1}
