@@ -117,7 +117,7 @@ export function App() {
       <div className="reader-header">
         <div className="reader-header-identity">
           <button className="reader-back" onClick={() => navigate(null)} aria-label="Back to Hatcher dashboard" title="Back to dashboard">←</button>
-          <span className="reader-session-name" title={active.title}>{active.title}</span>
+          <span className="reader-session-name" title={active.title}>{active.title}</span><span className="reader-session-section" title={active.target}>{active.target}</span>
           <details className="reader-details"><summary title="Session details" aria-label="Session details">⋯</summary><div className="reader-details-pop"><strong>{active.title}</strong><p>{active.target}</p><p>Printed pp. {active.firstPage}–{active.lastPage} · {active.durationMinutes} min</p><p>PDF page numbers may differ from printed pages.</p><button type="button" className="secondary reader-setup-link" onClick={()=>{document.querySelector("details.reader-details")?.removeAttribute("open");window.dispatchEvent(new Event("higher-math:open-session-setup"));setAgentOpen(true);}}>⚙ Session setup</button></div></details>
         </div>
         <div id="reader-toolbar-slot" className="reader-toolbar-slot" aria-label="PDF controls"></div>
