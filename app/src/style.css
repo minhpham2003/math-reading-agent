@@ -20,7 +20,7 @@
 
 /* Compact, distraction-free reading view */
 .workspace{height:100dvh;min-height:0;padding:0;display:flex;flex-direction:column;overflow:hidden}
-.reader-header{height:46px;min-height:46px;display:flex;align-items:center;gap:12px;padding:4px 10px;border-bottom:1px solid #28374b;background:#111d2c;position:relative;z-index:3}
+.reader-header{height:51px;min-height:51px;display:flex;align-items:center;gap:12px;padding:4px 10px;border-bottom:1px solid #28374b;background:#111d2c;position:relative;z-index:3}
 .reader-header-identity{display:flex;align-items:center;gap:8px;min-width:0;flex:0 1 280px}
 .reader-back{border:0;background:none;color:#bed6f5;font-size:24px;line-height:1;padding:3px 7px}
 .reader-session-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:700}
