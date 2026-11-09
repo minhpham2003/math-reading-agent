@@ -7,8 +7,8 @@ export const TANGENT_EVENT='higher-math:tangent-created';
 export const CHANGED_EVENT='higher-math:tangents-changed';
 export const key=(session:string)=>'higher-math:tangents:v2:'+session;
 export const buildCommit=(import.meta.env.VITE_COMMIT_SHA || 'local').slice(0,7);
-export const initial=():TangentData=>({version:2,activeId:'main',anchors:[],expandedIds:[],threads:[{id:'main',parentId:null,title:buildCommit,status:'in-progress',messages:[],summary:'',sourceIds:[]}]});
-export function read(session:string):TangentData{try{const v=JSON.parse(localStorage.getItem(key(session))||'null') as TangentData|null;if(v?.version===2&&Array.isArray(v.threads)&&Array.isArray(v.anchors)&&v.threads.some(t=>t.id==='main'))return {...v,threads:v.threads.map(t=>t.id==='main'?{...t,title:buildCommit}:t)};}catch{}return initial();}
+export const initial=():TangentData=>({version:2,activeId:'main',anchors:[],expandedIds:[],threads:[{id:'main',parentId:null,title:'Main branch',status:'in-progress',messages:[],summary:'',sourceIds:[]}]});
+export function read(session:string):TangentData{try{const v=JSON.parse(localStorage.getItem(key(session))||'null') as TangentData|null;if(v?.version===2&&Array.isArray(v.threads)&&Array.isArray(v.anchors)&&v.threads.some(t=>t.id==='main'))return {...v,threads:v.threads.map(t=>t.id==='main'?{...t,title:'Main branch'}:t)};}catch{}return initial();}
 export function write(session:string,v:TangentData){localStorage.setItem(key(session),JSON.stringify(v));window.dispatchEvent(new CustomEvent(CHANGED_EVENT,{detail:{session}}));}
 const titleFor=(text:string)=>text.trim().replace(/\s+/g,' ').slice(0,52)||'New branch';
 export function createTangent(session:string,origin:Omit<Anchor,'id'|'branchId'|'createdAt'>):string{
