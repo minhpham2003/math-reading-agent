@@ -152,7 +152,7 @@ function ContinuousPage({ pdf, number, scale, root, citations, tangentAnchors, o
     <canvas ref={canvas} aria-hidden="true" style={{ display: visible ? 'block' : 'none' }} />
     <div ref={layerRef} className="textLayer" />
     {citations.flatMap(ref => tidyBoxes(ref.boxes).map((b, i) =>
-      <div key={ref.id + '-' + i} className="source-highlight" title={ref.text}
+      <div key={ref.id + '-' + i} className="source-highlight" data-citation-id={ref.id} title={ref.text}
         style={{left:(b.x*100)+'%',top:(b.y*100)+'%',width:(b.w*100)+'%',height:(b.h*100)+'%'}} />))}
     {tangentAnchors.flatMap(a=>tidyBoxes(a.boxes??[]).map((b,i)=><button key={a.id+'-'+i} type="button" className="t2-pdf-highlight" title={'↗ '+a.text.slice(0,120)} onClick={event=>{event.stopPropagation();onTangentClick(tangentAnchors.filter(other=>other.boxes?.some(c=>c.x<b.x+b.w&&c.x+c.w>b.x&&c.y<b.y+b.h&&c.y+c.h>b.y)).map(x=>x.id),event.currentTarget);}} style={{left:b.x*100+'%',top:b.y*100+'%',width:b.w*100+'%',height:b.h*100+'%'}} />))}
     {selectionBoxes?.length ? tidyBoxes(selectionBoxes).map((b,i) => <div key={'selected-'+i} className="visual-selection-highlight" style={{left:(b.x*100)+'%',top:(b.y*100)+'%',width:(b.w*100)+'%',height:(b.h*100)+'%'}} />) : null}
@@ -592,6 +592,13 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     try {localStorage.setItem(refsKey(sessionId),JSON.stringify(next));setCitations(next);}
     catch {setMessage('Could not delete citation.');}
   }
+  function copyCitationLink(ref:Citation){
+    const link=new URL(window.location.href);
+    link.searchParams.delete('v');
+    link.searchParams.set('citation',ref.id);
+    link.hash='session-'+encodeURIComponent(sessionId);
+    void navigator.clipboard.writeText(link.toString()).catch(()=>setMessage('Clipboard unavailable.'));
+  }
   function goCitation(ref:Citation) {
     if (ref.filename !== filename) {setMessage('This citation belongs to another imported PDF.');return;}
     const first=tidyBoxes(ref.boxes).sort((a,b)=>a.y-b.y)[0];
@@ -604,7 +611,22 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       window.setTimeout(()=>{ignoreScrollRef.current=false;},120);
     } else jump(ref.page);
     setShowCitations(false);
+    // Draw attention to the saved geometry when following a citation link.
+    window.setTimeout(()=>{
+      const elements=scrollRoot?.querySelectorAll<HTMLElement>('.source-highlight[data-citation-id="'+ref.id+'"]');
+      elements?.forEach(el=>{el.classList.remove('source-highlight-flash');void el.offsetWidth;el.classList.add('source-highlight-flash');});
+    },180);
   }
+  const openedCitationRef=useRef<string|null>(null);
+  useEffect(()=>{
+    if(!pdf||!scrollRoot)return;
+    const id=new URLSearchParams(window.location.search).get('citation');
+    if(!id||openedCitationRef.current===id)return;
+    const saved=readRefs(sessionId).find(ref=>ref.id===id);
+    if(!saved)return;
+    openedCitationRef.current=id;
+    goCitation(saved);
+  },[pdf,scrollRoot,sessionId]);
 
   function submitPage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -650,7 +672,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       {citations.map(ref => <div className="source-entry" key={ref.id}>
         <button className="source-entry-link" onClick={() => goCitation(ref)}>
           <strong>{ref.filename} · p. {ref.page}</strong><span>“{ref.text}”</span></button>
-        <button className="secondary" onClick={() => void navigator.clipboard.writeText(ref.filename+', PDF p. '+ref.page+': “'+ref.text+'”').catch(()=>setMessage('Clipboard unavailable.'))}>Copy</button>
+        <button className="secondary" onClick={() => copyCitationLink(ref)}>Copy</button>
         <button className="secondary" onClick={() => deleteCitation(ref.id)}>Remove</button>
       </div>)}
     </aside>}
