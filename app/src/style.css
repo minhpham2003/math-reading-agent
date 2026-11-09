@@ -1062,3 +1062,17 @@ html[data-theme="light"] .t2-input-wrap .t2-rich-composer{
  background:#e6e9ed;color:#203044;border-color:#adc1d8
 }
 html[data-theme="light"] .t2-composer-citation{background:#d2dce7;color:#245781}
+
+/* Reading plan status is visible even when the panel is closed. */
+.reader-header .reader-plan-toggle.plan-incomplete,
+:root[data-theme="light"] .reader-header .reader-plan-toggle.plan-incomplete{
+ background:#e4bc57;color:#32270f;border:1px solid #b88b26;
+}
+.reader-header .reader-plan-toggle.plan-incomplete:hover,
+:root[data-theme="light"] .reader-header .reader-plan-toggle.plan-incomplete:hover{background:#f0cc72}
+.reader-header .reader-plan-toggle.plan-complete,
+:root[data-theme="light"] .reader-header .reader-plan-toggle.plan-complete{
+ background:#3a9673;color:#fff;border:1px solid #267052;
+}
+.reader-header .reader-plan-toggle.plan-complete:hover,
+:root[data-theme="light"] .reader-header .reader-plan-toggle.plan-complete:hover{background:#43a780}
