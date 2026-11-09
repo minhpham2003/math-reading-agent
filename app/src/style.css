@@ -682,3 +682,22 @@
 :root[data-theme="light"] .dashboard .progress{background:#bdcbd9}
 :root[data-theme="light"] .dashboard .progress>div{background:#416eae}
 :root[data-theme="light"] .dashboard .notice{background:#e8e2d5;color:#604e31;border-color:#cfc0a4}
+
+/* Explicit light-theme PDF number fields. Their native input fill must not
+   retain the dark palette (including when the zoom field is focused). */
+html[data-theme="light"] .pdf-toolbar input[type="number"],
+html[data-theme="light"] .pdf-toolbar input[type="number"]:hover,
+html[data-theme="light"] .pdf-toolbar input[type="number"]:focus{
+ background-color:#dce4ed !important;
+ color:#1b324e !important;
+ -webkit-text-fill-color:#1b324e;
+ caret-color:#1b324e;
+ border-color:#9bafc5;
+ box-shadow:none;
+ opacity:1;
+ color-scheme:light;
+}
+html[data-theme="light"] .pdf-toolbar input[type="number"]:focus-visible{
+ outline:2px solid #668fbc;
+ outline-offset:2px;
+}
