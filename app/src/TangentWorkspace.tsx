@@ -103,7 +103,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    <div className="t2-breadcrumb" ref={breadcrumbRef}>
     <div className="t2-breadcrumb-measure" ref={breadcrumbMeasureRef} aria-hidden="true">{ancestry.map((t,i)=><span key={t.id}>{i>0?' › ':''}{t.title}</span>)}</div>
     {!breadcrumbCompact||ancestry.length<=2?<>{ancestry.map((t,i)=><span key={t.id}>{i>0&&' › '}<button className={t.id===branch.id?'active':''} onClick={()=>go(t.id)}>{t.title}</button></span>)}</>:
-     <><button onClick={()=>go('main')}>{data.threads.find(t=>t.id==='main')?.title??'Otter'}</button><span> › </span><button onClick={()=>setBreadOpen(v=>!v)}>…</button><span> › </span><button className="active" onClick={()=>go(branch.id)}>{branch.title}</button>
+     <><button onClick={()=>go('main')}>{data.threads.find(t=>t.id==='main')?.title??'local'}</button><span> › </span><button onClick={()=>setBreadOpen(v=>!v)}>…</button><span> › </span><button className="active" onClick={()=>go(branch.id)}>{branch.title}</button>
       {breadOpen&&<div className="t2-ellipsis-menu">{ancestry.slice(1,-1).map(t=><button key={t.id} onClick={()=>go(t.id)}>{t.title}</button>)}</div>}</>}
    </div>
    {branch.id!=='main'&&<button className="t2-gear" title="Tangent settings" aria-label="Tangent settings" onClick={()=>{setNameDraft(branch.title);setSettings(true);}}>⚙</button>}
