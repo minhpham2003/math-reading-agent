@@ -1146,3 +1146,38 @@ html[data-theme="light"] .t2-selection-pop button.primary:hover{
 .t2-access-form{column-gap:14px;align-items:center}
 .t2-access-form input{margin-right:8px}
 .t2-access-form button[type="submit"]{align-self:center;height:36px;min-height:0;padding:5px 13px;line-height:1.25}
+
+/* Identical segmented Cite | Branch geometry in both app themes.
+   Override earlier per-button styles (including hover and focus rings). */
+.floating-citation-action,
+.t2-selection-pop,
+html[data-theme="light"] .floating-citation-action,
+html[data-theme="light"] .t2-selection-pop{
+ display:inline-flex!important;align-items:stretch!important;gap:0!important;
+ padding:0!important;overflow:hidden!important;
+ border-radius:12px!important;
+}
+.floating-citation-action>button.primary,
+.t2-selection-pop>button.primary,
+html[data-theme="light"] .floating-citation-action>button.primary,
+html[data-theme="light"] .t2-selection-pop>button.primary{
+ appearance:none!important;display:block!important;
+ border:0!important;border-radius:0!important;
+ outline-offset:-3px;
+ box-shadow:none!important;
+ margin:0!important;transform:none!important;
+ padding:6px 16px!important;
+ font-size:14px!important;line-height:1.3!important;
+ font-weight:400!important;
+}
+.floating-citation-action>button.primary+button.primary,
+.t2-selection-pop>button.primary+button.primary,
+html[data-theme="light"] .floating-citation-action>button.primary+button.primary,
+html[data-theme="light"] .t2-selection-pop>button.primary+button.primary{
+ border-left-style:solid!important;border-left-width:1px!important;
+}
+html[data-theme="light"] .floating-citation-action,
+html[data-theme="light"] .t2-selection-pop{
+ background:#d1d8e0!important;border:1px solid #a9b9ca!important;
+ box-shadow:0 5px 14px rgba(26,44,64,.18)!important;
+}
