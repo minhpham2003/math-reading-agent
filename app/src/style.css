@@ -501,4 +501,4 @@
 
 /* Separate the chat header from the branch explorer and each tree item. */
 .t2-header{border-bottom:1px solid #64849f;padding-bottom:10px}
-.t2-branch-view-body .t2-tree-row{border-bottom:1px solid rgba(142,170,193,.42)}
+.t2-branch-view-body .t2-tree-title{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
