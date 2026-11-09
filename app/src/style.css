@@ -542,3 +542,37 @@
 @media(max-width:760px){
  .workspace .work-grid.agent-collapsed .agent-panel{display:none}
 }
+
+/* Toolbar actions for reading and app appearance. */
+.reading-plan-toolbar-slot{display:flex;align-items:center}
+.reader-plan-toggle,.reader-theme-toggle{border:0;border-radius:9px;background:#263750;color:#d7e6fd;padding:8px 12px;white-space:nowrap;font:inherit;cursor:pointer}
+.reader-plan-toggle:hover,.reader-theme-toggle:hover{background:#34516e}
+.reader-theme-toggle{font-size:16px;min-width:37px}
+@media(max-width:760px){.reader-plan-toggle{font-size:11px;padding:7px 5px}.reader-theme-toggle{padding:6px;min-width:26px}}
+/* App-wide light palette; PDF pages keep their original paper rendering. */
+:root[data-theme="light"]{color-scheme:light;background:#f4f7fb;color:#203044}
+:root[data-theme="light"] body,:root[data-theme="light"] .app-shell{background:#f4f7fb;color:#203044}
+:root[data-theme="light"] h1,:root[data-theme="light"] h2,:root[data-theme="light"] h3{color:#1c2d43}
+:root[data-theme="light"] p,:root[data-theme="light"] .muted{color:#53657d}
+:root[data-theme="light"] .topbar,:root[data-theme="light"] .reader-header{background:#eaf0f7;border-color:#c8d5e5;color:#203044}
+:root[data-theme="light"] .workspace,:root[data-theme="light"] .work-grid,:root[data-theme="light"] .pdf-panel{background:#f4f7fb}
+:root[data-theme="light"] .work-panel,:root[data-theme="light"] .card,:root[data-theme="light"] .dialog,:root[data-theme="light"] .reading-navigator,:root[data-theme="light"] .reading-flow,:root[data-theme="light"] .t2-workspace{background:#fff;color:#203044;border-color:#cad7e6}
+:root[data-theme="light"] .pdf-canvas-scroll,:root[data-theme="light"] .workspace .pdf-canvas-scroll{background:#e7ecf3}
+:root[data-theme="light"] .secondary,:root[data-theme="light"] .reader-agent-toggle,:root[data-theme="light"] .reader-theme-toggle,:root[data-theme="light"] .reader-plan-toggle,:root[data-theme="light"] .menu-button{background:#e1e9f3;color:#243d59}
+:root[data-theme="light"] .secondary:hover,:root[data-theme="light"] .reader-agent-toggle:hover,:root[data-theme="light"] .reader-plan-toggle:hover,:root[data-theme="light"] .reader-theme-toggle:hover{background:#d2dfef}
+:root[data-theme="light"] .primary{background:#2861b4;color:#fff}
+:root[data-theme="light"] .source,:root[data-theme="light"] .plan-body,:root[data-theme="light"] .agent-placeholder,:root[data-theme="light"] .session-row,:root[data-theme="light"] .reading-nav-item{background:#f3f7fc;color:#203044;border-color:#c8d5e5}
+:root[data-theme="light"] .t2-message.user,:root[data-theme="light"] .tangent-message{background:#dce9f7;color:#203044}
+:root[data-theme="light"] .t2-message.assistant{background:transparent;color:#203044}
+:root[data-theme="light"] .t2-message.system,:root[data-theme="light"] .t2-origin,:root[data-theme="light"] .t2-finish,:root[data-theme="light"] .t2-settings,:root[data-theme="light"] .t2-branch-view-body,:root[data-theme="light"] .t2-tree-pop,:root[data-theme="light"] .t2-ellipsis-menu,:root[data-theme="light"] .t2-selection-pop,:root[data-theme="light"] .t2-chooser,:root[data-theme="light"] .t2-pdf-menu{background:#eef4fa;color:#203044;border-color:#bdcfe3}
+:root[data-theme="light"] .t2-breadcrumb button,:root[data-theme="light"] .t2-breadcrumb button.active,:root[data-theme="light"] .t2-tree-title,:root[data-theme="light"] .t2-tree-row>button:first-child,:root[data-theme="light"] .t2-gear,:root[data-theme="light"] .t2-return,:root[data-theme="light"] .t2-chooser button,:root[data-theme="light"] .t2-pdf-menu button{color:#254c7a}
+:root[data-theme="light"] .t2-tree-title.current{background:#d1e2f4}
+:root[data-theme="light"] .t2-link,:root[data-theme="light"] .t2-notification-link{color:#19599e}
+:root[data-theme="light"] .tangent-workspace input:not([type=checkbox]),:root[data-theme="light"] .tangent-workspace textarea,:root[data-theme="light"] .t2-composer textarea,:root[data-theme="light"] .t2-finish textarea,:root[data-theme="light"] .t2-settings input,:root[data-theme="light"] .dialog input,:root[data-theme="light"] .dialog select,:root[data-theme="light"] .t2-input-wrap textarea{background:#fff;color:#203044;border-color:#adc1d8}
+:root[data-theme="light"] .t2-input-wrap,:root[data-theme="light"] .t2-composer,:root[data-theme="light"] .t2-conversation{background:#fff;color:#203044}
+:root[data-theme="light"] .t2-rich-text p{color:inherit}
+:root[data-theme="light"] .t2-rich-text pre{background:#eaf1f9}
+:root[data-theme="light"] .t2-hover{background:#fff;color:#203044;border-color:#a9c1db}
+:root[data-theme="light"] .pane-resizer{background:#d1deec}
+:root[data-theme="light"] .pane-resizer::after{background:#7897b8}
+:root[data-theme="light"] .pdf-dark-mode .pdf-canvas-scroll{background:#172434}
