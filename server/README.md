@@ -14,3 +14,11 @@ The backend must be deployed separately; GitHub Pages cannot execute Node servic
 
 ## Check
 `curl http://localhost:8787/health` confirms the service is running and whether a server-side API key is configured. It does not test a model response.
+
+## Render deployment
+
+The repository contains `render.yaml`, a Blueprint for a **separate** Higher Math chat API hosted in Frankfurt. The file uses branch `implementation/02-ai-chat`, runs `node server/index.mjs`, exposes `/health`, disables automatic redeploys, and declares `OPENAI_API_KEY` as a private environment variable to enter in Render.
+
+The API has **not** been deployed simply by committing this file. To deploy, connect a Render workspace, approve a service/plan, then create the service from the Blueprint and supply a server-side API key. The public React preview additionally needs `VITE_AI_API_URL=https://<deployed-service>` at Vite build time. Until then the preview still saves notes without AI replies.
+
+**Security gate:** The current backend has origin filtering but no authentication or production-grade rate limiting. CORS alone is not access control: anybody can call the public endpoint outside a browser. **Do not make the API public with a paid API key until access controls and abuse limits are in place.**
