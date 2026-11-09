@@ -1016,3 +1016,31 @@ html[data-theme="light"] .t2-selection-pop button.primary{
  color:#1e354c!important;
  -webkit-text-fill-color:#1e354c!important;
 }
+
+/* Selection actions: same explicit theme colors in PDF and agent chat. */
+.floating-citation-action button.primary,
+.t2-selection-pop button.primary{
+ background:#2861b3!important;
+ color:#fff!important;
+ -webkit-text-fill-color:#fff!important;
+ border:1px solid #3975c4!important;
+}
+.floating-citation-action button.primary:hover,
+.t2-selection-pop button.primary:hover{
+ background:#3474cb!important;
+ color:#fff!important;
+ -webkit-text-fill-color:#fff!important;
+}
+html[data-theme="light"] .floating-citation-action button.primary,
+html[data-theme="light"] .t2-selection-pop button.primary{
+ background:#d1d8e0!important;
+ color:#192b3f!important;
+ -webkit-text-fill-color:#192b3f!important;
+ border:1px solid #a9b9ca!important;
+}
+html[data-theme="light"] .floating-citation-action button.primary:hover,
+html[data-theme="light"] .t2-selection-pop button.primary:hover{
+ background:#bdc9d6!important;
+ color:#192b3f!important;
+ -webkit-text-fill-color:#192b3f!important;
+}
