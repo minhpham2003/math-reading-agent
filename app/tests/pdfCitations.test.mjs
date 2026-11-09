@@ -44,3 +44,11 @@ test('do not link phrases in code blocks',()=>{
  assert.equal(preparePdfCitations('```text\nPDF page 7\n```',context),
   '```text\nPDF page 7\n```');
 });
+
+test('a passage quote containing literal parentheses is fully consumed',()=>{
+ const src='[PDF page 7] Definition 1.1 A (homological) spectral sequence consists of data E and d.';
+ const source='Document: Notes.pdf.\nRetrieved excerpts:\n'+src;
+ const message='See [Definition 1.1](pdf-page:7?quote=Definition%201.1%20A%20(homological)%20spectral%20sequence) now.';
+ assert.equal(preparePdfCitations(message,source),
+  'See [Definition 1.1](pdf-page:7?quote=Definition%201.1%20A%20%28homological%29%20spectral%20sequence) now.');
+});
