@@ -938,3 +938,14 @@ html[data-theme="light"] .t2-pdf-preview-entry:hover,html[data-theme="light"] .t
 html[data-theme="light"] .t2-viewport-preview{background:#e4eaf0;color:#223950;border-color:#a9bfd5;box-shadow:0 8px 20px #23384b30}
 html[data-theme="light"] .t2-viewport-preview strong{color:#223950}
 html[data-theme="light"] .t2-viewport-preview small{color:#476780}
+
+/* Saved citations: clean list without a rule above the first reference. */
+.sources-drawer .source-entry:first-child,
+.sources-drawer .source-entry:first-of-type{border-top:0}
+/* Highlight the exact saved rectangles briefly after opening a copied link. */
+.source-highlight.source-highlight-flash{animation:saved-citation-glow 4.2s ease-out forwards}
+@keyframes saved-citation-glow{
+ 0%,56%{background:rgba(255,184,34,.72);box-shadow:0 0 0 3px rgba(234,145,18,.5)}
+ 100%{background:unset;box-shadow:none}
+}
+@media(prefers-reduced-motion:reduce){.source-highlight.source-highlight-flash{animation:none}}
