@@ -38,7 +38,7 @@ export function preparePdfCitations(reply:string,context?:string):string{
     try{quote=decodeURIComponent(internal[2]);}
     catch{return '['+label+'](pdf-page:'+page+')';}
     return validQuote(quote,excerpt)
-     ? '['+label+'](pdf-page:'+page+'?quote='+encodeURIComponent(quote)+')'
+     ? '['+label+'](pdf-page:'+page+'?quote='+encodeURIComponent(quote).replace(/[()]/g,char=>char==='('? '%28':'%29')+')'
      : '['+label+'](pdf-page:'+page+')';
    }
    return '['+label+'](pdf-page:'+page+')';
