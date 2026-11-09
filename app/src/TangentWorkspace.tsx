@@ -103,7 +103,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
    <button className="secondary" aria-pressed={branchesOpen} onClick={()=>{setBranchesOpen(v=>!v);setSettings(false);setSelection(null);setHoverPreview(null);}}>Branches</button>
   </header>
 
-  {branchesOpen?<div className="t2-branch-view"><div className="t2-branch-view-header"><h3>Branches</h3><button type="button" className="secondary" onClick={()=>setBranchesOpen(false)}>← Back to chat</button></div><div className="t2-branch-view-body" role="navigation" aria-label="Conversation branches">{renderTree('main',0)}</div></div>:settings?<div className="t2-settings">
+  {branchesOpen?<div className="t2-branch-view"><div className="t2-branch-view-body" role="navigation" aria-label="Conversation branches">{renderTree('main',0)}</div></div>:settings?<div className="t2-settings">
     <h3>Tangent settings</h3>
     <label>Title<input value={nameDraft} onChange={e=>setNameDraft(e.target.value)}/></label>
     <h4>Starting point</h4><p className="muted">{data.anchors.find(a=>a.id===branch.originId)?.kind==='pdf'?'PDF passage':'Conversation excerpt'}</p>
