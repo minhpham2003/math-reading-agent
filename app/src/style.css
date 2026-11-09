@@ -507,3 +507,23 @@
 .t2-message .chat-math-block{display:block;max-width:100%;overflow-x:auto;overflow-y:hidden;margin:12px 0;padding:4px 0}
 .t2-message .chat-math-inline{display:inline}
 .t2-message .katex{font-size:1.05em;color:inherit}
+
+/* Adjustable reader split: drag handle is intentionally narrow and visible. */
+.workspace .work-grid.split-enabled{gap:0}
+.pane-resizer{position:relative;background:#314962;cursor:col-resize;touch-action:none;min-width:8px;z-index:5}
+.pane-resizer::after{content:"";position:absolute;top:45%;left:2px;width:4px;height:48px;border-radius:4px;background:#81a4c4;opacity:.7}
+.pane-resizer:hover,.pane-resizer:focus-visible{background:#648db4;outline:0}
+.workspace .split-enabled .work-panel{min-width:0}
+@media(max-width:760px){.workspace .work-grid.split-enabled{display:flex;flex-direction:column;overflow:auto}.workspace .work-grid.split-enabled>.agent-panel,.workspace .work-grid.split-enabled>.pdf-panel{flex:1 0 360px}.pane-resizer{display:none}}
+/* Natural document rhythm for assistant Markdown instead of raw formatting marks. */
+.t2-message.assistant .t2-rich-text{white-space:normal;overflow-wrap:anywhere}
+.t2-rich-text>:first-child{margin-top:0}
+.t2-rich-text>:last-child{margin-bottom:0}
+.t2-rich-text p{color:inherit;line-height:1.65;margin:.6em 0}
+.t2-rich-text h1,.t2-rich-text h2,.t2-rich-text h3{font-size:1.1em;margin:1em 0 .35em}
+.t2-rich-text ul,.t2-rich-text ol{padding-left:1.6em;margin:.7em 0}
+.t2-rich-text li{margin:.35em 0}
+.t2-rich-text pre{overflow-x:auto;background:#17293d;padding:12px;border-radius:8px}
+.t2-rich-text code{font-size:.9em}
+.t2-rich-text blockquote{border-left:3px solid #6589ac;padding-left:12px;margin:12px 0}
+.t2-rich-text .katex-display{overflow-x:auto;overflow-y:hidden;padding:6px 0}
