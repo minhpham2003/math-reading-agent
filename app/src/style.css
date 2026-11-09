@@ -827,3 +827,9 @@ html[data-theme="light"] .t2-settings input{background:#eef1f5;color:#25394f;bor
 /* Keep session creation actions at regular font weight. */
 .dashboard .hero .primary,
 .new-session-dialog .dialog-actions button{font-weight:400}
+
+/* PDF source references in AI answers: inline, keyboard accessible links. */
+.t2-pdf-citation{display:inline;border:0;background:transparent;color:#8dc9ff;font:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;padding:0 2px;cursor:pointer}
+.t2-pdf-citation:hover,.t2-pdf-citation:focus-visible{color:#c1e2ff;text-decoration-thickness:2px}
+html[data-theme="light"] .t2-pdf-citation{color:#1c5c96}
+html[data-theme="light"] .t2-pdf-citation:hover,html[data-theme="light"] .t2-pdf-citation:focus-visible{color:#123e6c}
