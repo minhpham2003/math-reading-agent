@@ -10,13 +10,13 @@ export const buildCommit=(import.meta.env.VITE_COMMIT_SHA || 'local').slice(0,7)
 export const initial=():TangentData=>({version:2,activeId:'main',anchors:[],expandedIds:[],threads:[{id:'main',parentId:null,title:buildCommit,status:'in-progress',messages:[],summary:'',sourceIds:[]}]});
 export function read(session:string):TangentData{try{const v=JSON.parse(localStorage.getItem(key(session))||'null') as TangentData|null;if(v?.version===2&&Array.isArray(v.threads)&&Array.isArray(v.anchors)&&v.threads.some(t=>t.id==='main'))return {...v,threads:v.threads.map(t=>t.id==='main'?{...t,title:buildCommit}:t)};}catch{}return initial();}
 export function write(session:string,v:TangentData){localStorage.setItem(key(session),JSON.stringify(v));window.dispatchEvent(new CustomEvent(CHANGED_EVENT,{detail:{session}}));}
-const titleFor=(text:string)=>text.trim().replace(/\s+/g,' ').slice(0,52)||'New tangent';
+const titleFor=(text:string)=>text.trim().replace(/\s+/g,' ').slice(0,52)||'New branch';
 export function createTangent(session:string,origin:Omit<Anchor,'id'|'branchId'|'createdAt'>):string{
  const state=read(session),parent=state.threads.find(t=>t.id===state.activeId)??state.threads[0];
  const id=crypto.randomUUID(),anchorId=crypto.randomUUID(),stamp=new Date().toISOString();
  const anchor:Anchor={...origin,id:anchorId,branchId:id,createdAt:stamp};
  const child:Thread={id,parentId:parent.id,title:titleFor(origin.text),status:'in-progress',messages:[],summary:'',originId:anchorId,originPage:origin.page,contextText:origin.kind==='chat'?origin.text:undefined,sourceIds:origin.kind==='pdf'?[anchorId]:[]};
- const creation:Entry[] = origin.kind==='pdf'?[{id:crypto.randomUUID(),role:'system',text:'Created tangent',createdAt:stamp,anchorId}]:[];
+ const creation:Entry[] = origin.kind==='pdf'?[{id:crypto.randomUUID(),role:'system',text:'Created branch',createdAt:stamp,anchorId}]:[];
  write(session,{...state,activeId:id,anchors:[...state.anchors,anchor],threads:state.threads.map(t=>t.id===parent.id?{...t,messages:[...t.messages,...creation]}:t).concat(child),expandedIds:[...new Set([...state.expandedIds,parent.id])]});
  window.dispatchEvent(new CustomEvent(TANGENT_EVENT,{detail:{session,id,origin}}));
  return id;
