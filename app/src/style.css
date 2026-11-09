@@ -899,3 +899,7 @@ html[data-theme="light"] .dashboard .session-row{background:transparent;border-c
 .flow-unit-title input,.flow-unit-location strong{font-weight:400}
 html[data-theme="light"] .dialog .dialog-actions .secondary,
 html[data-theme="light"] .dialog .dialog-actions .danger{font-weight:400}
+
+/* Heading in the expanded Reading plan, alongside its setup gear. */
+.reading-plan-tools{justify-content:space-between;margin-bottom:10px}
+.reading-plan-heading{font-size:17px;font-weight:500;color:inherit}
