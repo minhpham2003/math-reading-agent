@@ -680,10 +680,12 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
         <button className="secondary" onClick={()=>removeChatCitation(sessionId,ref.id)}>Remove</button>
       </div>)}
       {citations.map(ref => <div className="source-entry" key={ref.id}>
-        <button className="source-entry-link" onClick={() => goCitation(ref)}>
-          <strong>{ref.filename} · p. {ref.page}</strong><span>“{ref.text}”</span></button>
-        <button className="secondary" onClick={() => copyCitationLink(ref)}>Copy</button>
-        <button className="secondary" onClick={() => deleteCitation(ref.id)}>Remove</button>
+        <div className="source-entry-toolbar">
+          <button className="source-entry-page" onClick={() => goCitation(ref)}>p. {ref.page} ↗</button>
+          <button className="secondary" onClick={() => copyCitationLink(ref)}>Copy</button>
+          <button className="secondary" onClick={() => deleteCitation(ref.id)}>Remove</button>
+        </div>
+        <button className="source-entry-excerpt" title={ref.text} onClick={() => goCitation(ref)}>“{ref.text}”</button>
       </div>)}
     </aside>}
     {pdf ?
