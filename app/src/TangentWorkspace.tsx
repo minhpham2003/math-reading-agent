@@ -22,7 +22,6 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  const breadcrumbMeasureRef=useRef<HTMLDivElement>(null);
  const [hoverPreview,setHoverPreview]=useState<{ids:string[];x:number;y:number}|null>(null);
  const [error,setError]=useState('');
- const dropdownRef=useRef<HTMLDivElement>(null);
  const conversationRef=useRef<HTMLDivElement>(null);
  const inputRef=useRef<HTMLTextAreaElement>(null);
  const savedScroll=useRef<Record<string,number>>({});
@@ -33,9 +32,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  function persist(next:TangentData){try{write(sessionId,next);setData(next);setError('');}catch{setError('Unable to save this tangent.');}}
  useEffect(()=>{const sync=(event:Event)=>{const e=event as CustomEvent<{session:string}>;if(e.detail?.session===sessionId)setData(read(sessionId));};
  window.addEventListener(CHANGED_EVENT,sync);return()=>window.removeEventListener(CHANGED_EVENT,sync);},[sessionId]);
- useEffect(()=>{function onDown(e:MouseEvent){if(dropdownRef.current&&!dropdownRef.current.contains(e.target as Node))setBranchesOpen(false);}
- function esc(e:KeyboardEvent){if(e.key==='Escape'){setBranchesOpen(false);setChooser(null);setSelection(null);setBreadOpen(false);}}
- document.addEventListener('mousedown',onDown);document.addEventListener('keydown',esc);return()=>{document.removeEventListener('mousedown',onDown);document.removeEventListener('keydown',esc);};},[]);
+ useEffect(()=>{function esc(e:KeyboardEvent){if(e.key==='Escape'){setBranchesOpen(false);setChooser(null);setSelection(null);setBreadOpen(false);}}document.addEventListener('keydown',esc);return()=>document.removeEventListener('keydown',esc);},[]);
  useEffect(()=>{if(conversationRef.current)conversationRef.current.scrollTop=savedScroll.current[branch.id]??0;},[branch.id,settings]);
  function go(id:string){setHoverPreview(null);if(!data.threads.some(t=>t.id===id))return;if(conversationRef.current)savedScroll.current[branch.id]=conversationRef.current.scrollTop;persist({...data,activeId:id});setSelection(null);setChooser(null);setSettings(false);setFinish(false);setBranchesOpen(false);setBreadOpen(false);}
  useEffect(()=>{const el=inputRef.current;if(!el)return;el.style.height='auto';el.style.height=Math.min(el.scrollHeight,180)+'px';},[draft,settings,finish]);
@@ -103,11 +100,10 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
       {breadOpen&&<div className="t2-ellipsis-menu">{ancestry.slice(1,-1).map(t=><button key={t.id} onClick={()=>go(t.id)}>{t.title}</button>)}</div>}</>}
    </div>
    {branch.id!=='main'&&<button className="t2-gear" title="Tangent settings" aria-label="Tangent settings" onClick={()=>{setNameDraft(branch.title);setSettings(true);}}>⚙</button>}
-   <div className="t2-branch-holder" ref={dropdownRef}><button className="secondary" aria-expanded={branchesOpen} onClick={()=>setBranchesOpen(v=>!v)}>Branches ▾</button>
-    {branchesOpen&&<div className="t2-tree-pop" role="navigation" aria-label="Conversation branches">{renderTree('main',0)}</div>}</div>
+   <button className="secondary" aria-pressed={branchesOpen} onClick={()=>{setBranchesOpen(v=>!v);setSettings(false);setSelection(null);setHoverPreview(null);}}>Branches</button>
   </header>
 
-  {settings?<div className="t2-settings">
+  {branchesOpen?<div className="t2-branch-view"><div className="t2-branch-view-header"><h3>Branches</h3><button type="button" className="secondary" onClick={()=>setBranchesOpen(false)}>← Back to chat</button></div><div className="t2-branch-view-body" role="navigation" aria-label="Conversation branches">{renderTree('main',0)}</div></div>:settings?<div className="t2-settings">
     <h3>Tangent settings</h3>
     <label>Title<input value={nameDraft} onChange={e=>setNameDraft(e.target.value)}/></label>
     <h4>Starting point</h4><p className="muted">{data.anchors.find(a=>a.id===branch.originId)?.kind==='pdf'?'PDF passage':'Conversation excerpt'}</p>
@@ -131,7 +127,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
     <form className="t2-composer" onSubmit={saveNote}><div className="t2-input-wrap"><textarea ref={inputRef} rows={1} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form?.requestSubmit();}}} placeholder="Ask a question or write a note…" aria-label="Reading note"/><button type="submit" className="t2-send-button" disabled={!draft.trim()||!!sendingThread} aria-label="Send message" title="Send message"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20V4M5 11l7-7 7 7"/></svg></button></div>{branch.id!=='main'&&<div className="t2-compose-actions"><button type="button" className="secondary" onClick={saveSummary}>✓ Finish tangent & return</button></div>}</form>}
   </>}
-  {!aiConfigured()&&<p className="muted" role="status">AI backend not connected — messages are saved as notes.</p>}
+  {!branchesOpen&&!aiConfigured()&&<p className="muted" role="status">AI backend not connected — messages are saved as notes.</p>}
   {error&&<p role="alert">{error}</p>}
  </section>;
 }
