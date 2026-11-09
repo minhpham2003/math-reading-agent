@@ -352,3 +352,7 @@
 
 /* A tangent's inherited excerpt reads as an unboxed italic passage. */
 .t2-origin-text{font-style:italic;margin:5px 0 14px;padding:0;color:inherit;white-space:pre-wrap;overflow-wrap:anywhere}
+
+.t2-origin-compact{margin:5px 0 14px;padding:0;color:inherit}
+.t2-origin-compact>span{display:block;font-weight:600;margin-bottom:4px}
+.t2-origin-compact .t2-origin-text{margin:0}
