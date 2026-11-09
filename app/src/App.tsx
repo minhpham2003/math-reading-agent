@@ -33,9 +33,29 @@ export function App() {
   useEffect(()=>{document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;localStorage.setItem('higher-math:theme',theme);},[theme]);
   const [agentFraction,setAgentFraction]=useState(()=>{const n=Number(localStorage.getItem('higher-math:agent-pane-fraction'));return n>=.25&&n<=.75?n:.46;});
   const gridRef=useRef<HTMLDivElement>(null);
-  function resizeStart(e:ReactPointerEvent<HTMLDivElement>){if(e.button!==0)return;const grid=gridRef.current;if(!grid)return;e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);}
-  function resizeMove(e:ReactPointerEvent<HTMLDivElement>){if(!e.currentTarget.hasPointerCapture(e.pointerId)||!gridRef.current)return;const box=gridRef.current.getBoundingClientRect();const frac=Math.min(.75,Math.max(.25,1-(e.clientX-box.left)/box.width));setAgentFraction(frac);}
-  function resizeEnd(e:ReactPointerEvent<HTMLDivElement>){if(e.currentTarget.hasPointerCapture(e.pointerId)){e.currentTarget.releasePointerCapture(e.pointerId);localStorage.setItem('higher-math:agent-pane-fraction',String(agentFraction));}}
+  const dragFractionRef=useRef(agentFraction);
+  const dragFrameRef=useRef<number|null>(null);
+  useEffect(()=>()=>{if(dragFrameRef.current!==null)cancelAnimationFrame(dragFrameRef.current);},[]);
+  function resizeStart(e:ReactPointerEvent<HTMLDivElement>){if(e.button!==0||!gridRef.current)return;e.preventDefault();dragFractionRef.current=agentFraction;e.currentTarget.setPointerCapture(e.pointerId);gridRef.current.classList.add('is-resizing');}
+  function resizeMove(e:ReactPointerEvent<HTMLDivElement>){
+    if(!e.currentTarget.hasPointerCapture(e.pointerId)||!gridRef.current)return;
+    const box=gridRef.current.getBoundingClientRect();
+    const frac=Math.min(.75,Math.max(.25,1-(e.clientX-box.left)/box.width));
+    dragFractionRef.current=frac;
+    if(dragFrameRef.current!==null)return;
+    dragFrameRef.current=requestAnimationFrame(()=>{
+      dragFrameRef.current=null;
+      if(gridRef.current)gridRef.current.style.gridTemplateColumns=`minmax(0, ${1-dragFractionRef.current}fr) 8px minmax(0, ${dragFractionRef.current}fr)`;
+    });
+  }
+  function resizeEnd(e:ReactPointerEvent<HTMLDivElement>){
+    if(!e.currentTarget.hasPointerCapture(e.pointerId))return;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    if(dragFrameRef.current!==null){cancelAnimationFrame(dragFrameRef.current);dragFrameRef.current=null;}
+    gridRef.current?.classList.remove('is-resizing');
+    setAgentFraction(dragFractionRef.current);
+    localStorage.setItem('higher-math:agent-pane-fraction',String(dragFractionRef.current));
+  }
 
   const active = sessions.find(s => s.id === activeId) ?? null;
   const pendingDelete = sessions.find(s => s.id === deleteId);
