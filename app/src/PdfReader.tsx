@@ -173,6 +173,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   const [zoom, setZoom] = useState(1);
   const [zoomInput,setZoomInput]=useState<string|null>(null);
   const [fitWidth, setFitWidth] = useState(true);
+  const [pdfDark,setPdfDark]=useState(()=>localStorage.getItem('higher-math:pdf-dark:'+sessionId)==='true');
   const [availableWidth, setAvailableWidth] = useState(700);
   const [toolbarHost, setToolbarHost] = useState<HTMLElement | null>(null);
   const [actionsHost,setActionsHost]=useState<HTMLElement|null>(null);
@@ -574,11 +575,12 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       <form className="pdf-zoom-form" onSubmit={submitZoom}><input type="number" min="10" max="500" step="1" value={zoomInput??String(Math.round(scale*100))} onChange={e=>setZoomInput(e.target.value)} onFocus={()=>setZoomInput(String(Math.round(scale*100)))} onBlur={()=>setZoomInput(null)} aria-label="PDF zoom percentage" title="Enter zoom percentage and press Enter"/><span>%</span></form>
       <button className="secondary" onClick={() => changeZoom(1)} aria-label="Zoom in">+</button>
       <button className="secondary" onClick={fitPageWidth} aria-label="Fit PDF to available width">↔</button>
+      <button type="button" className={'secondary pdf-dark-toggle'+(pdfDark?' is-on':'')} aria-pressed={pdfDark} title={pdfDark?'Switch PDF to light mode':'Switch PDF to dark mode'} aria-label="Toggle PDF dark mode" onClick={()=>setPdfDark(v=>{const next=!v;localStorage.setItem('higher-math:pdf-dark:'+sessionId,String(next));return next;})}>{pdfDark?'☀':'☾'}</button>
       </div>
     </>}
   </div>;
 
-  return <div className={visualSelection ? "pdf-reader has-visual-selection" : "pdf-reader"}>
+  return <div className={"pdf-reader"+(visualSelection?" has-visual-selection":"")+(pdfDark?" pdf-dark-mode":"")}>
     {toolbarHost ? createPortal(controls, toolbarHost) : (!toolbarHostId ? controls : null)}
     {actionsHost ? createPortal(actions,actionsHost) : (!actionsHostId ? actions : null)}
     {message && <p role="alert" className="pdf-error">{message}</p>}
