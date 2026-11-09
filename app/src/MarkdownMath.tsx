@@ -24,8 +24,9 @@ export function MarkdownMath({text,onPdfNavigate,allowedPages,sessionId}:{text:s
    try{quote=decodeURIComponent(quote);}catch{/* preserve raw quote */}
    return '['+label+'](pdf-page:'+page+'?quote='+encodeURIComponent(quote).replace(/[()]/g,ch=>ch==='('?'%28':'%29')+')';
  });
- const chunks=safeText.split(/(\[[^\]\n]+\]\((?:pdf-page:\d+(?:\?quote=[^\s)]*)?|(?:chat-citation|pdf-citation):[a-zA-Z0-9-]+)\))/g);
- return <div className="t2-rich-text">{chunks.map((chunk,i)=><Markdown key={i}
+ // Render the whole response as a single Markdown document. Splitting at each
+ // citation created separate paragraphs and orphaned punctuation on new lines.
+ return <div className="t2-rich-text"><Markdown
    urlTransform={url=>/^(?:pdf-page:\d+(?:\?quote=[^)]*)?|(?:chat-citation|pdf-citation):[a-zA-Z0-9-]+)$/.test(url)?url:defaultUrlTransform(url)}
    remarkPlugins={[remarkGfm,remarkMath]}
    rehypePlugins={[[rehypeKatex,{trust:false,strict:'ignore',errorColor:'#718096'}]]}
@@ -48,5 +49,5 @@ export function MarkdownMath({text,onPdfNavigate,allowedPages,sessionId}:{text:s
      // Unsupported, unverified, or external links are text only. In
      // particular, an empty href must not navigate to this web app.
      return <span>{children}</span>;
-   }}}>{chunk}</Markdown>)}</div>;
+   }}}>{safeText}</Markdown></div>;
 }
