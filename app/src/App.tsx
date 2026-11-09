@@ -144,7 +144,7 @@ export function App() {
       </div>
     </section>}
     {newSessionOpen && <div className="overlay" role="presentation" onMouseDown={e => {if (e.target === e.currentTarget && !creating) setNewSessionOpen(false);}}>
-      <form className="dialog" onSubmit={createSession} role="dialog" aria-modal="true" aria-labelledby="new-session-title"><h2 id="new-session-title">New reading session</h2><p>Choose a scope and time. We will refine the plan inside the workspace.</p>
+      <form className="dialog new-session-dialog" onSubmit={createSession} role="dialog" aria-modal="true" aria-labelledby="new-session-title"><h2 id="new-session-title">New reading session</h2>
         <label className="new-session-pdf-field">PDF document <span className="required-marker">Required</span>
           <input type="file" accept=".pdf,application/pdf" required disabled={creating}
             onChange={e => setNewPdf(e.target.files?.[0] ?? null)}/>
