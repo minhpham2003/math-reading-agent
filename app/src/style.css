@@ -382,3 +382,6 @@
 
 .reader-session-section{font-size:12px;color:#aebfd3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-weight:400}
 .reader-header-identity{flex:0 1 390px}
+
+.reader-setup-gear{flex:none;padding:4px 7px;background:transparent;color:#b9cde3;border:0;border-radius:6px;font-size:18px;font-weight:400;line-height:1;cursor:pointer}
+.reader-setup-gear:hover,.reader-setup-gear:focus-visible{background:#263c54;color:#fff}
