@@ -84,7 +84,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
    <div className="t2-branch-holder" ref={dropdownRef}><button className="secondary" aria-expanded={branchesOpen} onClick={()=>setBranchesOpen(v=>!v)}>Branches ▾</button>
     {branchesOpen&&<div className="t2-tree-pop" role="navigation" aria-label="Conversation branches">{renderTree('main',0)}</div>}</div>
   </header>
-  {branch.parentId&&!settings&&<button className="t2-return" onClick={()=>go(branch.parentId!)}>← Return to parent</button>}
+
   {settings?<div className="t2-settings">
     <button className="secondary" onClick={()=>setSettings(false)}>← Back to tangent</button><h3>Tangent settings</h3>
     <label>Title<input value={nameDraft} onChange={e=>setNameDraft(e.target.value)}/></label>
@@ -96,7 +96,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
     <button className="primary" onClick={saveSettings}>Save changes</button>
    </div>:<>
    <div className="t2-conversation" ref={conversationRef} onMouseUp={()=>window.setTimeout(captureSelection,0)} onKeyUp={()=>window.setTimeout(captureSelection,0)}>
-    {branch.contextText&&<blockquote className="t2-origin"><strong>From {data.threads.find(t=>t.id===branch.parentId)?.title??'parent conversation'}</strong><p>{branch.contextText}</p></blockquote>}
+    {branch.contextText&&<p className="t2-origin-text">{branch.contextText}</p>}
     {branch.messages.map(message=><div className={'t2-message '+(message.role==='system'?'system':'user')} data-chat-message={message.id} key={message.id}>
      {message.role==='system'&&message.anchorId?<span>↗ Created tangent: <button className="t2-notification-link" onClick={()=>{const anchor=data.anchors.find(a=>a.id===message.anchorId);if(anchor)go(anchor.branchId);}}>{data.threads.find(t=>t.originId===message.anchorId)?.title??'Tangent'}</button></span>:linkedText(message)}
     </div>)}
