@@ -167,6 +167,7 @@ let pdfPageWidth = 612;
 type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void; toolbarHostId?: string; actionsHostId?:string; pageJump?: {page:number;seq:number}|null };
 export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId, actionsHostId, pageJump }: Props) {
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
+  const [pdfLoading,setPdfLoading]=useState(true);
   const [filename, setFilename] = useState('');
   const [pageNumber, setPageNumber] = useState(initialPage);
   const [pageInput, setPageInput] = useState(String(initialPage));
@@ -177,7 +178,6 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   const [availableWidth, setAvailableWidth] = useState(700);
   const [toolbarHost, setToolbarHost] = useState<HTMLElement | null>(null);
   const [actionsHost,setActionsHost]=useState<HTMLElement|null>(null);
-  const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [citations, setCitations] = useState<Citation[]>(() => readRefs(sessionId));
   const [tangentAnchors,setTangentAnchors]=useState<Anchor[]>(()=>readTangents(sessionId).anchors.filter(a=>a.kind==='pdf'));
@@ -220,10 +220,12 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     ignoreScrollRef.current = true;
     lastPageRef.current = initialPage;
     setCitations(readRefs(sessionId)); setPending(null); setSelectionPoint(null); setVisualSelection(null);
+    setPdfLoading(true);
     setPdf(null); setFilename(''); setPageNumber(initialPage);
     setPageInput(String(initialPage)); setMessage('');
     getSavedPdf(sessionId).then(async saved => {
-      if (!saved || cancelled) return;
+      if (cancelled) return;
+      if (!saved) {setMessage('This session has no saved PDF.');return;}
       const loaded = await getDocument({ data: new Uint8Array(saved.bytes.slice(0)) }).promise;
       if (cancelled) { await loaded.destroy(); return; }
       setPdf(loaded); setFilename(saved.name);
@@ -231,8 +233,8 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       lastPageRef.current = restored;
       setPageNumber(restored); setPageInput(String(restored));
     }).catch(() => {
-      if (!cancelled) setMessage('Saved PDF could not be opened. Please import it again.');
-    });
+      if (!cancelled) setMessage('Saved PDF could not be opened.');
+    }).finally(()=>{if(!cancelled)setPdfLoading(false);});
     return () => { cancelled = true; };
   }, [sessionId]);
 
@@ -536,25 +538,6 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     (event.currentTarget.elements.namedItem('page') as HTMLInputElement | null)?.blur();
   }
 
-  async function importFile(file: File) {
-    if (!(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
-      setMessage('Choose a PDF document.'); return;
-    }
-    setBusy(true); setMessage('');
-    try {
-      const bytes = await file.arrayBuffer();
-      const loaded = await getDocument({ data: new Uint8Array(bytes.slice(0)) }).promise;
-      await savePdf(sessionId, file.name, bytes);
-      ignoreScrollRef.current = true;
-      lastPageRef.current = 1;
-      setPdf(loaded); setFilename(file.name); setPageNumber(1); setPageInput('1');
-      setZoom(1); setFitWidth(true); setPending(null); setSelectionPoint(null); setVisualSelection(null);
-      onChangeRef.current(1);
-    } catch {
-      setMessage('The PDF could not be imported or saved. Check the file and your browser storage.');
-    } finally { setBusy(false); }
-  }
-
   const actions=<div className="pdf-header-actions">    <button data-citations-toggle className="secondary" onClick={() => setShowCitations(v => !v)}>Citations ({citations.length})</button>
 
   </div>;
@@ -585,7 +568,6 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     {toolbarHost ? createPortal(controls, toolbarHost) : (!toolbarHostId ? controls : null)}
     {actionsHost ? createPortal(actions,actionsHost) : (!actionsHostId ? actions : null)}
     {message && <p role="alert" className="pdf-error">{message}</p>}
-    {busy && <p className="muted">Importing PDF…</p>}
     {showCitations && <aside ref={sourcesRef} className="sources-drawer" aria-label="Saved source references">
       
       {citations.length===0 && <p>Select text in your PDF to create a citation.</p>}
@@ -605,13 +587,6 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
         {Array.from({ length: pdf.numPages }, (_, i) =>
           <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} tangentAnchors={tangentAnchors.filter(a=>a.page===i+1 && a.filename===filename)} onTangentClick={openTangentAnchor} selectionBoxes={visualSelection?.page===i+1 ? visualSelection.boxes : undefined} />)}
       </div> :
-      <div className="pdf-placeholder"><div className="eyebrow">Real PDF reader</div><h3>Choose a PDF to begin</h3>
-        <label className="primary pdf-import pdf-empty-import">Import PDF
-          <input type="file" accept=".pdf,application/pdf" disabled={busy} onChange={e => {
-            const file=e.target.files?.[0]; if(file) void importFile(file); e.target.value='';
-          }} />
-        </label>
-        <p>The file is stored locally in this browser for this session. It is not uploaded to a server.</p>
-        <p className="muted">PDF page numbers may differ from printed textbook page numbers.</p></div>}
+      <div className="pdf-loading-state" role="status">{pdfLoading ? "Loading PDF…" : "PDF unavailable for this session."}</div>}
   </div>;
 }
