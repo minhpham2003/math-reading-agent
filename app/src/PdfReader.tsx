@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { getDocument, GlobalWorkerOptions, TextLayer, type PDFDocumentProxy } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import 'pdfjs-dist/web/pdf_viewer.css';
+import {createTangent,read as readTangents,CHANGED_EVENT,type Anchor} from './tangentStore';
 
 GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -92,9 +93,9 @@ function tidyBoxes(boxes: Box[]): Box[] {
   return lines.map(b=>({x:b.x,y:b.y+b.h*.22,w:b.w,h:b.h*.56}));
 }
 type RenderTask = ReturnType<Awaited<ReturnType<PDFDocumentProxy['getPage']>>['render']>;
-type PageProps = { pdf: PDFDocumentProxy; number: number; scale: number; root: HTMLDivElement | null; citations: Citation[]; selectionBoxes?: Box[] };
+type PageProps = { pdf: PDFDocumentProxy; number: number; scale: number; root: HTMLDivElement | null; citations: Citation[]; tangentAnchors: Anchor[]; onTangentClick:(ids:string[],x:number,y:number)=>void; selectionBoxes?: Box[] };
 
-function ContinuousPage({ pdf, number, scale, root, citations, selectionBoxes }: PageProps) {
+function ContinuousPage({ pdf, number, scale, root, citations, tangentAnchors, onTangentClick, selectionBoxes }: PageProps) {
   const holder = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
@@ -153,6 +154,7 @@ function ContinuousPage({ pdf, number, scale, root, citations, selectionBoxes }:
     {citations.flatMap(ref => tidyBoxes(ref.boxes).map((b, i) =>
       <div key={ref.id + '-' + i} className="source-highlight" title={ref.text}
         style={{left:(b.x*100)+'%',top:(b.y*100)+'%',width:(b.w*100)+'%',height:(b.h*100)+'%'}} />))}
+    {tangentAnchors.flatMap(a=>tidyBoxes(a.boxes??[]).map((b,i)=><button key={a.id+'-'+i} type="button" className="t2-pdf-highlight" title={'↗ '+a.text.slice(0,120)} onClick={event=>{event.stopPropagation();const rect=event.currentTarget.getBoundingClientRect();onTangentClick(tangentAnchors.filter(other=>other.boxes?.some(c=>c.x<b.x+b.w&&c.x+c.w>b.x&&c.y<b.y+b.h&&c.y+c.h>b.y)).map(x=>x.id),rect.right,rect.bottom);}} style={{left:b.x*100+'%',top:b.y*100+'%',width:b.w*100+'%',height:b.h*100+'%'}} />))}
     {selectionBoxes?.length ? tidyBoxes(selectionBoxes).map((b,i) => <div key={'selected-'+i} className="visual-selection-highlight" style={{left:(b.x*100)+'%',top:(b.y*100)+'%',width:(b.w*100)+'%',height:(b.h*100)+'%'}} />) : null}
     {!visible && <span className="pdf-page-loading">Page {number}</span>}
   </div>;
@@ -175,6 +177,8 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [citations, setCitations] = useState<Citation[]>(() => readRefs(sessionId));
+  const [tangentAnchors,setTangentAnchors]=useState<Anchor[]>(()=>readTangents(sessionId).anchors.filter(a=>a.kind==='pdf'));
+  const [tangentMenu,setTangentMenu]=useState<{ids:string[];x:number;y:number}|null>(null);
   const [pending, setPending] = useState<Omit<Citation,'id'> | null>(null);
   const [selectionPoint, setSelectionPoint] = useState<{x:number;y:number} | null>(null);
   const [visualSelection, setVisualSelection] = useState<{page:number;boxes:Box[]} | null>(null);
@@ -188,6 +192,10 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   const previousScale = useRef<number | null>(null);
   const dragStart = useRef<{x:number;y:number;page:number} | null>(null);
 
+  useEffect(()=>{const sync=(event:Event)=>{const e=event as CustomEvent<{session:string}>;if(e.detail?.session===sessionId)setTangentAnchors(readTangents(sessionId).anchors.filter(a=>a.kind==='pdf'));};window.addEventListener(CHANGED_EVENT,sync);return()=>window.removeEventListener(CHANGED_EVENT,sync);},[sessionId]);
+  function openTangentAnchor(ids:string[],x:number,y:number){if(ids.length===1){const a=tangentAnchors.find(a=>a.id===ids[0]);if(a){const data=readTangents(sessionId);writeActive(data,a.branchId);}return;}setTangentMenu({ids,x,y});}
+  function writeActive(data:ReturnType<typeof readTangents>,id:string){localStorage.setItem('higher-math:tangents:v2:'+sessionId,JSON.stringify({...data,activeId:id}));window.dispatchEvent(new CustomEvent(CHANGED_EVENT,{detail:{session:sessionId}}));setTangentMenu(null);}
+  function createPdfTangent(){if(!pending)return;try{createTangent(sessionId,{kind:'pdf',targetId:filename,page:pending.page,filename:pending.filename,text:pending.text,boxes:pending.boxes});setPending(null);setSelectionPoint(null);setVisualSelection(null);window.getSelection()?.removeAllRanges();}catch{setMessage('Could not create tangent. Check local browser storage.');}}
   useEffect(() => {
     setToolbarHost(toolbarHostId ? window.document.getElementById(toolbarHostId) : null);
   }, [toolbarHostId]);
@@ -571,11 +579,12 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     </aside>}
     {pdf ?
       <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseDown={onPdfMouseDown} onMouseUp={onPdfMouseUp} onKeyUp={() => window.setTimeout(captureSelection,0)}>
+    {tangentMenu&&<div className="t2-pdf-menu" style={{left:tangentMenu.x,top:tangentMenu.y}}><strong>Related tangents</strong>{tangentMenu.ids.map(id=>{const a=tangentAnchors.find(x=>x.id===id);const state=readTangents(sessionId);const t=state.threads.find(t=>t.id===a?.branchId);return t?<button key={id} type="button" onClick={()=>writeActive(state,t.id)}>{t.title} · {t.status}</button>:null;})}<button type="button" onClick={()=>setTangentMenu(null)}>Close</button></div>}
     {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
-      <button type="button" className="primary" onClick={saveCitation}>Save Citation</button>
+      <button type="button" className="primary" onClick={saveCitation}>Save Citation</button><button type="button" className="primary" onClick={createPdfTangent}>↗ Create Tangent</button>
     </div>}
         {Array.from({ length: pdf.numPages }, (_, i) =>
-          <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} selectionBoxes={visualSelection?.page===i+1 ? visualSelection.boxes : undefined} />)}
+          <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} tangentAnchors={tangentAnchors.filter(a=>a.page===i+1 && a.filename===filename)} onTangentClick={openTangentAnchor} selectionBoxes={visualSelection?.page===i+1 ? visualSelection.boxes : undefined} />)}
       </div> :
       <div className="pdf-placeholder"><div className="eyebrow">Real PDF reader</div><h3>Choose a PDF to begin</h3>
         <label className="primary pdf-import pdf-empty-import">Import PDF
