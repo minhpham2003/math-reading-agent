@@ -349,3 +349,6 @@
 .t2-breadcrumb-measure span{padding:0 3px}
 .t2-breadcrumb>span{flex:none}
 .t2-breadcrumb>span button{max-width:none}
+
+/* A tangent's inherited excerpt reads as an unboxed italic passage. */
+.t2-origin-text{font-style:italic;margin:5px 0 14px;padding:0;color:inherit;white-space:pre-wrap;overflow-wrap:anywhere}
