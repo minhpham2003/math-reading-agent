@@ -82,7 +82,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
    const result=await generatePdfAssessment(sessionId,title,title,firstPage,lastPage,duration);
    change({...state,assessment:result.assessment,assessmentSource:{kind:'ai',pages:result.sourcePages,name:result.documentName,coverage:result.coverage},assessmentApproved:false,planApproved:false,stage:'assessment'});
    setAssessmentOpen(true);setEditingAssessment(false);
-  }catch(e){setError(e instanceof Error?e.message:'Unable to analyze the selected PDF pages.');}
+  }catch(e){const message=e instanceof Error?e.message:'Unable to analyze the selected PDF pages.';if(/access token|unauthorized|invalid token/i.test(message)){setHasToken(false);setAccessToken('');}setError(message);}
   finally{setAnalyzing(false);}
  }
  function updateAssessment(field:keyof Assessment,value:string){
