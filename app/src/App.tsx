@@ -26,7 +26,7 @@ export function App() {
   const [agentFraction,setAgentFraction]=useState(()=>{const n=Number(localStorage.getItem('higher-math:agent-pane-fraction'));return n>=.25&&n<=.75?n:.46;});
   const gridRef=useRef<HTMLDivElement>(null);
   function resizeStart(e:ReactPointerEvent<HTMLDivElement>){if(e.button!==0)return;const grid=gridRef.current;if(!grid)return;e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);}
-  function resizeMove(e:ReactPointerEvent<HTMLDivElement>){if(!e.currentTarget.hasPointerCapture(e.pointerId)||!gridRef.current)return;const box=gridRef.current.getBoundingClientRect();const frac=Math.min(.75,Math.max(.25,(e.clientX-box.left)/box.width));setAgentFraction(frac);}
+  function resizeMove(e:ReactPointerEvent<HTMLDivElement>){if(!e.currentTarget.hasPointerCapture(e.pointerId)||!gridRef.current)return;const box=gridRef.current.getBoundingClientRect();const frac=Math.min(.75,Math.max(.25,1-(e.clientX-box.left)/box.width));setAgentFraction(frac);}
   function resizeEnd(e:ReactPointerEvent<HTMLDivElement>){if(e.currentTarget.hasPointerCapture(e.pointerId)){e.currentTarget.releasePointerCapture(e.pointerId);localStorage.setItem('higher-math:agent-pane-fraction',String(agentFraction));}}
 
   const active = sessions.find(s => s.id === activeId) ?? null;
@@ -128,16 +128,15 @@ export function App() {
         <div id="reader-toolbar-slot" className="reader-toolbar-slot" aria-label="PDF controls"></div>
         <div className="reader-header-right"><div id="reader-actions-slot" className="reader-actions-slot" aria-label="Document actions"></div><button className="reader-agent-toggle" type="button" onClick={() => setAgentOpen(v => !v)} aria-pressed={agentOpen}>{agentOpen ? 'Hide agent' : 'Show agent'}</button></div>
       </div>
-      <div ref={gridRef} className={agentOpen ? "work-grid split-enabled" : "work-grid agent-collapsed"} style={agentOpen?{gridTemplateColumns:`minmax(0, ${agentFraction}fr) 8px minmax(0, ${1-agentFraction}fr)`}:undefined}>
-        {agentOpen && <article className="work-panel agent-panel">
+      <div ref={gridRef} className={agentOpen ? "work-grid split-enabled" : "work-grid agent-collapsed"} style={agentOpen?{gridTemplateColumns:`minmax(0, ${1-agentFraction}fr) 8px minmax(0, ${agentFraction}fr)`}:undefined}>
+        <article className="work-panel pdf-panel">
+          <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} toolbarHostId="reader-toolbar-slot" actionsHostId="reader-actions-slot" pageJump={pageJump} />
+        </article>
+        {agentOpen && <div className="pane-resizer" role="separator" aria-label="Resize PDF and agent panels" aria-orientation="vertical" aria-valuenow={Math.round((1-agentFraction)*100)} tabIndex={0} onPointerDown={resizeStart} onPointerMove={resizeMove} onPointerUp={resizeEnd} onPointerCancel={resizeEnd} onKeyDown={e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();const next=Math.min(.75,Math.max(.25,agentFraction+(e.key==="ArrowRight"?-.03:.03)));setAgentFraction(next);localStorage.setItem("higher-math:agent-pane-fraction",String(next));}}}/>}        {agentOpen && <article className="work-panel agent-panel">
           <ReadingFlow key={active.id} sessionId={active.id} title={active.target}
             firstPage={active.firstPage} lastPage={active.lastPage} duration={active.durationMinutes} currentPdfPage={active.pdfPage}
             onNavigate={page => setPageJump(old=>({page,seq:(old?.seq??0)+1}))}/>
         </article>}
-        {agentOpen && <div className="pane-resizer" role="separator" aria-label="Resize agent and PDF panels" aria-orientation="vertical" aria-valuenow={Math.round(agentFraction*100)} tabIndex={0} onPointerDown={resizeStart} onPointerMove={resizeMove} onPointerUp={resizeEnd} onPointerCancel={resizeEnd} onKeyDown={e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();const next=Math.min(.75,Math.max(.25,agentFraction+(e.key==="ArrowRight"?.03:-.03)));setAgentFraction(next);localStorage.setItem("higher-math:agent-pane-fraction",String(next));}}}/>}
-        <article className="work-panel pdf-panel">
-          <PdfReader key={active.id} sessionId={active.id} initialPage={active.pdfPage ?? 1} onPageChange={updatePage} toolbarHostId="reader-toolbar-slot" actionsHostId="reader-actions-slot" pageJump={pageJump} />
-        </article>
       </div>
     </section>}
     {newSessionOpen && <div className="overlay" role="presentation" onMouseDown={e => {if (e.target === e.currentTarget && !creating) setNewSessionOpen(false);}}>
