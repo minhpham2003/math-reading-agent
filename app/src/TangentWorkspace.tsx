@@ -6,7 +6,7 @@ import {MarkdownMath} from './MarkdownMath';
 import {retrievePdfContext} from './pdfIndex';
 import {citationExcerptsFromContext,preparePdfCitations,stripLegacySourceList} from './pdfCitations';
 
-type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number};
+type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number;visible?:boolean};
 const ancestorsOf=(thread:Thread,data:TangentData)=>{const result:Thread[]=[];let node:Thread|undefined=thread;while(node){result.unshift(node);node=node.parentId?data.threads.find(t=>t.id===node!.parentId):undefined;}return result;};
 
 export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionId:string;currentPdfPage?:number;onNavigate:(page:number,quote?:string)=>void}){
@@ -85,7 +85,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
   const pre=document.createRange();pre.selectNodeContents(textNode);pre.setEnd(range.startContainer,range.startOffset);
   const pos=pre.toString().length;const selected=selection.toString();if(!selected.trim()){setSelection(null);return;}
   selectedRangeRef.current=range.cloneRange();
-  const rect=range.getBoundingClientRect();setSelection({messageId,start:pos,end:pos+selected.length,text:selected,x:rect.left+rect.width/2,y:rect.bottom+7});
+  const rect=range.getBoundingClientRect();setSelection({messageId,start:pos,end:pos+selected.length,text:selected,x:rect.left+rect.width/2,y:rect.top-8,visible:true});
  }
  useEffect(()=>{
   if(!selection)return;
@@ -93,8 +93,9 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    const range=selectedRangeRef.current;
    if(!range||!conversationRef.current){setSelection(null);return;}
    const rect=range.getBoundingClientRect(),box=conversationRef.current.getBoundingClientRect();
-   if(rect.bottom<box.top||rect.top>box.bottom){setSelection(null);return;}
-   setSelection(prev=>prev?{...prev,x:rect.left+rect.width/2,y:Math.min(box.bottom-8,rect.bottom+7)}:null);
+   const visible=rect.bottom>=box.top&&rect.top<=box.bottom;
+   // Keep the selection for scroll-back; only hide the floating control.
+   setSelection(prev=>prev?{...prev,x:rect.left+rect.width/2,y:rect.top-8,visible}:null);
   };
   const dismiss=(event:PointerEvent)=>{
    if(selectionPopRef.current?.contains(event.target as Node))return;
@@ -159,7 +160,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
     {!branch.messages.length&&!branch.contextText&&<p className="muted">Start the discussion whenever you're ready.</p>}
     {sendingThread===branch.id&&<p className="muted" role="status">AI is responding…</p>}
    </div>
-   {selection&&<div ref={selectionPopRef} className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Create Tangent</button></div>}
+   {selection&&selection.visible!==false&&<div ref={selectionPopRef} className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Create Tangent</button></div>}
    {hoverPreview&&<div className="t2-viewport-preview" role="tooltip" style={{left:hoverPreview.x,top:hoverPreview.y,transform:hoverPreview.y>120?'translateY(-100%)':'none'}}>{hoverPreview.ids.map(id=>{const anchor=data.anchors.find(a=>a.id===id);const t=data.threads.find(x=>x.id===anchor?.branchId);return t?<div key={id}><strong>{t.title}</strong><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></div>:null;})}</div>}
    {chooser&&<div className="t2-chooser" style={{left:Math.min(window.innerWidth-265,chooser.x),top:Math.min(window.innerHeight-180,chooser.y)}}><strong>Related tangents</strong>{chooser.ids.map(id=>{const a=data.anchors.find(x=>x.id===id);const t=data.threads.find(x=>x.id===a?.branchId);return t?<button key={id} onClick={()=>go(t.id)}>{t.title} · {t.status}</button>:null;})}<button onClick={()=>setChooser(null)}>Close</button></div>}
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
