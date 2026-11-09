@@ -17,7 +17,13 @@ function normalizeMath(input:string){
 }
 
 export function MarkdownMath({text,onPdfNavigate,allowedPages}:{text:string;onPdfNavigate?:(page:number,quote?:string)=>void;allowedPages?:number[]}){
- const safeText=normalizeMath(text).replace(/(\]\(pdf-page:\d+\?quote=)([^\n]*?)(?=\))/g,(_full,prefix:string,quote:string)=>prefix+quote.replace(/\(/g,'%28').replace(/\)/g,'%29'));
+ // Recover model-generated citations even when an unescaped parenthesis
+ // appears in the quote, e.g. "(homological)" inside the URL.
+ const safeText=normalizeMath(text).replace(/\[([^\]\n]+)\]\(pdf-page:(\d+)\?quote=([^\n]+)\)/g,(_full,label:string,page:string,raw:string)=>{
+   let quote=raw.trim();
+   try{quote=decodeURIComponent(quote);}catch{/* retain literal quote */}
+   return '['+label+'](pdf-page:'+page+'?quote='+encodeURIComponent(quote).replace(/[()]/g,ch=>ch==='('?'%28':'%29')+')';
+ });
  const chunks=safeText.split(/(\[[^\]\n]+\]\(pdf-page:\d+(?:\?quote=[^\s)]*)?\))/g);
  return <div className="t2-rich-text">{chunks.map((chunk,i)=><Markdown key={i}
    urlTransform={url=>/^pdf-page:\d+(?:\?quote=[^)]*)?$/.test(url)?url:defaultUrlTransform(url)}
