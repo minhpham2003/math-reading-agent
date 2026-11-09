@@ -16,18 +16,18 @@ function normalizeMath(input:string){
    : normalized.replace(/\$\$/g, String.fromCharCode(92)+'$'+String.fromCharCode(92)+'$');
 }
 
-export function MarkdownMath({text,onPdfNavigate,allowedPages}:{text:string;onPdfNavigate?:(page:number)=>void;allowedPages?:number[]}){
- const chunks=normalizeMath(text).split(/(\[[^\]\n]+\]\(pdf-page:\d+\))/g);
+export function MarkdownMath({text,onPdfNavigate,allowedPages}:{text:string;onPdfNavigate?:(page:number,quote?:string)=>void;allowedPages?:number[]}){
+ const chunks=normalizeMath(text).split(/(\[[^\]\n]+\]\(pdf-page:\d+(?:\?quote=[^)]*)?\))/g);
  return <div className="t2-rich-text">{chunks.map((chunk,i)=><Markdown key={i}
-   urlTransform={url=>/^pdf-page:\d+$/.test(url)?url:defaultUrlTransform(url)}
+   urlTransform={url=>/^pdf-page:\d+(?:\?quote=[^)]*)?$/.test(url)?url:defaultUrlTransform(url)}
    remarkPlugins={[remarkGfm,remarkMath]}
    rehypePlugins={[[rehypeKatex,{trust:false,strict:'ignore',errorColor:'#718096'}]]}
    components={{a:({href,children})=>{
-     const match=/^pdf-page:(\d+)$/.exec(href??'');
+     const match=/^pdf-page:(\d+)(?:\?quote=(.+))?$/.exec(href??'');
      if(match){
        const page=Number(match[1]);
        return onPdfNavigate&&allowedPages?.includes(page)
-         ? <button type="button" className="t2-pdf-citation" onClick={()=>onPdfNavigate(page)} title={'Go to PDF page '+page}>{children} ↗</button>
+         ? <button type="button" className="t2-pdf-citation" onClick={()=>onPdfNavigate(page,match[2]?decodeURIComponent(match[2]):undefined)} title={'Go to PDF '+(match[2]?'passage':'page')+' '+page}>{children} ↗</button>
          : <span>{children}</span>;
      }
      return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
