@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: higher-math-chat-api
+    runtime: node
+    region: frankfurt
+    branch: implementation/02-ai-chat
+    buildCommand: node --version
+    startCommand: node server/index.mjs
+    healthCheckPath: /health
+    autoDeployTrigger: 'off'
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ALLOWED_ORIGINS
+        value: https://minhpham2003.github.io
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+      - key: OPENAI_API_KEY
+        sync: false
