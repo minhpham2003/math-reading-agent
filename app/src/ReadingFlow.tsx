@@ -1,6 +1,7 @@
 import {useEffect,useState} from 'react';
 import {ReadingMode} from './ReadingMode';
 import {generatePdfAssessment} from './pdfAssessment';
+import {getAccessToken,setAccessToken,verifyAccessToken} from './aiChat';
 
 type Assessment = {
  scope:string; structure:string; difficulty:string; dependencies:string;
@@ -58,11 +59,21 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  const [assessmentOpen,setAssessmentOpen]=useState(!state.assessmentApproved);
  const [error,setError]=useState('');
  const [analyzing,setAnalyzing]=useState(false);
+ const [tokenDraft,setTokenDraft]=useState('');
+ const [hasToken,setHasToken]=useState(!!getAccessToken());
+ const [verifying,setVerifying]=useState(false);
  useEffect(()=>{setState(load(sessionId,title,firstPage,lastPage,duration));setEditingAssessment(false);setAssessmentOpen(!load(sessionId,title,firstPage,lastPage,duration).assessmentApproved);setExpanded(!load(sessionId,title,firstPage,lastPage,duration).planApproved);setSetupMode(!(load(sessionId,title,firstPage,lastPage,duration).assessmentApproved&&load(sessionId,title,firstPage,lastPage,duration).planApproved));},[sessionId]);
  useEffect(()=>{const open=()=>{setSetupMode(v=>!v);setAssessmentOpen(false);setExpanded(false);};window.addEventListener('higher-math:open-session-setup',open);return()=>window.removeEventListener('higher-math:open-session-setup',open);},[]);
  function change(next:State) {
   try {localStorage.setItem(key(sessionId),JSON.stringify(next));setState(next);setError('');}
   catch{setError('Unable to save this session. Check browser storage.');}
+ }
+ async function unlockAssessment(){
+  if(!tokenDraft.trim()||verifying)return;
+  setVerifying(true);setError('');
+  try{await verifyAccessToken(tokenDraft.trim());setAccessToken(tokenDraft);setHasToken(true);setTokenDraft('');}
+  catch(e){setError(e instanceof Error?e.message:'Could not verify access token.');}
+  finally{setVerifying(false);}
  }
  async function analyzePdf(){
   if(analyzing)return;
@@ -114,7 +125,8 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
   <div className="assessment-toggle-row"><h2 className={state.assessmentApproved?"approved-heading":""}>Reading assessment {state.assessmentApproved&&<span aria-label="Approved">✓</span>}</h2><button className="secondary" aria-expanded={assessmentOpen} onClick={()=>setAssessmentOpen(v=>!v)}>{assessmentOpen?'Collapse ▴':'Expand ▾'}</button></div>
 
   {assessmentOpen && <div className="assessment-source-panel">
-    <button className="primary" type="button" disabled={analyzing} onClick={()=>void analyzePdf()}>{analyzing?'Analyzing PDF…':state.assessmentSource?'Regenerate PDF assessment':'Generate assessment from PDF'}</button>
+    {!hasToken&&<div className="assessment-unlock"><label>AI access token <input type="password" autoComplete="off" value={tokenDraft} onChange={e=>setTokenDraft(e.target.value)} placeholder="Enter access token"/></label><button type="button" className="secondary" disabled={!tokenDraft.trim()||verifying} onClick={()=>void unlockAssessment()}>{verifying?'Verifying…':'Unlock AI'}</button></div>}
+    <button className="primary" type="button" disabled={analyzing||!hasToken} onClick={()=>void analyzePdf()}>{analyzing?'Analyzing PDF…':state.assessmentSource?'Regenerate PDF assessment':'Generate assessment from PDF'}</button>
     {state.assessmentSource?<div><p><strong>AI assessment from {state.assessmentSource.name}</strong></p>
       <p className="muted">{state.assessmentSource.coverage} Text extraction may distort mathematical notation; verify all claims against the PDF before approving.</p>
       <div className="assessment-evidence">Source pages: {state.assessmentSource.pages.map(p=><button key={p} type="button" className="secondary" onClick={()=>onNavigate(p)}>p. {p} ↗</button>)}</div>
