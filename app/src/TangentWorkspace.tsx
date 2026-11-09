@@ -53,7 +53,6 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
   const points=new Set<number>([0,message.text.length]);references.forEach(a=>{points.add(Math.min(message.text.length,a.start!));points.add(Math.min(message.text.length,a.end!));});
   const edges=[...points].sort((a,b)=>a-b);
   return <span data-message-content>{edges.slice(0,-1).map((start,i)=>{const end=edges[i+1],slice=message.text.slice(start,end);const matches=references.filter(a=>a.start!<end&&a.end!>start);if(!matches.length)return <span key={i}>{slice}</span>;
-   const names=matches.map(a=>data.threads.find(t=>t.id===a.branchId)).filter((t):t is Thread=>!!t);
    return <button key={i} type="button" className="t2-link" onClick={e=>openAnchors(matches.map(a=>a.id),e)} onMouseEnter={e=>{const rect=e.currentTarget.getBoundingClientRect();setHoverPreview({ids:matches.map(a=>a.id),x:Math.max(12,Math.min(rect.left,window.innerWidth-260)),y:rect.top>120?rect.top-9:rect.bottom+9});}} onMouseLeave={()=>setHoverPreview(null)} onFocus={e=>{const rect=e.currentTarget.getBoundingClientRect();setHoverPreview({ids:matches.map(a=>a.id),x:Math.max(12,Math.min(rect.left,window.innerWidth-260)),y:rect.top>120?rect.top-9:rect.bottom+9});}} onBlur={()=>setHoverPreview(null)}>{slice}</button>;
   })}</span>;
  }
