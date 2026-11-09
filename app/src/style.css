@@ -579,3 +579,32 @@
 
 /* Keep reading-plan and theme actions aligned with the other header buttons. */
 .reader-header .reader-plan-toggle,.reader-header .reader-theme-toggle{height:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;padding-top:0;padding-bottom:0}
+
+/* Light mode contrast repair: override dark-only foreground rules. */
+:root[data-theme="light"] .reader-header,
+:root[data-theme="light"] .reader-header button,
+:root[data-theme="light"] .reader-header .pdf-filename,
+:root[data-theme="light"] .reader-header .page-indicator,
+:root[data-theme="light"] .reader-session-name,
+:root[data-theme="light"] .reader-session-section,
+:root[data-theme="light"] .reader-back,
+:root[data-theme="light"] .reader-setup-gear{color:#233b57}
+:root[data-theme="light"] .reader-header button:disabled{color:#6f8094}
+:root[data-theme="light"] .reading-nav-link,
+:root[data-theme="light"] .reading-nav-link span,
+:root[data-theme="light"] .reading-nav-heading,
+:root[data-theme="light"] .reading-navigator,
+:root[data-theme="light"] .reading-mode button,
+:root[data-theme="light"] .reading-mode strong{color:#263e57}
+:root[data-theme="light"] .reading-nav-link small,
+:root[data-theme="light"] .reading-nav-link .reading-unit-description{color:#536d87}
+:root[data-theme="light"] .reading-nav-item.is-current{background:#dce6f0;border-color:#b5c9df}
+:root[data-theme="light"] .reading-nav-item.is-completed .reading-nav-link,
+:root[data-theme="light"] .reading-nav-item.is-completed .reading-nav-link small,
+:root[data-theme="light"] .reading-nav-item.is-completed .reading-unit-description{color:#24735b}
+:root[data-theme="light"] .reading-nav-item>.unit-completed-toggle{background:#d4dfea;color:#263e57}
+:root[data-theme="light"] .t2-tree-title,
+:root[data-theme="light"] .t2-breadcrumb,
+:root[data-theme="light"] .t2-conversation,
+:root[data-theme="light"] .t2-message.assistant,
+:root[data-theme="light"] .t2-rich-text{color:#25394f}
