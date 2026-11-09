@@ -435,3 +435,10 @@
 .pdf-dark-mode .continuous-pdf-page canvas,.pdf-dark-mode .continuous-pdf-page .textLayer{filter:invert(1) hue-rotate(180deg)}
 .pdf-dark-mode .pdf-canvas-scroll{background:#171c25}
 .reader-header .pdf-dark-toggle.is-on{color:#f0e2b5;border:1px solid #817659}
+
+/* Compact composer grows with content, with the send action inside the field. */
+.t2-input-wrap{position:relative;width:100%}
+.t2-input-wrap textarea{display:block;width:100%;min-height:48px;max-height:180px;resize:none;overflow-y:auto;padding:12px 62px 12px 13px;line-height:24px;box-sizing:border-box}
+.t2-input-wrap .t2-send-button{position:absolute;right:8px;bottom:6px;width:36px;height:36px;margin:0;z-index:2}
+.t2-input-wrap .t2-send-button svg{width:21px;height:21px}
+.t2-composer .t2-compose-actions{margin-top:8px}
