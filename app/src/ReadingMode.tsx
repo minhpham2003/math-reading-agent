@@ -7,17 +7,16 @@ function location(unit:ReadingUnit){
  const end=unit.endPage??unit.page;
  return end===unit.page?'PDF page '+unit.page:'PDF pages '+unit.page+'–'+end;
 }
-export function ReadingMode({sessionId,title,units,onNavigate,onToggle,onSetup,currentPdfPage}:
- {sessionId:string;title:string;units:ReadingUnit[];currentPdfPage?:number;onNavigate:(page:number)=>void;onToggle:(id:string)=>void;onSetup:()=>void}) {
+export function ReadingMode({sessionId,title,units,onNavigate,onToggle,currentPdfPage}:
+ {sessionId:string;title:string;units:ReadingUnit[];currentPdfPage?:number;onNavigate:(page:number)=>void;onToggle:(id:string)=>void}) {
  const [listOpen,setListOpen]=useState(true);
  const [selectedId,setSelectedId]=useState<string|null>(null);
  const [detailsId,setDetailsId]=useState<string|null>(null);
  const selected=units.find(u=>u.id===selectedId)??units.find(u=>!u.done)??units[0];
  return <div className="reading-mode">
 
-  <div className="reading-mode-top"><h2>{title}</h2><button className="secondary" onClick={onSetup}>⚙ Session setup</button></div>
   <section className="reading-navigator">
-   <div className="reading-nav-heading"><strong>Reading plan · {units.filter(u=>u.done).length}/{units.length} completed</strong>
+   <div className="reading-nav-heading"><strong><span className="reading-nav-session-title">{title}</span><span className="reading-nav-separator"> · </span>Reading plan · {units.filter(u=>u.done).length}/{units.length} completed</strong>
     <button className="secondary" aria-expanded={listOpen} onClick={()=>{setListOpen(v=>!v);setDetailsId(null)}}>{listOpen?'Collapse ▴':'Expand ▾'}</button></div>
    {listOpen&&<div className="reading-nav-list">{units.map((unit,i)=><div className={'reading-nav-item'+(selected?.id===unit.id?' is-current':'')+(unit.done?' is-completed':'')} key={unit.id}>
     <button className="reading-nav-link" aria-expanded={detailsId===unit.id} onClick={()=>{setSelectedId(unit.id);setDetailsId(current=>current===unit.id?null:unit.id);onNavigate(unit.page)}}><span>{unit.done?'✓':selected?.id===unit.id?'●':'○'} {i+1}. {unit.title}</span><small>{location(unit)}</small>{unit.description&&detailsId===unit.id&&<span className="reading-unit-description">{unit.description}</span>}</button>
