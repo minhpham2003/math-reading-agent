@@ -7,6 +7,7 @@ import {MarkdownMath} from './MarkdownMath';
 import {retrievePdfContext} from './pdfIndex';
 import {getReadingSessionContext} from './readingSessionContext';
 import {readChatCitations,saveChatCitation} from './chatCitations';
+import {copyLinkedCitation} from './citationClipboard';
 import {citationExcerptsFromContext,preparePdfCitations,stripLegacySourceList} from './pdfCitations';
 
 type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number;visible?:boolean};
@@ -164,8 +165,14 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
  },[selection?.messageId,selection?.start,selection?.end]);
  function saveSelectedCitation(){
   if(!selection)return;
-  saveChatCitation({id:crypto.randomUUID(),sessionId,threadId:branch.id,messageId:selection.messageId,text:selection.text,start:selection.start,end:selection.end});
-  selectedRangeRef.current=null;setSelection(null);window.getSelection()?.removeAllRanges();
+  const ref={id:crypto.randomUUID(),sessionId,threadId:branch.id,messageId:selection.messageId,text:selection.text,start:selection.start,end:selection.end};
+  try {
+   saveChatCitation(ref);
+   // Copy the same compact internal link used by the Citations panel.
+   void copyLinkedCitation(sessionId,ref.id,'chat','Chat citation')
+     .catch(()=>setError('Citation saved, but clipboard access was denied. Use Copy in Citations.'));
+   selectedRangeRef.current=null;setSelection(null);window.getSelection()?.removeAllRanges();
+  }catch{setError('Could not save the citation in browser storage.');}
  }
  useEffect(()=>{const open=(event:Event)=>{if((event as CustomEvent<{sessionId:string;id:string}>).detail?.sessionId===sessionId){const id=(event as CustomEvent<{id:string}>).detail.id;const url=new URL(window.location.href);url.searchParams.set('chatCitation',id);window.history.replaceState(null,'',url.pathname+url.search+url.hash);setCitationNavigation(n=>n+1);}};window.addEventListener('higher-math:open-chat-citation',open);return()=>window.removeEventListener('higher-math:open-chat-citation',open);},[sessionId]);
  useEffect(()=>{
