@@ -2,6 +2,7 @@ services:
   - type: web
     name: higher-math-chat-api
     runtime: node
+    plan: free
     region: frankfurt
     branch: implementation/02-ai-chat
     buildCommand: node --version
