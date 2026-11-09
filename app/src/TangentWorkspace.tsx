@@ -3,11 +3,12 @@ import {read,write,createTangent,CHANGED_EVENT,type TangentData,type Thread,type
 import {aiConfigured,requestAiReply,getAccessToken,setAccessToken} from './aiChat';
 import {MathText} from './MathText';
 import {MarkdownMath} from './MarkdownMath';
+import {retrievePdfContext} from './pdfIndex';
 
 type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number};
 const ancestorsOf=(thread:Thread,data:TangentData)=>{const result:Thread[]=[];let node:Thread|undefined=thread;while(node){result.unshift(node);node=node.parentId?data.threads.find(t=>t.id===node!.parentId):undefined;}return result;};
 
-export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;currentPdfPage?:number;onNavigate:(page:number)=>void}){
+export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionId:string;currentPdfPage?:number;onNavigate:(page:number)=>void}){
  const [data,setData]=useState<TangentData>(()=>read(sessionId));
  const [draft,setDraft]=useState('');
  const [sendingThread,setSendingThread]=useState<string|null>(null);
@@ -53,7 +54,8 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
   try{
    const thread=updated.threads.find(t=>t.id===threadId)!;
    const messages=thread.messages.filter(m=>m.role==='user'||m.role==='assistant').map(m=>({role:m.role as 'user'|'assistant',content:m.text}));
-   const reply=await requestAiReply(messages);
+   const context=await retrievePdfContext(sessionId,entry.text,currentPdfPage).catch(()=>undefined);
+   const reply=await requestAiReply(messages,context);
    // Read the latest stored state so branch navigation and PDF tangent updates are preserved.
    const latest=read(sessionId);
    const assistant:Entry={id:crypto.randomUUID(),role:'assistant',text:reply,createdAt:new Date().toISOString()};
