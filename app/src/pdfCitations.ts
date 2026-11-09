@@ -52,7 +52,7 @@ export function preparePdfCitations(reply:string,context?:string):string{
  });
  // Link bare PDF page mentions only if that page was retrieved.
  // Leave Markdown links and code spans/blocks untouched.
- return rewritten.split(/(\[[^\]\n]+\]\([^\)\n]*\)|\x60[^\x60\n]*\x60|\x60{3}[\s\S]*?\x60{3})/g).map((part,i)=>{
+ return rewritten.split(/(\[[^\]\n]+\]\([^\)\n]*\)|\x60{3}[\s\S]*?\x60{3}|\x60[^\x60\n]*\x60)/g).map((part,i)=>{
   if(i%2===1)return part;
   return part.replace(/\bPDF page (\d+)\b/gi,(full,pageString:string)=>{
    const page=Number(pageString);
