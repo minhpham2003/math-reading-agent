@@ -184,6 +184,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   const [selectionPoint, setSelectionPoint] = useState<{x:number;y:number} | null>(null);
   const [visualSelection, setVisualSelection] = useState<{page:number;boxes:Box[]} | null>(null);
   const [showCitations, setShowCitations] = useState(false);
+  const sourcesRef = useRef<HTMLElement>(null);
   const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
   const onChangeRef = useRef(onPageChange);
   onChangeRef.current = onPageChange;
@@ -484,6 +485,19 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     return () => window.document.removeEventListener('pointerdown', dismiss);
   }, [pending]);
 
+  useEffect(() => {
+    if (!showCitations) return;
+    const closeOnOutside = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (sourcesRef.current?.contains(target)) return;
+      if (target instanceof Element && target.closest('.pdf-header-actions')) return;
+      setShowCitations(false);
+    };
+    document.addEventListener('pointerdown', closeOnOutside);
+    return () => document.removeEventListener('pointerdown', closeOnOutside);
+  }, [showCitations]);
+
   function saveCitation() {
     if (!pending) return;
     const next = [...citations, {...pending,id:crypto.randomUUID()}];
@@ -567,7 +581,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     {actionsHost ? createPortal(actions,actionsHost) : (!actionsHostId ? actions : null)}
     {message && <p role="alert" className="pdf-error">{message}</p>}
     {busy && <p className="muted">Importing PDF…</p>}
-    {showCitations && <aside className="sources-drawer" aria-label="Saved source references">
+    {showCitations && <aside ref={sourcesRef} className="sources-drawer" aria-label="Saved source references">
       <div className="sources-heading"><strong>Saved citations</strong><button onClick={() => setShowCitations(false)}>×</button></div>
       {citations.length===0 && <p>Select text in your PDF to create a citation.</p>}
       {citations.map(ref => <div className="source-entry" key={ref.id}>
