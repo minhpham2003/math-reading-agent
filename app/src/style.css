@@ -646,3 +646,20 @@
  padding:2px 4px;
  line-height:normal;
 }
+
+/* Light mode PDF numeric inputs should blend with surrounding controls. */
+:root[data-theme="light"] .reader-header .pdf-page-form input,
+:root[data-theme="light"] .reader-header .pdf-zoom-form input{
+ background:#c5d0dc;
+ color:#233b57;
+ border:1px solid #aabbd0;
+ box-shadow:none;
+}
+:root[data-theme="light"] .reader-header .pdf-page-form input:hover,
+:root[data-theme="light"] .reader-header .pdf-page-form input:focus,
+:root[data-theme="light"] .reader-header .pdf-zoom-form input:hover,
+:root[data-theme="light"] .reader-header .pdf-zoom-form input:focus{
+ background:#d5dee8;
+ color:#192f49;
+ border-color:#7396bc;
+}
