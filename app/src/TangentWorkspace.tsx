@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState,type FormEvent,type MouseEvent as ReactMouseEvent} from 'react';
 import {read,write,createTangent,CHANGED_EVENT,type TangentData,type Thread,type Entry} from './tangentStore';
+import {aiConfigured,requestAiReply} from './aiChat';
 
 type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number};
 const ancestorsOf=(thread:Thread,data:TangentData)=>{const result:Thread[]=[];let node:Thread|undefined=thread;while(node){result.unshift(node);node=node.parentId?data.threads.find(t=>t.id===node!.parentId):undefined;}return result;};
@@ -7,6 +8,7 @@ const ancestorsOf=(thread:Thread,data:TangentData)=>{const result:Thread[]=[];le
 export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;currentPdfPage?:number;onNavigate:(page:number)=>void}){
  const [data,setData]=useState<TangentData>(()=>read(sessionId));
  const [draft,setDraft]=useState('');
+ const [sendingThread,setSendingThread]=useState<string|null>(null);
  const [selection,setSelection]=useState<SelectState|null>(null);
  const [branchesOpen,setBranchesOpen]=useState(false);
  const [settings,setSettings]=useState(false);
@@ -37,9 +39,27 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
  useEffect(()=>{if(conversationRef.current)conversationRef.current.scrollTop=savedScroll.current[branch.id]??0;},[branch.id,settings]);
  function go(id:string){setHoverPreview(null);if(!data.threads.some(t=>t.id===id))return;if(conversationRef.current)savedScroll.current[branch.id]=conversationRef.current.scrollTop;persist({...data,activeId:id});setSelection(null);setChooser(null);setSettings(false);setFinish(false);setBranchesOpen(false);setBreadOpen(false);}
  useEffect(()=>{const el=inputRef.current;if(!el)return;el.style.height='auto';el.style.height=Math.min(el.scrollHeight,180)+'px';},[draft,settings,finish]);
- function saveNote(event:FormEvent){event.preventDefault();if(!draft.trim())return;const entry:Entry={id:crypto.randomUUID(),role:'user',text:draft.trim(),createdAt:new Date().toISOString()};
- persist({...data,threads:data.threads.map(t=>t.id===branch.id?{...t,messages:[...t.messages,entry],status:'in-progress'}:t)});
- setDraft('');requestAnimationFrame(()=>{if(conversationRef.current)conversationRef.current.scrollTop=conversationRef.current.scrollHeight;});}
+ async function saveNote(event:FormEvent){
+  event.preventDefault();if(!draft.trim()||sendingThread)return;
+  const threadId=branch.id;
+  const entry:Entry={id:crypto.randomUUID(),role:'user',text:draft.trim(),createdAt:new Date().toISOString()};
+  const updated={...data,threads:data.threads.map(t=>t.id===threadId?{...t,messages:[...t.messages,entry],status:'in-progress' as const}:t)};
+  persist(updated);setDraft('');
+  requestAnimationFrame(()=>{if(conversationRef.current)conversationRef.current.scrollTop=conversationRef.current.scrollHeight;});
+  if(!aiConfigured())return;
+  setSendingThread(threadId);
+  try{
+   const thread=updated.threads.find(t=>t.id===threadId)!;
+   const messages=thread.messages.filter(m=>m.role==='user'||m.role==='assistant').map(m=>({role:m.role as 'user'|'assistant',content:m.text}));
+   const reply=await requestAiReply(messages);
+   // Read the latest stored state so branch navigation and PDF tangent updates are preserved.
+   const latest=read(sessionId);
+   const assistant:Entry={id:crypto.randomUUID(),role:'assistant',text:reply,createdAt:new Date().toISOString()};
+   persist({...latest,threads:latest.threads.map(t=>t.id===threadId?{...t,messages:[...t.messages,assistant]}:t)});
+   requestAnimationFrame(()=>{if(conversationRef.current&&read(sessionId).activeId===threadId)conversationRef.current.scrollTop=conversationRef.current.scrollHeight;});
+  }catch(e){setError(e instanceof Error?e.message:'AI request failed.');}
+  finally{setSendingThread(null);}
+ }
  function captureSelection(){
   const selection=window.getSelection();if(!selection||selection.isCollapsed||!selection.rangeCount){setSelection(null);return;}
   const range=selection.getRangeAt(0);const start=range.startContainer.parentElement?.closest<HTMLElement>('[data-chat-message]');
@@ -99,17 +119,19 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
    </div>:<>
    <div className="t2-conversation" ref={conversationRef} onMouseUp={()=>window.setTimeout(captureSelection,0)} onKeyUp={()=>window.setTimeout(captureSelection,0)}>
     {branch.contextText&&<div className="t2-origin-compact"><span>From {data.threads.find(t=>t.id===branch.parentId)?.title??"parent"}:</span><p className="t2-origin-text">{branch.contextText}</p></div>}
-    {branch.messages.map(message=><div className={'t2-message '+(message.role==='system'?'system':'user')} data-chat-message={message.id} key={message.id}>
+    {branch.messages.map(message=><div className={'t2-message '+(message.role==='system'?'system':message.role==='assistant'?'assistant':'user')} data-chat-message={message.id} key={message.id}>
      {message.role==='system'&&message.anchorId?<span>↗ Created tangent: <button className="t2-notification-link" onClick={()=>{const anchor=data.anchors.find(a=>a.id===message.anchorId);if(anchor)go(anchor.branchId);}}>{data.threads.find(t=>t.originId===message.anchorId)?.title??'Tangent'}</button></span>:linkedText(message)}
     </div>)}
     {!branch.messages.length&&!branch.contextText&&<p className="muted">Start the discussion whenever you're ready.</p>}
+    {sendingThread===branch.id&&<p className="muted" role="status">AI is responding…</p>}
    </div>
    {selection&&<div className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Create Tangent</button></div>}
    {hoverPreview&&<div className="t2-viewport-preview" role="tooltip" style={{left:hoverPreview.x,top:hoverPreview.y,transform:hoverPreview.y>120?'translateY(-100%)':'none'}}>{hoverPreview.ids.map(id=>{const anchor=data.anchors.find(a=>a.id===id);const t=data.threads.find(x=>x.id===anchor?.branchId);return t?<div key={id}><strong>{t.title}</strong><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></div>:null;})}</div>}
    {chooser&&<div className="t2-chooser" style={{left:Math.min(window.innerWidth-265,chooser.x),top:Math.min(window.innerHeight-180,chooser.y)}}><strong>Related tangents</strong>{chooser.ids.map(id=>{const a=data.anchors.find(x=>x.id===id);const t=data.threads.find(x=>x.id===a?.branchId);return t?<button key={id} onClick={()=>go(t.id)}>{t.title} · {t.status}</button>:null;})}<button onClick={()=>setChooser(null)}>Close</button></div>}
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
-    <form className="t2-composer" onSubmit={saveNote}><div className="t2-input-wrap"><textarea ref={inputRef} rows={1} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form?.requestSubmit();}}} placeholder="Ask a question or write a note…" aria-label="Reading note"/><button type="submit" className="t2-send-button" disabled={!draft.trim()} aria-label="Send message" title="Send message"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20V4M5 11l7-7 7 7"/></svg></button></div>{branch.id!=='main'&&<div className="t2-compose-actions"><button type="button" className="secondary" onClick={saveSummary}>✓ Finish tangent & return</button></div>}</form>}
+    <form className="t2-composer" onSubmit={saveNote}><div className="t2-input-wrap"><textarea ref={inputRef} rows={1} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();e.currentTarget.form?.requestSubmit();}}} placeholder="Ask a question or write a note…" aria-label="Reading note"/><button type="submit" className="t2-send-button" disabled={!draft.trim()||!!sendingThread} aria-label="Send message" title="Send message"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20V4M5 11l7-7 7 7"/></svg></button></div>{branch.id!=='main'&&<div className="t2-compose-actions"><button type="button" className="secondary" onClick={saveSummary}>✓ Finish tangent & return</button></div>}</form>}
   </>}
+  {!aiConfigured()&&<p className="muted" role="status">AI backend not connected — messages are saved as notes.</p>}
   {error&&<p role="alert">{error}</p>}
  </section>;
 }
