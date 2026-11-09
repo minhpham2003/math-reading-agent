@@ -92,7 +92,7 @@ export function ReadingFlow({sessionId,title,firstPage,lastPage,duration,onNavig
  }
  const canApprove=fields.every(f=>state.assessment[f.id].trim());
  if(state.assessmentApproved&&state.planApproved&&!setupMode) {
-  return <ReadingMode sessionId={sessionId} title={title} units={state.units} currentPdfPage={currentPdfPage}
+  return <ReadingMode sessionId={sessionId} units={state.units} currentPdfPage={currentPdfPage}
     onNavigate={onNavigate} onToggle={id=>change({...state,units:state.units.map(u=>u.id===id?{...u,done:!u.done}:u)})}
     />;
  }
