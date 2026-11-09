@@ -713,3 +713,7 @@ html[data-theme="light"] .pdf-toolbar input[type="number"]:focus-visible{
 }
 .pdf-loading-state{height:100%;min-height:160px;display:flex;align-items:center;justify-content:center;color:#91a6bf;font-size:13px}
 :root[data-theme="light"] .pdf-loading-state{color:#53677d}
+
+/* Give the AI access label breathing room before its input. */
+.t2-access-form{column-gap:12px;gap:12px}
+.t2-access-form label{margin-right:8px}
