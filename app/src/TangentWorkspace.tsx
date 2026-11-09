@@ -1,4 +1,4 @@
-import {useEffect,useRef,useState,type FormEvent,type MouseEvent as ReactMouseEvent,type ClipboardEvent} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState,type FormEvent,type MouseEvent as ReactMouseEvent,type ClipboardEvent} from 'react';
 import {createPortal} from 'react-dom';
 import {read,write,createTangent,CHANGED_EVENT,type TangentData,type Thread,type Entry} from './tangentStore';
 import {aiConfigured,requestAiReply,verifyAccessToken,getAccessToken,setAccessToken} from './aiChat';
@@ -127,7 +127,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
   selectedRangeRef.current=range.cloneRange();
   const rect=range.getBoundingClientRect();setSelection({messageId,start:pos,end:pos+selected.length,text:selected,x:rect.left+rect.width/2,y:rect.top-8,visible:true});
  }
- useEffect(()=>{
+ useLayoutEffect(()=>{
   if(!selection)return;
   const update=()=>{
    const range=selectedRangeRef.current;
