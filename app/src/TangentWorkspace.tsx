@@ -60,7 +60,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    const reply=await requestAiReply(messages,context);
    // Read the latest stored state so branch navigation and PDF tangent updates are preserved.
    const latest=read(sessionId);
-   const hasSourceLink=/\]\(pdf-page:\d+\)/.test(reply);
+   const hasSourceLink=[...reply.matchAll(/\]\(pdf-page:(\d+)\)/g)].some(match=>citationPages.includes(Number(match[1])));
    const citedReply=!hasSourceLink&&citationPages.length
     ? reply+'\n\nPDF sources: '+citationPages.slice(0,3).map(page=>'[p. '+page+'](pdf-page:'+page+')').join(' · ')
     : reply;
