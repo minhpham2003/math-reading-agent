@@ -3,6 +3,9 @@ import { loadSessions, saveSessions, type ReadingSession } from './storage';
 import { PdfReader, deleteSavedPdf, importSessionPdf } from './PdfReader';
 import { ReadingFlow } from './ReadingFlow';
 import {deletePdfIndex} from './pdfIndex';
+import {getDocument,GlobalWorkerOptions} from 'pdfjs-dist';
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+GlobalWorkerOptions.workerSrc=workerUrl;
 
 type SessionFormState = {
   title: string; target: string; firstPage: string; lastPage: string; durationMinutes: string;
@@ -19,6 +22,8 @@ export function App() {
   const [form, setForm] = useState<SessionFormState>(initialForm);
   const [newPdf, setNewPdf] = useState<File | null>(null);
   const [creating, setCreating] = useState(false);
+  const [pdfPageCount,setPdfPageCount]=useState<number|null>(null);
+  const [checkingPdf,setCheckingPdf]=useState(false);
   const [formError, setFormError] = useState('');
   const [storageError, setStorageError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -43,6 +48,19 @@ export function App() {
     setActiveId(id);
     window.history.replaceState(null, '', id ? '#session-' + encodeURIComponent(id) : window.location.pathname + window.location.search);
   }
+  async function choosePdf(file:File|null){
+    setNewPdf(file);setPdfPageCount(null);setFormError('');
+    if(!file)return;
+    setCheckingPdf(true);
+    let doc:Awaited<ReturnType<ReturnType<typeof getDocument>['promise']['then']>>|undefined;
+    try{
+      const task=getDocument({data:new Uint8Array(await file.arrayBuffer())});
+      doc=await task.promise;
+      setPdfPageCount(doc.numPages);
+      setForm(prev=>({...prev,firstPage:prev.firstPage&&Number(prev.firstPage)<=doc!.numPages?prev.firstPage:'1',lastPage:prev.lastPage&&Number(prev.lastPage)<=doc!.numPages?prev.lastPage:String(doc!.numPages)}));
+    }catch{setFormError('Could not read the PDF page count. Please choose a valid PDF.');}
+    finally{if(doc)await doc.destroy();setCheckingPdf(false);}
+  }
   async function createSession(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const first = Number(form.firstPage), last = Number(form.lastPage);
@@ -50,6 +68,8 @@ export function App() {
       setFormError('Enter a title, reading target, and a valid printed-page range.'); return;
     }
     if (!newPdf) { setFormError('Choose the PDF for this reading session.'); return; }
+    if(checkingPdf||!pdfPageCount){setFormError('The PDF page count must be verified before creating the session.');return;}
+    if(first>pdfPageCount||last>pdfPageCount){setFormError('Select a page range between 1 and '+pdfPageCount+'.');return;}
     setCreating(true);
     setFormError('');
     const now = new Date().toISOString();
@@ -147,15 +167,15 @@ export function App() {
       <form className="dialog new-session-dialog" onSubmit={createSession} role="dialog" aria-modal="true" aria-labelledby="new-session-title"><h2 id="new-session-title">New reading session</h2>
         <label className="new-session-pdf-field">PDF document <span className="required-marker">Required</span>
           <input type="file" accept=".pdf,application/pdf" required disabled={creating}
-            onChange={e => setNewPdf(e.target.files?.[0] ?? null)}/>
-          <small>{newPdf ? newPdf.name : 'Choose the document you want to read. The file stays in this browser.'}</small>
+            onChange={e => void choosePdf(e.target.files?.[0] ?? null)}/>
+          <small>{newPdf ? newPdf.name+(pdfPageCount?' · '+pdfPageCount+' PDF pages':checkingPdf?' · Checking pages…':'') : 'Choose the document you want to read. The file stays in this browser.'}</small>
         </label>
         <label>Session title<input autoFocus required maxLength={120} placeholder="e.g. Homotopy equivalence" value={form.title} onChange={e => setForm({...form,title:e.target.value})}/></label>
         <label>Section or reading target<input required placeholder="e.g. Chapter 3, §3.1" value={form.target} onChange={e => setForm({...form,target:e.target.value})}/></label>
-        <div className="form-row"><label>First printed page<input type="number" min="1" required value={form.firstPage} onChange={e => setForm({...form,firstPage:e.target.value})}/></label><label>Last printed page<input type="number" min="1" required value={form.lastPage} onChange={e => setForm({...form,lastPage:e.target.value})}/></label></div>
+        <div className="form-row"><label>First PDF page<input type="number" min="1" max={pdfPageCount??undefined} required value={form.firstPage} onChange={e => setForm({...form,firstPage:e.target.value})}/></label><label>Last PDF page<input type="number" min={form.firstPage||"1"} max={pdfPageCount??undefined} required value={form.lastPage} onChange={e => setForm({...form,lastPage:e.target.value})}/></label></div>
         <label>Session duration<select value={form.durationMinutes} onChange={e => setForm({...form,durationMinutes:e.target.value})}><option value="30">30 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></label>
         {formError && <p role="alert" className="form-error">{formError}</p>}
-        <div className="dialog-actions"><button className="secondary" type="button" disabled={creating} onClick={() => {setNewSessionOpen(false);setFormError('');setNewPdf(null);}}>Cancel</button><button className="primary" type="submit" disabled={creating}>{creating ? 'Importing PDF…' : 'Create session'}</button></div>
+        <div className="dialog-actions"><button className="secondary" type="button" disabled={creating} onClick={() => {setNewSessionOpen(false);setFormError('');setNewPdf(null);}}>Cancel</button><button className="primary" type="submit" disabled={creating||checkingPdf||!pdfPageCount}>{creating ? 'Importing PDF…' : 'Create session'}</button></div>
       </form></div>}
     {pendingDelete && <div className="overlay" onMouseDown={e => {if (e.target === e.currentTarget) setDeleteId(null);}}><div className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title"><h2 id="delete-title">Delete session?</h2><p>Delete “{pendingDelete.title}” from this browser? This cannot be undone.</p><div className="dialog-actions"><button className="secondary" onClick={() => setDeleteId(null)}>Cancel</button><button className="danger" onClick={deleteSession}>Delete session</button></div></div></div>}
   </div>;
