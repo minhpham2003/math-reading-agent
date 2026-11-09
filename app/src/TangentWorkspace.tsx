@@ -1,138 +1,107 @@
-import {useState, type FormEvent} from 'react';
+import {useEffect,useRef,useState,type FormEvent,type MouseEvent as ReactMouseEvent} from 'react';
+import {read,write,createTangent,CHANGED_EVENT,type TangentData,type Thread,type Entry,type Anchor} from './tangentStore';
 
-type Message={id:string; text:string; createdAt:string};
-type Branch={id:string; parentId:string|null; title:string; status:'in-progress'|'completed'|'archived'; messages:Message[]; summary:string; originMessageId:string|null; inherited:Message[]; includedIds:string[]; originalIncludedIds:string[]; savedPdfPage:number|null};
-type Tree={branches:Branch[]; activeId:string; expandedSummaries:string[]};
-const ROOT='main';
-const storageKey=(sessionId:string)=>'higher-math:tangents:v1:'+sessionId;
-function blank():Tree{return {activeId:ROOT,expandedSummaries:[],branches:[{id:ROOT,parentId:null,title:'Main reading',status:'in-progress',messages:[],summary:'',originMessageId:null,inherited:[],includedIds:[],originalIncludedIds:[],savedPdfPage:null}]};}
-function load(id:string):Tree{
- try{
-  const parsed=JSON.parse(localStorage.getItem(storageKey(id))??'null') as Tree|null;
-  if(parsed&&Array.isArray(parsed.branches)&&parsed.branches.some(b=>b.id===ROOT)&&parsed.branches.some(b=>b.id===parsed.activeId))return parsed;
- }catch{/* use empty tree */}
- return blank();
-}
-function guessTitle(text:string){return text.replace(/\s+/g,' ').trim().slice(0,65)||'New tangent';}
-function summaryOf(branch:Branch){
- const text=branch.messages.map(m=>m.text).join(' ').trim();
- return text?text.slice(0,240)+(text.length>240?'…':''):'Tangent on '+branch.title;
-}
-export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:
- {sessionId:string;currentPdfPage?:number;onNavigate:(page:number)=>void}){
- const [tree,setTree]=useState<Tree>(()=>load(sessionId));
+type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number};
+const ancestorsOf=(thread:Thread,data:TangentData)=>{const result:Thread[]=[];let node:Thread|undefined=thread;while(node){result.unshift(node);node=node.parentId?data.threads.find(t=>t.id===node!.parentId):undefined;}return result;};
+
+export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionId:string;currentPdfPage?:number;onNavigate:(page:number)=>void}){
+ const [data,setData]=useState<TangentData>(()=>read(sessionId));
  const [draft,setDraft]=useState('');
- const [editingSummary,setEditingSummary]=useState(false);
- const [summaryDraft,setSummaryDraft]=useState('');
- const [selecting,setSelecting]=useState(false);
- const [selectedIds,setSelectedIds]=useState<string[]>([]);
- const [treeOpen,setTreeOpen]=useState(false);
- const [showArchived,setShowArchived]=useState(false);
+ const [selection,setSelection]=useState<SelectState|null>(null);
+ const [branchesOpen,setBranchesOpen]=useState(false);
+ const [settings,setSettings]=useState(false);
+ const [nameDraft,setNameDraft]=useState('');
+ const [finish,setFinish]=useState(false);
+ const [summary,setSummary]=useState('');
+ const [chooser,setChooser]=useState<{ids:string[];x:number;y:number}|null>(null);
+ const [breadOpen,setBreadOpen]=useState(false);
  const [error,setError]=useState('');
- const active=tree.branches.find(b=>b.id===tree.activeId)??tree.branches[0];
- const byId=new Map(tree.branches.map(b=>[b.id,b]));
- const ancestors:Branch[]=[];let cursor:Branch|undefined=active;
- while(cursor){ancestors.unshift(cursor);cursor=cursor.parentId?byId.get(cursor.parentId):undefined;}
- const children=(parentId:string)=>tree.branches.filter(b=>b.parentId===parentId);
- function save(next:Tree){try{localStorage.setItem(storageKey(sessionId),JSON.stringify(next));setTree(next);setError('');}catch{setError('Cannot save tangents in this browser.');}}
- function switchTo(id:string){const branch=byId.get(id);if(!branch)return;save({...tree,activeId:id});setEditingSummary(false);setSelecting(false);if(branch.savedPdfPage && branch.savedPdfPage>0)onNavigate(branch.savedPdfPage);}
- function appendMessage(event:FormEvent<HTMLFormElement>){
-  event.preventDefault();const content=draft.trim();if(!content)return;
-  const message={id:crypto.randomUUID(),text:content,createdAt:new Date().toISOString()};
-  save({...tree,branches:tree.branches.map(b=>b.id===active.id?{...b,status:b.id===ROOT?b.status:'in-progress' as const,messages:[...b.messages,message]}:b)});
-  setDraft('');
+ const dropdownRef=useRef<HTMLDivElement>(null);
+ const conversationRef=useRef<HTMLDivElement>(null);
+ const savedScroll=useRef<Record<string,number>>({});
+ const branch=data.threads.find(t=>t.id===data.activeId)??data.threads[0];
+ const ancestry=ancestorsOf(branch,data);
+ const anchorsFor=(id:string)=>data.anchors.filter(a=>a.kind==='chat'&&a.targetId===id);
+ function persist(next:TangentData){try{write(sessionId,next);setData(next);setError('');}catch{setError('Unable to save this tangent.');}}
+ useEffect(()=>{const sync=(event:Event)=>{const e=event as CustomEvent<{session:string}>;if(e.detail?.session===sessionId)setData(read(sessionId));};
+ window.addEventListener(CHANGED_EVENT,sync);return()=>window.removeEventListener(CHANGED_EVENT,sync);},[sessionId]);
+ useEffect(()=>{function onDown(e:MouseEvent){if(dropdownRef.current&&!dropdownRef.current.contains(e.target as Node))setBranchesOpen(false);}
+ function esc(e:KeyboardEvent){if(e.key==='Escape'){setBranchesOpen(false);setChooser(null);setSelection(null);setBreadOpen(false);}}
+ document.addEventListener('mousedown',onDown);document.addEventListener('keydown',esc);return()=>{document.removeEventListener('mousedown',onDown);document.removeEventListener('keydown',esc);};},[]);
+ useEffect(()=>{if(conversationRef.current)conversationRef.current.scrollTop=savedScroll.current[branch.id]??0;},[branch.id,settings]);
+ function go(id:string){if(!data.threads.some(t=>t.id===id))return;if(conversationRef.current)savedScroll.current[branch.id]=conversationRef.current.scrollTop;persist({...data,activeId:id});setSelection(null);setChooser(null);setSettings(false);setFinish(false);setBranchesOpen(false);setBreadOpen(false);}
+ function saveNote(event:FormEvent){event.preventDefault();if(!draft.trim())return;const entry:Entry={id:crypto.randomUUID(),role:'user',text:draft.trim(),createdAt:new Date().toISOString()};
+ persist({...data,threads:data.threads.map(t=>t.id===branch.id?{...t,messages:[...t.messages,entry],status:'in-progress'}:t)});
+ setDraft('');requestAnimationFrame(()=>{if(conversationRef.current)conversationRef.current.scrollTop=conversationRef.current.scrollHeight;});}
+ function captureSelection(){
+  const selection=window.getSelection();if(!selection||selection.isCollapsed||!selection.rangeCount){setSelection(null);return;}
+  const range=selection.getRangeAt(0);const start=range.startContainer.parentElement?.closest<HTMLElement>('[data-chat-message]');
+  const end=range.endContainer.parentElement?.closest<HTMLElement>('[data-chat-message]');
+  if(!start||start!==end||!conversationRef.current?.contains(start)){setSelection(null);return;}
+  const messageId=start.dataset.chatMessage!;const message=branch.messages.find(m=>m.id===messageId);
+  const textNode=start.querySelector<HTMLElement>('[data-message-content]');if(!message||!textNode||!textNode.contains(range.commonAncestorContainer)){setSelection(null);return;}
+  const pre=document.createRange();pre.selectNodeContents(textNode);pre.setEnd(range.startContainer,range.startOffset);
+  const pos=pre.toString().length;const selected=selection.toString();if(!selected.trim()){setSelection(null);return;}
+  const rect=range.getBoundingClientRect();setSelection({messageId,start:pos,end:pos+selected.length,text:selected,x:rect.left+rect.width/2,y:rect.bottom+7});
  }
- function beginTangent(anchor?:Message){
-  const id=crypto.randomUUID();
-  const selected=anchor?[anchor]:active.messages.length?[active.messages[active.messages.length-1]]:[];
-  const context=active.messages.slice(0,Math.max(0,active.messages.length-1)).slice(-2);
-  const branch:Branch={id,parentId:active.id,title:guessTitle(anchor?.text??selected[0]?.text??'New tangent'),
-   status:'in-progress',messages:[],summary:guessTitle(anchor?.text??'Tangent in progress'),originMessageId:anchor?.id??selected[0]?.id??null,
-   inherited:context,includedIds:selected.map(m=>m.id),originalIncludedIds:selected.map(m=>m.id),
-   savedPdfPage:currentPdfPage??null};
-  save({...tree,activeId:id,branches:[...tree.branches,branch]});
-  setSelecting(false);setEditingSummary(false);
+ function makeTangent(){if(!selection)return;createTangent(sessionId,{kind:'chat',targetId:selection.messageId,start:selection.start,end:selection.end,text:selection.text});setSelection(null);window.getSelection()?.removeAllRanges();}
+ function openAnchors(ids:string[],event:ReactMouseEvent){event.preventDefault();event.stopPropagation();if(ids.length===1)go(data.anchors.find(a=>a.id===ids[0])!.branchId);else setChooser({ids,x:event.clientX,y:event.clientY});}
+ function linkedText(message:Entry){
+  const references=anchorsFor(message.id).filter(a=>a.start!==undefined&&a.end!==undefined&&a.end>a.start);
+  if(!references.length)return <span data-message-content>{message.text}</span>;
+  const points=new Set<number>([0,message.text.length]);references.forEach(a=>{points.add(Math.min(message.text.length,a.start!));points.add(Math.min(message.text.length,a.end!));});
+  const edges=[...points].sort((a,b)=>a-b);
+  return <span data-message-content>{edges.slice(0,-1).map((start,i)=>{const end=edges[i+1],slice=message.text.slice(start,end);const matches=references.filter(a=>a.start!<end&&a.end!>start);if(!matches.length)return <span key={i}>{slice}</span>;
+   const names=matches.map(a=>data.threads.find(t=>t.id===a.branchId)).filter((t):t is Thread=>!!t);
+   return <button key={i} type="button" className="t2-link" onClick={e=>openAnchors(matches.map(a=>a.id),e)} title={names.map(t=>t.title+' · '+t.status).join('\n')}>{slice}<span className="t2-hover">{names.map(t=><span key={t.id}>{t.title} · {t.status==='completed'?'✓ Completed':'● In progress'}</span>)}</span></button>;
+  })}</span>;
  }
- function startFinish(){setSummaryDraft(summaryOf(active));setEditingSummary(true);}
- function finish(){
-  if(active.id===ROOT||!active.parentId)return;
-  const parentId=active.parentId;
-  save({...tree,activeId:parentId,branches:tree.branches.map(b=>b.id===active.id?{...b,summary:summaryDraft.trim()||'Tangent completed',status:'completed'}:b)});
-  setEditingSummary(false);setSelecting(false);
-  if(active.savedPdfPage)onNavigate(active.savedPdfPage);
+ function renderTree(id:string,depth:number):React.ReactNode{
+  const node=data.threads.find(t=>t.id===id);if(!node)return null;
+  const kids=data.threads.filter(t=>t.parentId===id);
+  const expanded=data.expandedIds.includes(id);
+  return <div key={id} className="t2-tree-node" style={{paddingLeft:depth*13}}>
+   <div className="t2-tree-row">{kids.length?<button aria-label={(expanded?'Collapse ':'Expand ')+node.title} onClick={()=>persist({...data,expandedIds:expanded?data.expandedIds.filter(x=>x!==id):[...data.expandedIds,id]})}>{expanded?'▾':'▸'}</button>:<span className="t2-tree-spacer"/>}
+    <button className={'t2-tree-title'+(id===branch.id?' current':'')} onClick={()=>go(id)}>{node.title}</button>{id!=='main'&&<span className={node.status==='completed'?'t2-done':'t2-pending'} title={node.status}>{node.status==='completed'?'✓':'●'}</span>}
+   </div>{expanded&&kids.map(k=>renderTree(k.id,depth+1))}</div>;
  }
- function toggleIncluded(id:string){setSelectedIds(ids=>ids.includes(id)?ids.filter(x=>x!==id):[...ids,id]);}
- function applySelection(){
-  save({...tree,branches:tree.branches.map(b=>b.id===active.id?{...b,includedIds:selectedIds}:b)});
-  setSelecting(false);
- }
- function archive(){
-  if(active.id===ROOT||!active.parentId)return;
-  const parent=active.parentId;
-  save({...tree,activeId:parent,branches:tree.branches.map(b=>b.id===active.id?{...b,status:'archived'}:b)});
- }
- function destroy(){
-  if(active.id===ROOT||!active.parentId)return;
-  if(!window.confirm('Delete this tangent and its notes? Child tangents will be kept and attached to its parent. This cannot be undone.'))return;
-  const parent=active.parentId;
-  save({...tree,activeId:parent,branches:tree.branches.filter(b=>b.id!==active.id).map(b=>b.parentId===active.id?{...b,parentId:parent}:b)});
- }
- function toggleSummary(id:string){
-  const expanded=tree.expandedSummaries.includes(id);
-  save({...tree,expandedSummaries:expanded?tree.expandedSummaries.filter(x=>x!==id):[...tree.expandedSummaries,id]});
- }
- function renderTree(parentId:string,depth=0):React.ReactNode{
-  return children(parentId).filter(b=>b.status!=='archived'||showArchived).map(b=><div key={b.id} style={{paddingLeft:depth*12}}>
-   <button className={'tangent-tree-link'+(active.id===b.id?' active':'')} onClick={()=>switchTo(b.id)}>{b.status==='completed'?'✓ ':b.status==='archived'?'◌ ':'↳ '}{b.title} <small>({b.status})</small></button>
-   {renderTree(b.id,depth+1)}
-  </div>);
- }
- return <section className="tangent-workspace" aria-label="Branching reading notes">
-  <div className="tangent-nav">
-   <div className="tangent-breadcrumbs">{ancestors.map((b,i)=><span key={b.id}>{i>0&&' › '}<button className={b.id===active.id?'active':''} onClick={()=>switchTo(b.id)}>{b.title}</button></span>)}</div>
-   <button className="secondary" aria-expanded={treeOpen} onClick={()=>setTreeOpen(v=>!v)}>Branches {treeOpen?'▴':'▾'}</button>
-  </div>
-  {treeOpen&&<div className="tangent-tree"><button className="tangent-tree-link" onClick={()=>switchTo(ROOT)}>Main reading</button>{renderTree(ROOT)}<label><input type="checkbox" checked={showArchived} onChange={e=>setShowArchived(e.target.checked)}/> Show archived</label></div>}
-  {active.id!==ROOT&&<div className="tangent-detail">
-   <div className="tangent-title-line"><strong>Tangent · {active.status}</strong><button className="secondary" onClick={()=>switchTo(active.parentId!)}>Return to parent</button></div>
-   <label>Title<input value={active.title} onChange={e=>save({...tree,branches:tree.branches.map(b=>b.id===active.id?{...b,title:e.target.value}:b)})}/></label>
-   {!!active.inherited.length&&<details><summary>Earlier context (read-only)</summary>{active.inherited.map(m=><blockquote key={m.id}>{m.text}</blockquote>)}</details>}
-   <div className="tangent-actions"><button className="secondary" onClick={()=>{setSelectedIds(active.includedIds);setSelecting(v=>!v)}}>Edit source selection</button>
-    <button className="secondary" onClick={archive}>Archive</button><button className="secondary" onClick={destroy}>Delete</button></div>
-   {selecting&&<div className="tangent-selection-editor"><strong>Select parent messages to reference</strong>
-    {(byId.get(active.parentId!)?.messages??[]).map(m=><label key={m.id}><input type="checkbox" checked={selectedIds.includes(m.id)} onChange={()=>toggleIncluded(m.id)}/>{m.text}</label>)}
-    <button className="primary" onClick={applySelection}>Apply changes</button><button className="secondary" onClick={()=>setSelecting(false)}>Cancel</button>
-   </div>}
-  </div>}
-  <div className="tangent-messages">
-   {active.id!==ROOT&&active.includedIds.length>0&&<div className="tangent-source-context"><strong>Referenced parent discussion</strong>
-    {active.includedIds.map(id=>byId.get(active.parentId!)?.messages.find(m=>m.id===id)).filter((m):m is Message=>!!m).map(m=><blockquote key={m.id}>{m.text}</blockquote>)}
-   </div>}
-   {active.messages.map(m=>{
-    const linked=children(active.id).filter(b=>b.includedIds.includes(m.id));
-    return <div key={m.id} className={'tangent-message'+(linked.length?' has-linked-tangent':'')}>
-     {linked.length===0&&<><span>{m.text}</span><button className="tangent-create" title="Create tangent from this message" aria-label="Create tangent from message" onClick={()=>beginTangent(m)}>↗</button></>}
-     {linked.map(b=><div key={b.id} className="tangent-inline-summary">
-      <strong>{b.status}</strong> · {b.summary} <button onClick={()=>switchTo(b.id)}>Open tangent ↗</button>
-      <button onClick={()=>toggleSummary(b.id)}>{tree.expandedSummaries.includes(b.id)?'Hide original':'Show original'}</button>
-      {tree.expandedSummaries.includes(b.id)&&<blockquote>{m.text}</blockquote>}
-     </div>)}
-    </div>;
-   })}
-   {children(active.id).filter(b=>b.includedIds.length===0).map(b=><div className="tangent-inline-summary" key={b.id}>
-    <strong>{b.status}</strong> · {b.summary} <button onClick={()=>switchTo(b.id)}>Open tangent ↗</button>
-   </div>)}
-   {active.messages.length===0&&<p className="muted">No notes on this branch yet. Add a question or observation below.</p>}
-  </div>
-  {editingSummary?<div className="tangent-finish"><h3>Finish tangent & return</h3><p className="muted">Review this manually prepared draft. AI summaries are not connected yet.</p>
-   <textarea value={summaryDraft} onChange={e=>setSummaryDraft(e.target.value)} rows={4}/>
-   <button className="primary" onClick={finish}>Save summary & return</button><button className="secondary" onClick={()=>setEditingSummary(false)}>Cancel</button>
-  </div>:<form className="tangent-compose" onSubmit={appendMessage}>
-   <textarea rows={3} value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Ask a question or write a note…" aria-label="Reading note"/>
-   <div className="tangent-actions"><button className="secondary" type="button" onClick={()=>beginTangent()}>+ Tangent</button>
-    {active.id!==ROOT&&<button className="secondary" type="button" onClick={startFinish}>Finish tangent & return</button>}
-    <button className="primary" type="submit" disabled={!draft.trim()}>Save note</button></div>
-  </form>}
+ function saveSettings(){const value=nameDraft.trim()||branch.title;persist({...data,threads:data.threads.map(t=>t.id===branch.id?{...t,title:value}:t)});setSettings(false);}
+ function finishSave(){const parent=branch.parentId;if(!parent)return;persist({...data,activeId:parent,threads:data.threads.map(t=>t.id===branch.id?{...t,status:'completed',summary:summary.trim()}:t)});setFinish(false);if(branch.originPage)onNavigate(branch.originPage);}
+ function saveSummary(){setSummary(branch.summary);setFinish(true);}
+ return <section className="t2-workspace">
+  <header className="t2-header">
+   <div className="t2-breadcrumb">
+    {ancestry.length<=2?<>{ancestry.map((t,i)=><span key={t.id}>{i>0&&' › '}<button className={t.id===branch.id?'active':''} onClick={()=>go(t.id)}>{t.title}</button></span>)}</>:
+     <><button onClick={()=>go('main')}>Main reading</button><span> › </span><button onClick={()=>setBreadOpen(v=>!v)}>…</button><span> › </span><button className="active" onClick={()=>go(branch.id)}>{branch.title}</button>
+      {breadOpen&&<div className="t2-ellipsis-menu">{ancestry.slice(1,-1).map(t=><button key={t.id} onClick={()=>go(t.id)}>{t.title}</button>)}</div>}</>}
+   </div>
+   {branch.id!=='main'&&<button className="t2-gear" title="Tangent settings" aria-label="Tangent settings" onClick={()=>{setNameDraft(branch.title);setSettings(true);}}>⚙</button>}
+   <div className="t2-branch-holder" ref={dropdownRef}><button className="secondary" aria-expanded={branchesOpen} onClick={()=>setBranchesOpen(v=>!v)}>Branches ▾</button>
+    {branchesOpen&&<div className="t2-tree-pop" role="navigation" aria-label="Conversation branches">{renderTree('main',0)}</div>}</div>
+  </header>
+  {branch.parentId&&!settings&&<button className="t2-return" onClick={()=>go(branch.parentId!)}>← Return to parent</button>}
+  {settings?<div className="t2-settings">
+    <button className="secondary" onClick={()=>setSettings(false)}>← Back to tangent</button><h3>Tangent settings</h3>
+    <label>Title<input value={nameDraft} onChange={e=>setNameDraft(e.target.value)}/></label>
+    <h4>Starting point</h4><p className="muted">{data.anchors.find(a=>a.id===branch.originId)?.kind==='pdf'?'PDF passage':'Conversation excerpt'}</p>
+    <blockquote>{data.anchors.find(a=>a.id===branch.originId)?.text}</blockquote>
+    <h4>Source context</h4><p>Available sources: parent conversation and current reading PDF.</p>
+    <p>Attached references: {branch.sourceIds.length} specific PDF passage(s).</p>
+    <p className="muted">Fine-grained context and source editing will be added with the AI integration.</p>
+    <button className="primary" onClick={saveSettings}>Save changes</button>
+   </div>:<>
+   <div className="t2-conversation" ref={conversationRef} onMouseUp={()=>window.setTimeout(captureSelection,0)} onKeyUp={()=>window.setTimeout(captureSelection,0)}>
+    {branch.contextText&&<blockquote className="t2-origin"><strong>From {data.threads.find(t=>t.id===branch.parentId)?.title??'parent conversation'}</strong><p>{branch.contextText}</p></blockquote>}
+    {branch.messages.map(message=><div className={'t2-message '+(message.role==='system'?'system':'user')} data-chat-message={message.id} key={message.id}>
+     {message.role==='system'&&message.anchorId?<span>↗ Created tangent: <button className="t2-notification-link" onClick={()=>{const anchor=data.anchors.find(a=>a.id===message.anchorId);if(anchor)go(anchor.branchId);}}>{data.threads.find(t=>t.originId===message.anchorId)?.title??'Tangent'}</button></span>:linkedText(message)}
+    </div>)}
+    {!branch.messages.length&&!branch.contextText&&<p className="muted">Start the discussion whenever you're ready.</p>}
+   </div>
+   {selection&&<div className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>↗ Create Tangent</button></div>}
+   {chooser&&<div className="t2-chooser" style={{left:Math.min(window.innerWidth-265,chooser.x),top:Math.min(window.innerHeight-180,chooser.y)}}><strong>Related tangents</strong>{chooser.ids.map(id=>{const a=data.anchors.find(x=>x.id===id);const t=data.threads.find(x=>x.id===a?.branchId);return t?<button key={id} onClick={()=>go(t.id)}>{t.title} · {t.status}</button>:null;})}<button onClick={()=>setChooser(null)}>Close</button></div>}
+   {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
+    <form className="t2-composer" onSubmit={saveNote}><textarea rows={3} value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Ask a question or write a note…" aria-label="Reading note"/><div className="t2-compose-actions">{branch.id!=='main'&&<button type="button" className="secondary" onClick={saveSummary}>✓ Finish tangent & return</button>}<button type="submit" className="primary" disabled={!draft.trim()}>Save note</button></div></form>}
+  </>}
   {error&&<p role="alert">{error}</p>}
  </section>;
 }
