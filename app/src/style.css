@@ -636,3 +636,13 @@
 :root[data-theme="light"] .reader-header .pdf-zoom-form,
 :root[data-theme="light"] .reader-header .pdf-zoom-form input,
 :root[data-theme="light"] .reader-header .pdf-page-form input{color:#1f3854;opacity:1}
+
+/* Compact editable page and zoom fields independently of toolbar button sizing. */
+.reader-header .pdf-page-form input,
+.reader-header .pdf-zoom-form input{
+ height:28px;
+ min-height:28px;
+ max-height:28px;
+ padding:2px 4px;
+ line-height:normal;
+}
