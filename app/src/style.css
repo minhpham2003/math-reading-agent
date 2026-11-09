@@ -1193,3 +1193,14 @@ html[data-theme="light"] .t2-selection-pop{
 .assessment-unlock input{display:block;width:100%;box-sizing:border-box}
 .assessment-unlock button{height:36px}
 html[data-theme="light"] .assessment-source-panel{border-color:#adc1d8;background:#dfe6ed}
+
+/* Phase 3 assessment: compact, scannable headings and bullet points. */
+.reading-flow .assessment-summary-section{margin:0 0 14px}
+.reading-flow .assessment-summary-section h3{font-size:15px;font-weight:650;margin:0 0 5px;color:inherit}
+.reading-flow .assessment-summary-section ul{margin:0;padding-left:21px}
+.reading-flow .assessment-summary-section li{font-size:14px;line-height:1.52;margin:4px 0;overflow-wrap:anywhere;color:inherit}
+html[data-theme="light"] .reading-flow .assessment-summary-section h3,
+html[data-theme="light"] .reading-flow .assessment-summary-section li{color:#25394f}
+/* Avoid expensive transitions and prevent text selection during active resizing. */
+.workspace .work-grid.is-resizing,.workspace .work-grid.is-resizing *{transition:none!important}
+.workspace .work-grid.is-resizing{user-select:none}
