@@ -1204,3 +1204,7 @@ html[data-theme="light"] .reading-flow .assessment-summary-section li{color:#253
 /* Avoid expensive transitions and prevent text selection during active resizing. */
 .workspace .work-grid.is-resizing,.workspace .work-grid.is-resizing *{transition:none!important}
 .workspace .work-grid.is-resizing{user-select:none}
+
+/* Visible build identifier beside the book project title. */
+.project-build-id{display:inline-block;vertical-align:middle;font-size:.3em;font-weight:500;letter-spacing:.02em;color:#92aac8;background:#23364b;padding:5px 9px;border-radius:7px}
+:root[data-theme="light"] .project-build-id{background:#c2cfdd;color:#2a4661}
