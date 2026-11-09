@@ -5,6 +5,7 @@ import {aiConfigured,requestAiReply,verifyAccessToken,getAccessToken,setAccessTo
 import {MathText} from './MathText';
 import {MarkdownMath} from './MarkdownMath';
 import {retrievePdfContext} from './pdfIndex';
+import {getReadingSessionContext} from './readingSessionContext';
 import {readChatCitations,saveChatCitation} from './chatCitations';
 import {citationExcerptsFromContext,preparePdfCitations,stripLegacySourceList} from './pdfCitations';
 
@@ -99,8 +100,13 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
    const thread=updated.threads.find(t=>t.id===threadId)!;
    const messages=thread.messages.filter(m=>m.role==='user'||m.role==='assistant').map(m=>({role:m.role as 'user'|'assistant',content:m.text}));
    const context=await retrievePdfContext(sessionId,entry.text,currentPdfPage).catch(()=>undefined);
+   const sessionContext=getReadingSessionContext(sessionId,currentPdfPage);
+   // Session state and PDF excerpts are distinct: the plan is not PDF evidence.
+   // Reserve room for both within the existing backend's 16k context budget.
+   const sourceContext=[sessionContext?'[APP SESSION CONTEXT — NOT PDF SOURCE]\n'+sessionContext.slice(0,6500):'',
+     context?'[PDF SOURCE EXCERPTS]\n'+context.slice(0,9000):''].filter(Boolean).join('\n\n');
    const citationPages=[...citationExcerptsFromContext(context).keys()];
-   const reply=await requestAiReply(messages,context);
+   const reply=await requestAiReply(messages,sourceContext||undefined);
    const citedReply=preparePdfCitations(reply,context);
    // Read the latest stored state so branch navigation and PDF tangent updates are preserved.
    const latest=read(sessionId);
