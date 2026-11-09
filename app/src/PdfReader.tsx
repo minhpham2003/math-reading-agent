@@ -164,7 +164,7 @@ function ContinuousPage({ pdf, number, scale, root, citations, tangentAnchors, o
 // approximate reserved height with its actual ratio when it becomes visible.
 let pdfPageWidth = 612;
 
-type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void; toolbarHostId?: string; actionsHostId?:string; pageJump?: {page:number;seq:number}|null };
+type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void; toolbarHostId?: string; actionsHostId?:string; pageJump?: {page:number;seq:number;quote?:string}|null };
 export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId, actionsHostId, pageJump }: Props) {
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [pdfLoading,setPdfLoading]=useState(true);
@@ -307,7 +307,33 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   }
 
   useEffect(() => {
-    if (pdf && scrollRoot && pageJump) jump(pageJump.page);
+    if(!pdf||!scrollRoot||!pageJump)return;
+    jump(pageJump.page);
+    scrollRoot.querySelectorAll('.pdf-cited-passage').forEach(el=>el.classList.remove('pdf-cited-passage'));
+    const quote=pageJump.quote?.trim();
+    if(!quote)return;
+    const normalize=(value:string)=>value.toLowerCase().replace(/[^\\p{L}\\p{N}]+/gu,' ').trim();
+    const needle=normalize(quote).slice(0,160);
+    if(needle.length<5)return;
+    let retries=0,timer:ReturnType<typeof setTimeout>;
+    const locate=()=>{
+      const layer=scrollRoot.querySelector<HTMLElement>('[data-pdf-page="'+pageJump.page+'"] .textLayer');
+      const spans=layer?Array.from(layer.querySelectorAll<HTMLElement>('span')).filter(el=>el.textContent?.trim()):[];
+      const parts=spans.map(el=>normalize(el.textContent??''));
+      const joined=parts.join(' ');
+      const pos=joined.indexOf(needle);
+      if(pos>=0){
+        let offset=0,first:HTMLElement|undefined;
+        for(let i=0;i<spans.length;i++){
+          const end=offset+parts[i].length;
+          if(pos<end&&pos+needle.length>offset){spans[i].classList.add('pdf-cited-passage');first??=spans[i];}
+          offset=end+1;
+        }
+        if(first){const rect=first.getBoundingClientRect(),rootRect=scrollRoot.getBoundingClientRect();scrollRoot.scrollTop+=rect.top-rootRect.top-90;}
+      }else if(retries++<15){timer=window.setTimeout(locate,180);}
+    };
+    timer=window.setTimeout(locate,250);
+    return()=>{window.clearTimeout(timer);scrollRoot.querySelectorAll('.pdf-cited-passage').forEach(el=>el.classList.remove('pdf-cited-passage'));};
   }, [pageJump?.seq, pdf, scrollRoot]);
 
   function onScroll() {
