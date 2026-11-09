@@ -190,6 +190,14 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   const tangentMenuRef=useRef<HTMLDivElement>(null);
   const [pending, setPending] = useState<Omit<Citation,'id'> | null>(null);
   const [selectionPoint, setSelectionPoint] = useState<{x:number;y:number} | null>(null);
+  const citationActionRef=useRef<HTMLDivElement>(null);
+  useLayoutEffect(()=>{
+    const popup=citationActionRef.current;
+    if(!popup||!selectionPoint||!scrollRoot)return;
+    const leftBound=scrollRoot.scrollLeft+8;
+    const rightBound=scrollRoot.scrollLeft+scrollRoot.clientWidth-popup.offsetWidth-8;
+    popup.style.left=Math.max(leftBound,Math.min(selectionPoint.x,Math.max(leftBound,rightBound)))+'px';
+  },[selectionPoint,scrollRoot]);
   const [visualSelection, setVisualSelection] = useState<{page:number;boxes:Box[]} | null>(null);
   const [showCitations, setShowCitations] = useState(false);
   const sourcesRef = useRef<HTMLElement>(null);
@@ -710,7 +718,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       return t?<button key={id} className="t2-pdf-preview-entry" type="button" onClick={()=>{setTangentMenu(null);writeActive(state,t.id);}}><span>{t.title}</span><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></button>:null;
     })}</div>}
 
-    {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
+    {pending && selectionPoint && <div ref={citationActionRef} className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
       <button type="button" className="primary" onClick={saveCitation}>Cite</button><button type="button" className="primary" onClick={createPdfTangent}>Branch</button>
     </div>}
         {Array.from({ length: pdf.numPages }, (_, i) =>
