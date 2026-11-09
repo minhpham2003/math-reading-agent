@@ -96,7 +96,7 @@ export function TangentWorkspace({sessionId,onNavigate}:{sessionId:string;curren
     <button className="primary" onClick={saveSettings}>Save changes</button>
    </div>:<>
    <div className="t2-conversation" ref={conversationRef} onMouseUp={()=>window.setTimeout(captureSelection,0)} onKeyUp={()=>window.setTimeout(captureSelection,0)}>
-    {branch.contextText&&<p className="t2-origin-text">{branch.contextText}</p>}
+    {branch.contextText&&<div className="t2-origin-compact"><span>From {data.threads.find(t=>t.id===branch.parentId)?.title??"parent"}:</span><p className="t2-origin-text">{branch.contextText}</p></div>}
     {branch.messages.map(message=><div className={'t2-message '+(message.role==='system'?'system':'user')} data-chat-message={message.id} key={message.id}>
      {message.role==='system'&&message.anchorId?<span>↗ Created tangent: <button className="t2-notification-link" onClick={()=>{const anchor=data.anchors.find(a=>a.id===message.anchorId);if(anchor)go(anchor.branchId);}}>{data.threads.find(t=>t.originId===message.anchorId)?.title??'Tangent'}</button></span>:linkedText(message)}
     </div>)}
