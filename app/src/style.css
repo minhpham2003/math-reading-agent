@@ -663,3 +663,22 @@
  color:#192f49;
  border-color:#7396bc;
 }
+
+/* Light-mode dashboard: replace leftover pale-on-dark text colors. */
+:root[data-theme="light"] .dashboard,
+:root[data-theme="light"] .dashboard .card,
+:root[data-theme="light"] .dashboard .session-row,
+:root[data-theme="light"] .dashboard .source,
+:root[data-theme="light"] .dashboard .stat,
+:root[data-theme="light"] .dashboard .session-row strong{color:#22364c}
+:root[data-theme="light"] .dashboard .breadcrumb,
+:root[data-theme="light"] .dashboard .eyebrow,
+:root[data-theme="light"] .dashboard .topbar-tag{color:#4a627e}
+:root[data-theme="light"] .dashboard .text-button{color:#225c9c}
+:root[data-theme="light"] .dashboard .text-button:hover{color:#173f6f;text-decoration:underline}
+:root[data-theme="light"] .dashboard .badge{background:#d1dfeb;color:#254461}
+:root[data-theme="light"] .dashboard .menu-button{background:#d1dae5;color:#243d59;border-color:#819bb7}
+:root[data-theme="light"] .dashboard .menu-button:hover{background:#bfcddd}
+:root[data-theme="light"] .dashboard .progress{background:#bdcbd9}
+:root[data-theme="light"] .dashboard .progress>div{background:#416eae}
+:root[data-theme="light"] .dashboard .notice{background:#e8e2d5;color:#604e31;border-color:#cfc0a4}
