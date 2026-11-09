@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent, type CSSProperties, type MouseEvent as ReactMouseEvent } from 'react';
 import { createPortal } from 'react-dom';
+import {readChatCitations,removeChatCitation,citationDeepLink,CHAT_CITATIONS_EVENT} from './chatCitations';
 import { getDocument, GlobalWorkerOptions, TextLayer, type PDFDocumentProxy } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import 'pdfjs-dist/web/pdf_viewer.css';
@@ -180,6 +181,8 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
   const [actionsHost,setActionsHost]=useState<HTMLElement|null>(null);
   const [message, setMessage] = useState('');
   const [citations, setCitations] = useState<Citation[]>(() => readRefs(sessionId));
+  const [chatCitations,setChatCitations]=useState(()=>readChatCitations(sessionId));
+  useEffect(()=>{const sync=(event:Event)=>{if((event as CustomEvent<{sessionId:string}>).detail?.sessionId===sessionId)setChatCitations(readChatCitations(sessionId));};window.addEventListener(CHAT_CITATIONS_EVENT,sync);return()=>window.removeEventListener(CHAT_CITATIONS_EVENT,sync);},[sessionId]);
   const [tangentAnchors,setTangentAnchors]=useState<Anchor[]>(()=>readTangents(sessionId).anchors.filter(a=>a.kind==='pdf'));
   const [tangentMenu,setTangentMenu]=useState<{ids:string[];x:number;y:number;visible:boolean}|null>(null);
   const tangentMenuAnchorRef=useRef<HTMLElement|null>(null);
@@ -593,11 +596,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     catch {setMessage('Could not delete citation.');}
   }
   function copyCitationLink(ref:Citation){
-    const link=new URL(window.location.href);
-    link.searchParams.delete('v');
-    link.searchParams.set('citation',ref.id);
-    link.hash='session-'+encodeURIComponent(sessionId);
-    void navigator.clipboard.writeText(link.toString()).catch(()=>setMessage('Clipboard unavailable.'));
+    void navigator.clipboard.writeText(citationDeepLink(sessionId,ref.id,'pdf')).catch(()=>setMessage('Clipboard unavailable.'));
   }
   function goCitation(ref:Citation) {
     if (ref.filename !== filename) {setMessage('This citation belongs to another imported PDF.');return;}
@@ -636,7 +635,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     (event.currentTarget.elements.namedItem('page') as HTMLInputElement | null)?.blur();
   }
 
-  const actions=<div className="pdf-header-actions">    <button data-citations-toggle className="secondary" onClick={() => setShowCitations(v => !v)}>Citations ({citations.length})</button>
+  const actions=<div className="pdf-header-actions">    <button data-citations-toggle className="secondary" onClick={() => setShowCitations(v => !v)}>Citations ({citations.length+chatCitations.length})</button>
 
   </div>;
   const controls = <div className="pdf-toolbar">
@@ -668,7 +667,18 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     {message && <p role="alert" className="pdf-error">{message}</p>}
     {showCitations && <aside ref={sourcesRef} className="sources-drawer" aria-label="Saved source references">
       
-      {citations.length===0 && <p>Select text in your PDF to create a citation.</p>}
+      {citations.length+chatCitations.length===0 && <p>Select text in your PDF or agent chat to create a citation.</p>}
+      {chatCitations.map(ref=><div className="source-entry" key={ref.id}>
+        <button className="source-entry-link" onClick={()=>{
+          const url=new URL(citationDeepLink(sessionId,ref.id,'chat'));
+          window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+          window.dispatchEvent(new CustomEvent('higher-math:open-chat-citation',{detail:{sessionId,id:ref.id}}));
+          setShowCitations(false);
+        }}>
+          <strong>Agent chat · saved excerpt</strong><span title={ref.text}>“{ref.text}”</span></button>
+        <button className="secondary" onClick={()=>void navigator.clipboard.writeText(citationDeepLink(sessionId,ref.id,'chat')).catch(()=>setMessage('Clipboard unavailable.'))}>Copy</button>
+        <button className="secondary" onClick={()=>removeChatCitation(sessionId,ref.id)}>Remove</button>
+      </div>)}
       {citations.map(ref => <div className="source-entry" key={ref.id}>
         <button className="source-entry-link" onClick={() => goCitation(ref)}>
           <strong>{ref.filename} · p. {ref.page}</strong><span>“{ref.text}”</span></button>
