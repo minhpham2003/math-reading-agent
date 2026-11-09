@@ -984,3 +984,35 @@ html[data-theme="light"] .sources-drawer .source-entry-excerpt{color:#263b52}
  box-shadow:0 10px 25px rgba(18,36,58,.18);
 }
 .reading-mode>.t2-workspace{min-height:0;height:100%;flex:1}
+
+/* Unified clean selection actions for both the PDF and agent chat. */
+.floating-citation-action,
+.t2-selection-pop{
+ background:transparent!important;
+ border:0!important;
+ box-shadow:none!important;
+ padding:0!important;
+ gap:10px;
+}
+.floating-citation-action button.primary,
+.t2-selection-pop button.primary,
+html[data-theme="light"] .floating-citation-action button.primary,
+html[data-theme="light"] .t2-selection-pop button.primary{
+ background:#fff!important;
+ color:#253b53!important;
+ -webkit-text-fill-color:#253b53!important;
+ border:1px solid #a8bdd1!important;
+ border-radius:10px!important;
+ box-shadow:0 5px 14px rgba(26,44,64,.18)!important;
+ font-size:14px!important;
+ line-height:1.35!important;
+ font-weight:400!important;
+ padding:10px 15px!important;
+ white-space:nowrap;
+}
+.floating-citation-action button.primary:hover,
+.t2-selection-pop button.primary:hover{
+ background:#f1f5f9!important;
+ color:#1e354c!important;
+ -webkit-text-fill-color:#1e354c!important;
+}
