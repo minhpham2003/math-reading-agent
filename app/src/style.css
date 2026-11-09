@@ -432,6 +432,6 @@
 /* PDF-only dark viewing mode: invert rendered paper and ink together.
    The overlays stay outside the filter so citations and tangent links retain
    their interactive hit regions and recognizable highlight colors. */
-.pdf-dark-mode .continuous-pdf-page{filter:invert(1) hue-rotate(180deg)}
+.pdf-dark-mode .continuous-pdf-page canvas,.pdf-dark-mode .continuous-pdf-page .textLayer{filter:invert(1) hue-rotate(180deg)}
 .pdf-dark-mode .pdf-canvas-scroll{background:#171c25}
 .reader-header .pdf-dark-toggle.is-on{color:#f0e2b5;border:1px solid #817659}
