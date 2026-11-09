@@ -4,6 +4,7 @@ import {aiConfigured,requestAiReply,verifyAccessToken,getAccessToken,setAccessTo
 import {MathText} from './MathText';
 import {MarkdownMath} from './MarkdownMath';
 import {retrievePdfContext} from './pdfIndex';
+import {readChatCitations,saveChatCitation} from './chatCitations';
 import {citationExcerptsFromContext,preparePdfCitations,stripLegacySourceList} from './pdfCitations';
 
 type SelectState={messageId:string;start:number;end:number;text:string;x:number;y:number;visible?:boolean};
@@ -115,6 +116,44 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
   document.addEventListener('pointerdown',dismiss,true);
   return()=>{container?.removeEventListener('scroll',update);window.removeEventListener('resize',update);document.removeEventListener('pointerdown',dismiss,true);};
  },[selection?.messageId,selection?.start,selection?.end]);
+ function saveSelectedCitation(){
+  if(!selection)return;
+  saveChatCitation({id:crypto.randomUUID(),sessionId,threadId:branch.id,messageId:selection.messageId,text:selection.text,start:selection.start,end:selection.end});
+  selectedRangeRef.current=null;setSelection(null);window.getSelection()?.removeAllRanges();
+ }
+ useEffect(()=>{
+  const id=new URLSearchParams(window.location.search).get('chatCitation');
+  if(!id)return;
+  const ref=readChatCitations(sessionId).find(c=>c.id===id);
+  if(!ref)return;
+  if(data.activeId!==ref.threadId){const latest=read(sessionId);write(sessionId,{...latest,activeId:ref.threadId});setData(read(sessionId));}
+  let cancelled=false;
+  const timer=window.setTimeout(()=>{
+   if(cancelled)return;
+   const msg=Array.from(conversationRef.current?.querySelectorAll<HTMLElement>('[data-chat-message]')??[]).find(node=>node.dataset.chatMessage===ref.messageId);
+   if(!msg)return;
+   msg.scrollIntoView({block:'center',behavior:'instant'});
+   msg.classList.add('t2-cited-message-flash');
+   window.setTimeout(()=>msg.classList.remove('t2-cited-message-flash'),4200);
+   // Select exactly the saved excerpt when it is represented in the DOM.
+   const container=msg.querySelector<HTMLElement>('[data-message-content]');
+   if(!container)return;
+   const nodes:Array<Text>=[];
+   const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT);
+   while(walker.nextNode())nodes.push(walker.currentNode as Text);
+   const full=nodes.map(n=>n.textContent??'').join('');
+   const found=full.indexOf(ref.text);
+   if(found<0)return;
+   let at=0,first:Text|undefined,last:Text|undefined,start=0,end=0;
+   for(const node of nodes){const len=node.textContent?.length??0;
+    if(!first&&found>=at&&found<at+len){first=node;start=found-at;}
+    if(first&&found+ref.text.length<=at+len){last=node;end=found+ref.text.length-at;break;}
+    at+=len;
+   }
+   if(first&&last){const range=document.createRange();range.setStart(first,start);range.setEnd(last,end);const sel=window.getSelection();sel?.removeAllRanges();sel?.addRange(range);window.setTimeout(()=>{if(sel?.rangeCount&&sel.getRangeAt(0)===range)sel.removeAllRanges();},4200);}
+  },220);
+  return()=>{cancelled=true;window.clearTimeout(timer);};
+ },[sessionId,data.activeId,data.threads.length]);
  function makeTangent(){if(!selection)return;selectedRangeRef.current=null;createTangent(sessionId,{kind:'chat',targetId:selection.messageId,start:selection.start,end:selection.end,text:selection.text});setSelection(null);window.getSelection()?.removeAllRanges();}
  function openAnchors(ids:string[],event:ReactMouseEvent){event.preventDefault();event.stopPropagation();if(ids.length===1)go(data.anchors.find(a=>a.id===ids[0])!.branchId);else {chooserAnchorRef.current=event.currentTarget as HTMLElement;const rect=chooserAnchorRef.current.getBoundingClientRect();setChooser({ids,x:rect.left,y:rect.bottom+8,visible:true});}}
  useEffect(()=>{if(!chooser)return;const reposition=()=>{const anchor=chooserAnchorRef.current,container=conversationRef.current;if(!anchor||!container||!anchor.isConnected){setChooser(null);return;}const rect=anchor.getBoundingClientRect(),box=container.getBoundingClientRect();setChooser(prev=>prev?{...prev,x:Math.max(8,Math.min(rect.left,window.innerWidth-265)),y:rect.bottom+8,visible:rect.bottom>=box.top&&rect.top<=box.bottom}:null);};const outside=(e:PointerEvent)=>{if(chooserRef.current?.contains(e.target as Node)||chooserAnchorRef.current?.contains(e.target as Node))return;setChooser(null);chooserAnchorRef.current=null;};const container=conversationRef.current;container?.addEventListener('scroll',reposition,{passive:true});window.addEventListener('resize',reposition);document.addEventListener('pointerdown',outside,true);reposition();return()=>{container?.removeEventListener('scroll',reposition);window.removeEventListener('resize',reposition);document.removeEventListener('pointerdown',outside,true);};},[chooser?.ids.join('|')]);
@@ -169,7 +208,7 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:{sessionI
     {!branch.messages.length&&!branch.contextText&&<p className="muted">Start the discussion whenever you're ready.</p>}
     {sendingThread===branch.id&&<p className="muted" role="status">AI is responding…</p>}
    </div>
-   {selection&&<div ref={selectionPopRef} className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Create Tangent</button></div>}
+   {selection&&<div ref={selectionPopRef} className="t2-selection-pop" style={{left:selection.x,top:selection.y}}><button className="primary" onMouseDown={e=>e.preventDefault()} onClick={makeTangent}>Create Tangent</button><button className="secondary" onMouseDown={e=>e.preventDefault()} onClick={saveSelectedCitation}>Save Citation</button></div>}
    {hoverPreview&&<div className="t2-viewport-preview" role="tooltip" style={{left:hoverPreview.x,top:hoverPreview.y,transform:hoverPreview.y>120?'translateY(-100%)':'none'}}>{hoverPreview.ids.map(id=>{const anchor=data.anchors.find(a=>a.id===id);const t=data.threads.find(x=>x.id===anchor?.branchId);return t?<div key={id}><strong>{t.title}</strong><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></div>:null;})}</div>}
    {chooser&&chooser.visible&&<div ref={chooserRef} className="t2-chooser" style={{left:chooser.x,top:Math.min(window.innerHeight-180,chooser.y)}}><strong>Related tangents</strong>{chooser.ids.map(id=>{const a=data.anchors.find(x=>x.id===id);const t=data.threads.find(x=>x.id===a?.branchId);return t?<button key={id} onClick={()=>go(t.id)}>{t.title} · {t.status}</button>:null;})}</div>}
    {finish?<div className="t2-finish"><h3>Finish tangent & return</h3><p className="muted">Write or edit your summary. AI summary generation is not connected yet.</p><textarea rows={4} value={summary} onChange={e=>setSummary(e.target.value)}/><button className="primary" onClick={finishSave}>Save summary & return</button><button className="secondary" onClick={()=>setFinish(false)}>Cancel</button></div>:
