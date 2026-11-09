@@ -52,3 +52,10 @@ test('a passage quote containing literal parentheses is fully consumed',()=>{
  assert.equal(preparePdfCitations(message,source),
   'See [Definition 1.1](pdf-page:7?quote=Definition%201.1%20A%20%28homological%29%20spectral%20sequence) now.');
 });
+
+test('a page-only Definition link acquires a real passage anchor',()=>{
+ const source='Document: Notes.pdf.\nRetrieved excerpts:\n[PDF page 7] Definition 1.1 A homological spectral sequence consists of data and differentials.';
+ const answer=preparePdfCitations('[Definition 1.1](pdf-page:7)',source);
+ assert.match(answer,/^\\[Definition 1\\.1\\]\\(pdf-page:7\\?quote=Definition%201\\.1/);
+ assert.ok(answer.includes('spectral'));
+});
