@@ -465,3 +465,7 @@
 .reading-mode>.t2-workspace{flex:1;min-height:0}
 .t2-workspace>.t2-conversation{flex:1;min-height:0;max-height:none}
 .t2-workspace>.t2-composer{flex:none}
+
+/* Warm, high-visibility tangent anchors on navy PDF pages. */
+.pdf-dark-mode .t2-pdf-highlight{background:rgba(255,215,100,.34);outline:1px solid rgba(255,208,76,.42)}
+.pdf-dark-mode .t2-pdf-highlight:hover{background:rgba(255,218,102,.56);outline:1px solid #ffd55e}
