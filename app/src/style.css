@@ -726,3 +726,70 @@ html[data-theme="light"] .pdf-toolbar input[type="number"]:focus-visible{
 .dialog label select,
 .dialog input::placeholder,
 .dialog textarea::placeholder{font-weight:400}
+
+/* Light mode: complete reading setup and plan editor surface audit.
+   Keep contrast consistent across summary, editable cards, controls and labels. */
+html[data-theme="light"] .reading-flow,
+html[data-theme="light"] .reading-flow h2,
+html[data-theme="light"] .reading-flow strong,
+html[data-theme="light"] .reading-flow .plan-heading,
+html[data-theme="light"] .reading-flow .assessment-toggle-row,
+html[data-theme="light"] .reading-flow .flow-unit-title,
+html[data-theme="light"] .reading-flow .flow-unit-title span,
+html[data-theme="light"] .reading-flow .flow-unit-location{color:#25394f}
+html[data-theme="light"] .reading-flow .assessment-summary,
+html[data-theme="light"] .reading-flow .flow-unit,
+html[data-theme="light"] .reading-flow .new-unit,
+html[data-theme="light"] .reading-flow .flow-stage{
+ background:#e1e6ec;
+ color:#25394f;
+ border-color:#b9c7d6;
+}
+html[data-theme="light"] .reading-flow .assessment-summary p,
+html[data-theme="light"] .reading-flow .assessment-summary strong{color:#25394f}
+html[data-theme="light"] .reading-flow label,
+html[data-theme="light"] .reading-flow .flow-page-range label,
+html[data-theme="light"] .reading-flow .flow-unit label,
+html[data-theme="light"] .reading-flow .flow-unit-location strong,
+html[data-theme="light"] .reading-flow .muted{color:#425c77}
+html[data-theme="light"] .reading-flow input,
+html[data-theme="light"] .reading-flow textarea,
+html[data-theme="light"] .reading-flow select{
+ background:#eef1f5;
+ color:#23384f;
+ -webkit-text-fill-color:#23384f;
+ border:1px solid #a6b9ce;
+ color-scheme:light;
+}
+html[data-theme="light"] .reading-flow input::placeholder,
+html[data-theme="light"] .reading-flow textarea::placeholder{color:#748396;-webkit-text-fill-color:#748396}
+html[data-theme="light"] .reading-flow input:focus,
+html[data-theme="light"] .reading-flow textarea:focus{background:#f3f5f8;border-color:#6a92bb;outline-color:#6a92bb}
+html[data-theme="light"] .reading-flow .approved-heading,
+html[data-theme="light"] .reading-flow .approved-heading span{color:#24735b}
+html[data-theme="light"] .reading-flow .flow-error-toast{color:#76353c;background:#f5e2e4}
+html[data-theme="light"] .reading-flow button.secondary,
+html[data-theme="light"] .reading-flow .flow-actions button.secondary{background:#c6d2df;color:#273e58;border-color:#9fb3c8}
+html[data-theme="light"] .reading-flow button.secondary:hover{background:#b7c6d7}
+html[data-theme="light"] .reading-flow .flow-unit .unit-completed-toggle.is-completed{background:#b9dacd;color:#1e604b}
+html[data-theme="light"] .dialog .new-session-pdf-field,
+html[data-theme="light"] .dialog .new-session-pdf-field input[type="file"]{
+ background:#dee5ed;
+ color:#263d56;
+ border-color:#afc0d2;
+ color-scheme:light;
+}
+html[data-theme="light"] .dialog .new-session-pdf-field .required-marker,
+html[data-theme="light"] .dialog .new-session-pdf-field small{color:#465f79}
+html[data-theme="light"] .dialog .new-session-pdf-field input[type="file"]::file-selector-button{
+ background:#c5d1de;color:#263d56;border:1px solid #9fb2c7;border-radius:5px;padding:5px 9px;margin-right:9px
+}
+/* Additional dialogue/chat surfaces that previously relied on dark defaults. */
+html[data-theme="light"] .t2-access-form,
+html[data-theme="light"] .t2-access-form label,
+html[data-theme="light"] .t2-finish,
+html[data-theme="light"] .t2-settings,
+html[data-theme="light"] .t2-branch-view-body{color:#25394f}
+html[data-theme="light"] .t2-access-form input,
+html[data-theme="light"] .t2-finish textarea,
+html[data-theme="light"] .t2-settings input{background:#eef1f5;color:#25394f;border-color:#a6b9ce}
