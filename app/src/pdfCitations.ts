@@ -50,9 +50,9 @@ export function preparePdfCitations(reply:string,context?:string):string{
     let quote:string;
     try{quote=decodeURIComponent(internal[2]);}
     catch{return pageCitation(label,page,excerpt);}
-    return validQuote(quote,excerpt)
-     ? '['+label+'](pdf-page:'+page+'?quote='+encodeURIComponent(quote).replace(/[()]/g,char=>char==='('? '%28':'%29')+')'
-     : pageCitation(label,page,excerpt);
+    // Keep the original passage target: PDF extraction is not reliable enough
+    // to reject a quote merely because normalization differs.
+    return '['+label+'](pdf-page:'+page+'?quote='+encodeURIComponent(quote).replace(/[()]/g,char=>char==='('? '%28':'%29')+')';
    }
    return pageCitation(label,page,excerpt);
   }
