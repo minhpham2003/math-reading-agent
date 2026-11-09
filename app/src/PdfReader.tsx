@@ -656,7 +656,13 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     </aside>}
     {pdf ?
       <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseDown={onPdfMouseDown} onMouseUp={onPdfMouseUp} onKeyUp={() => window.setTimeout(captureSelection,0)}>
-    {tangentMenu?.visible&&<div ref={tangentMenuRef} className="t2-pdf-menu" style={{left:tangentMenu.x,top:tangentMenu.y}}><strong>Related tangents</strong>{tangentMenu.ids.map(id=>{const a=tangentAnchors.find(x=>x.id===id);const state=readTangents(sessionId);const t=state.threads.find(t=>t.id===a?.branchId);return t?<button key={id} type="button" onClick={()=>writeActive(state,t.id)}>{t.title} · {t.status}</button>:null;})}</div>}
+    {tangentMenu?.visible&&<div ref={tangentMenuRef} className="t2-pdf-tangent-preview" style={{left:tangentMenu.x,top:tangentMenu.y}}>{tangentMenu.ids.map(id=>{
+      const a=tangentAnchors.find(x=>x.id===id);
+      const state=readTangents(sessionId);
+      const t=state.threads.find(t=>t.id===a?.branchId);
+      return t?<button key={id} className="t2-pdf-preview-entry" type="button" onClick={()=>{setTangentMenu(null);writeActive(state,t.id);}}><span>{t.title}</span><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></button>:null;
+    })}</div>}
+
     {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
       <button type="button" className="primary" onClick={saveCitation}>Save Citation</button><button type="button" className="primary" onClick={createPdfTangent}>Create Tangent</button>
     </div>}
