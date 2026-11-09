@@ -493,7 +493,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       const target = event.target;
       if (!(target instanceof Node)) return;
       if (sourcesRef.current?.contains(target)) return;
-      if (target instanceof Element && target.closest('.pdf-header-actions')) return;
+      if (target instanceof Element && target.closest('[data-citations-toggle]')) return;
       setShowCitations(false);
     };
     document.addEventListener('pointerdown', closeOnOutside);
@@ -553,7 +553,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     } finally { setBusy(false); }
   }
 
-  const actions=<div className="pdf-header-actions">    <button className="secondary" onClick={() => setShowCitations(v => !v)}>Sources ({citations.length})</button>
+  const actions=<div className="pdf-header-actions">    <button data-citations-toggle className="secondary" onClick={() => setShowCitations(v => !v)}>Citations ({citations.length})</button>
 
   </div>;
   const controls = <div className="pdf-toolbar">
@@ -584,7 +584,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     {message && <p role="alert" className="pdf-error">{message}</p>}
     {busy && <p className="muted">Importing PDF…</p>}
     {showCitations && <aside ref={sourcesRef} className="sources-drawer" aria-label="Saved source references">
-      <div className="sources-heading"><strong>Saved citations</strong><button onClick={() => setShowCitations(false)}>×</button></div>
+      
       {citations.length===0 && <p>Select text in your PDF to create a citation.</p>}
       {citations.map(ref => <div className="source-entry" key={ref.id}>
         <button className="source-entry-link" onClick={() => goCitation(ref)}>
