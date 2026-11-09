@@ -108,13 +108,19 @@ export function TangentWorkspace({sessionId,currentPdfPage,onNavigate}:
    {active.id!==ROOT&&active.includedIds.length>0&&<div className="tangent-source-context"><strong>Referenced parent discussion</strong>
     {active.includedIds.map(id=>byId.get(active.parentId!)?.messages.find(m=>m.id===id)).filter((m):m is Message=>!!m).map(m=><blockquote key={m.id}>{m.text}</blockquote>)}
    </div>}
-   {active.messages.map(m=><div key={m.id} className="tangent-message">
-    <span>{m.text}</span><button className="tangent-create" title="Create tangent from this message" aria-label="Create tangent from message" onClick={()=>beginTangent(m)}>↗</button>
-    {children(active.id).filter(b=>b.includedIds.includes(m.id)).map(b=><div key={b.id} className="tangent-inline-summary">
-     <strong>{b.status}</strong> · {b.summary} <button onClick={()=>switchTo(b.id)}>Open tangent ↗</button>
-     <button onClick={()=>toggleSummary(b.id)}>{tree.expandedSummaries.includes(b.id)?'Hide original':'Show original'}</button>
-     {tree.expandedSummaries.includes(b.id)&&<blockquote>{m.text}</blockquote>}
-    </div>)}
+   {active.messages.map(m=>{
+    const linked=children(active.id).filter(b=>b.includedIds.includes(m.id));
+    return <div key={m.id} className={'tangent-message'+(linked.length?' has-linked-tangent':'')}>
+     {linked.length===0&&<><span>{m.text}</span><button className="tangent-create" title="Create tangent from this message" aria-label="Create tangent from message" onClick={()=>beginTangent(m)}>↗</button></>}
+     {linked.map(b=><div key={b.id} className="tangent-inline-summary">
+      <strong>{b.status}</strong> · {b.summary} <button onClick={()=>switchTo(b.id)}>Open tangent ↗</button>
+      <button onClick={()=>toggleSummary(b.id)}>{tree.expandedSummaries.includes(b.id)?'Hide original':'Show original'}</button>
+      {tree.expandedSummaries.includes(b.id)&&<blockquote>{m.text}</blockquote>}
+     </div>)}
+    </div>;
+   })}
+   {children(active.id).filter(b=>b.includedIds.length===0).map(b=><div className="tangent-inline-summary" key={b.id}>
+    <strong>{b.status}</strong> · {b.summary} <button onClick={()=>switchTo(b.id)}>Open tangent ↗</button>
    </div>)}
    {active.messages.length===0&&<p className="muted">No notes on this branch yet. Add a question or observation below.</p>}
   </div>
