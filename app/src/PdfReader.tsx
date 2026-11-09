@@ -321,12 +321,24 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       const spans=layer?Array.from(layer.querySelectorAll<HTMLElement>('span')).filter(el=>el.textContent?.trim()):[];
       const parts=spans.map(el=>normalize(el.textContent??''));
       const joined=parts.join(' ');
-      const pos=joined.indexOf(needle);
+      // PDF.js may split symbols, superscripts and punctuation into separate
+      // text spans. Prefer the exact quote, then progressively shorter
+      // distinctive prefixes so a long mathematical statement still anchors.
+      let pos=joined.indexOf(needle),matched=needle;
+      if(pos<0){
+        const tokens=needle.split(' ').filter(Boolean);
+        for(let size=Math.min(tokens.length,12);size>=2;size--){
+          const candidate=tokens.slice(0,size).join(' ');
+          if(candidate.length<9)continue;
+          const found=joined.indexOf(candidate);
+          if(found>=0){pos=found;matched=candidate;break;}
+        }
+      }
       if(pos>=0){
         let offset=0,first:HTMLElement|undefined;
         for(let i=0;i<spans.length;i++){
           const end=offset+parts[i].length;
-          if(pos<end&&pos+needle.length>offset){spans[i].classList.add('pdf-cited-passage');first??=spans[i];}
+          if(pos<end&&pos+matched.length>offset){spans[i].classList.add('pdf-cited-passage');first??=spans[i];}
           offset=end+1;
         }
         if(first){const rect=first.getBoundingClientRect(),rootRect=scrollRoot.getBoundingClientRect();scrollRoot.scrollTop+=rect.top-rootRect.top-90;}
