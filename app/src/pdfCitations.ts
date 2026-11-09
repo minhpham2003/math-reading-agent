@@ -28,8 +28,8 @@ function validQuote(quote:string,excerpt:string):boolean{
 export function preparePdfCitations(reply:string,context?:string):string{
  const excerpts=citationExcerptsFromContext(context);
  const clean=stripLegacySourceList(reply);
- const rewritten=clean.replace(/\[([^\]\n]{1,180})\]\(([^)\n]+)\)/g,(_all,label:string,url:string)=>{
-  const internal=/^pdf-page:(\d+)(?:\?quote=(.*))?$/.exec(url);
+ const rewritten=clean.replace(/\[([^\]\n]{1,180})\]\(((?:[^()\n]|\([^()\n]*\))*)\)/g,(_all,label:string,url:string)=>{
+ const internal=/^pdf-page:(\d+)(?:\?quote=(.*))?$/.exec(url);
   if(internal){
    const page=Number(internal[1]),excerpt=excerpts.get(page);
    if(!excerpt)return label;
