@@ -923,3 +923,18 @@ html[data-theme="light"] .dialog .dialog-actions .danger{font-weight:400}
  background:transparent!important;box-shadow:none!important;
 }
 @media(prefers-reduced-motion:reduce){.pdf-cited-passage{transition:none!important}}
+
+/* PDF anchor branch chooser: the same detailed preview style as chat hover cards. */
+.t2-pdf-tangent-preview{position:fixed;z-index:105;display:flex;flex-direction:column;min-width:235px;max-width:min(320px,calc(100vw - 20px));padding:9px 12px;border-radius:11px;background:#13273d;color:#eaf6ff;border:1px solid #688cac;box-shadow:0 9px 22px #0006}
+.t2-pdf-preview-entry{background:none;border:0;color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:9px 5px;text-align:left;font:inherit;font-size:14px;border-bottom:1px solid #688cac66}
+.t2-pdf-preview-entry:last-child{border-bottom:0}
+.t2-pdf-preview-entry:hover,.t2-pdf-preview-entry:focus-visible{background:#ffffff12;border-radius:5px}
+.t2-pdf-preview-entry>span{overflow-wrap:anywhere}
+.t2-pdf-preview-entry small{color:#b7d6ee;font-size:12px}
+html[data-theme="light"] .t2-pdf-tangent-preview{background:#e4eaf0;color:#223950;border-color:#a9bfd5;box-shadow:0 8px 20px #23384b30}
+html[data-theme="light"] .t2-pdf-preview-entry{color:#223950;border-color:#b4c5d5}
+html[data-theme="light"] .t2-pdf-preview-entry small{color:#476780}
+html[data-theme="light"] .t2-pdf-preview-entry:hover,html[data-theme="light"] .t2-pdf-preview-entry:focus-visible{background:#cfdae6}
+html[data-theme="light"] .t2-viewport-preview{background:#e4eaf0;color:#223950;border-color:#a9bfd5;box-shadow:0 8px 20px #23384b30}
+html[data-theme="light"] .t2-viewport-preview strong{color:#223950}
+html[data-theme="light"] .t2-viewport-preview small{color:#476780}
