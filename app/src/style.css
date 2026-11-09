@@ -402,3 +402,14 @@
  .reader-header .pdf-header-actions .secondary{padding:4px 6px}
  .reader-header .pdf-filename{max-width:95px}
 }
+
+/* Header geometry: the PDF control group is centered against the full header,
+   not merely within the space remaining after the left/right actions. */
+.reader-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+.reader-toolbar-slot{grid-column:2;justify-self:center;overflow:visible}
+.reader-header-right{grid-column:3;justify-self:end}
+.reader-header-identity{grid-column:1;justify-self:start}
+@media(max-width:1160px){
+ .reader-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+ .reader-toolbar-slot{max-width:100%;overflow:visible}
+}
