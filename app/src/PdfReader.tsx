@@ -711,7 +711,7 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
     })}</div>}
 
     {pending && selectionPoint && <div className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
-      <button type="button" className="primary" onClick={saveCitation}>Save Citation</button><button type="button" className="primary" onClick={createPdfTangent}>Create Tangent</button>
+      <button type="button" className="primary" onClick={saveCitation}>Cite</button><button type="button" className="primary" onClick={createPdfTangent}>Branch</button>
     </div>}
         {Array.from({ length: pdf.numPages }, (_, i) =>
           <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} tangentAnchors={tangentAnchors.filter(a=>a.page===i+1 && a.filename===filename)} onTangentClick={openTangentAnchor} selectionBoxes={visualSelection?.page===i+1 ? visualSelection.boxes : undefined} />)}
