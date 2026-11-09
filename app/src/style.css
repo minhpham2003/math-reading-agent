@@ -502,3 +502,8 @@
 /* Separate the chat header from the branch explorer and each tree item. */
 .t2-header{border-bottom:1px solid #64849f;padding-bottom:10px}
 .t2-branch-view-body .t2-tree-title{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+
+/* Typeset AI math inside the conversation without changing plain prose. */
+.t2-message .chat-math-block{display:block;max-width:100%;overflow-x:auto;overflow-y:hidden;margin:12px 0;padding:4px 0}
+.t2-message .chat-math-inline{display:inline}
+.t2-message .katex{font-size:1.05em;color:inherit}
