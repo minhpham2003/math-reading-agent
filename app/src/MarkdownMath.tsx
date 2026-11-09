@@ -24,12 +24,18 @@ export function MarkdownMath({text,onPdfNavigate,allowedPages}:{text:string;onPd
    rehypePlugins={[[rehypeKatex,{trust:false,strict:'ignore',errorColor:'#718096'}]]}
    components={{a:({href,children})=>{
      const match=/^pdf-page:(\d+)(?:\?quote=(.+))?$/.exec(href??'');
-     if(match){
-       const page=Number(match[1]);
-       return onPdfNavigate&&allowedPages?.includes(page)
-         ? <button type="button" className="t2-pdf-citation" onClick={()=>onPdfNavigate(page,match[2]?decodeURIComponent(match[2]):undefined)} title={'Go to PDF '+(match[2]?'passage':'page')+' '+page}>{children} ↗</button>
-         : <span>{children}</span>;
+     const label=String(children).trim();
+     // Repair old model outputs that incorrectly linked "PDF page 7" to
+     // an external website. Never open external URLs as PDF citations.
+     const pageLabel=/^(?:PDF page|p\.)\s*(\d+)$/i.exec(label);
+     const page=match?Number(match[1]):pageLabel?Number(pageLabel[1]):null;
+     if(page!==null && onPdfNavigate && allowedPages?.includes(page)){
+       let quote:string|undefined;
+       try{quote=match?.[2]?decodeURIComponent(match[2]):undefined;}catch{quote=undefined;}
+       return <button type="button" className="t2-pdf-citation" onClick={()=>onPdfNavigate(page,quote)} title={'Go to PDF '+(quote?'passage':'page')+' '+page}>{children} ↗</button>;
      }
-     return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
+     // Unsupported, unverified, or external links are text only. In
+     // particular, an empty href must not navigate to this web app.
+     return <span>{children}</span>;
    }}}>{chunk}</Markdown>)}</div>;
 }
