@@ -372,3 +372,10 @@
  font-weight:400;
 }
 .reading-nav-item.is-current{background:transparent;border-color:#466e94}
+
+/* Compact header details: don't let general dialog/button styles inflate the popup. */
+.reader-details-pop{left:auto;right:0;top:calc(100% + 8px);width:245px;min-width:0;max-width:min(245px,calc(100vw - 20px));padding:11px 13px;z-index:50;font-size:12px;line-height:1.4}
+.reader-details-pop strong{font-size:13px;font-weight:500}
+.reader-details-pop p{margin:5px 0;font-size:11px;line-height:1.4}
+.reader-details-pop .reader-setup-link{display:block;width:100%;margin-top:9px;padding:7px 9px;border-radius:6px;font-size:12px;text-align:left;background:transparent;border:1px solid #4d647e;color:#dceafa;font-weight:400}
+.reader-details-pop .reader-setup-link:hover{background:#273c54}
