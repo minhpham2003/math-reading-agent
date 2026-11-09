@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, type PointerEvent as ReactPointerEvent, ty
 import { loadSessions, saveSessions, type ReadingSession } from './storage';
 import { PdfReader, deleteSavedPdf, importSessionPdf } from './PdfReader';
 import { ReadingFlow } from './ReadingFlow';
+import {deletePdfIndex} from './pdfIndex';
 
 type SessionFormState = {
   title: string; target: string; firstPage: string; lastPage: string; durationMinutes: string;
@@ -78,6 +79,7 @@ export function App() {
       localStorage.removeItem('higher-math:reading-notes:v1:' + deleteId);
       localStorage.removeItem('higher-math:tangents:v2:' + deleteId);
       void deleteSavedPdf(deleteId).catch(() => setStorageError('Session deleted, but its cached PDF could not be cleared.'));
+      void deletePdfIndex(deleteId).catch(()=>undefined);
     }
   }
   function updatePage(page: number) {
