@@ -451,7 +451,7 @@
    and soften black ink to pale blue-gray instead of hard white on black. */
 .pdf-dark-mode .continuous-pdf-page canvas,
 .pdf-dark-mode .continuous-pdf-page .textLayer{
-  filter:invert(1) hue-rotate(180deg) brightness(.80) contrast(.78) sepia(.10);
+  filter:invert(1) hue-rotate(180deg) brightness(.94) contrast(.84) sepia(.04);
 }
 .pdf-dark-mode .continuous-pdf-page{background:#1c293a}
 .pdf-dark-mode .pdf-canvas-scroll{background:#172434}
@@ -467,5 +467,5 @@
 .t2-workspace>.t2-composer{flex:none}
 
 /* Warm, high-visibility tangent anchors on navy PDF pages. */
-.pdf-dark-mode .t2-pdf-highlight{background:rgba(255,215,100,.34);outline:1px solid rgba(255,208,76,.42)}
-.pdf-dark-mode .t2-pdf-highlight:hover{background:rgba(255,218,102,.56);outline:1px solid #ffd55e}
+.pdf-dark-mode .t2-pdf-highlight{background:rgba(255,233,157,.30);outline:1px solid rgba(255,226,136,.44)}
+.pdf-dark-mode .t2-pdf-highlight:hover{background:rgba(255,237,172,.46);outline:1px solid #ffe69b}
