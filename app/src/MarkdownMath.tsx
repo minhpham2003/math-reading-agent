@@ -24,12 +24,14 @@ export function MarkdownMath({text,onPdfNavigate,allowedPages}:{text:string;onPd
    try{quote=decodeURIComponent(quote);}catch{/* preserve raw quote */}
    return '['+label+'](pdf-page:'+page+'?quote='+encodeURIComponent(quote).replace(/[()]/g,ch=>ch==='('?'%28':'%29')+')';
  });
- const chunks=safeText.split(/(\[[^\]\n]+\]\(pdf-page:\d+(?:\?quote=[^\s)]*)?\))/g);
+ const chunks=safeText.split(/(\[[^\]\n]+\]\((?:pdf-page:\d+(?:\?quote=[^\s)]*)?|chat-citation:[a-zA-Z0-9-]+)\))/g);
  return <div className="t2-rich-text">{chunks.map((chunk,i)=><Markdown key={i}
-   urlTransform={url=>/^pdf-page:\d+(?:\?quote=[^)]*)?$/.test(url)?url:defaultUrlTransform(url)}
+   urlTransform={url=>/^(?:pdf-page:\d+(?:\?quote=[^)]*)?|chat-citation:[a-zA-Z0-9-]+)$/.test(url)?url:defaultUrlTransform(url)}
    remarkPlugins={[remarkGfm,remarkMath]}
    rehypePlugins={[[rehypeKatex,{trust:false,strict:'ignore',errorColor:'#718096'}]]}
    components={{a:({href,children})=>{
+     const chatId=/^chat-citation:([a-zA-Z0-9-]+)$/.exec(href??'')?.[1];
+     if(chatId)return <button type="button" className="t2-pdf-citation" onClick={()=>window.dispatchEvent(new CustomEvent('higher-math:open-chat-citation',{detail:{id:chatId}}))}>{children} ↗</button>;
      const match=/^pdf-page:(\d+)(?:\?quote=(.+))?$/.exec(href??'');
      const label=String(children).trim();
      // Repair old model outputs that incorrectly linked "PDF page 7" to
