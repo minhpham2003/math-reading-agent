@@ -97,8 +97,6 @@ export function App() {
   const projectSources=sources.filter(source=>source.projectId===activeProject?.id);
   const projectSessions=sessions.filter(session=>session.projectId===activeProject?.id);
   const latestSession=[...projectSessions].sort((x,y)=>new Date(y.updatedAt).getTime()-new Date(x.updatedAt).getTime())[0];
-  const completedSessions=projectSessions.filter(s=>s.status==='complete').length;
-  const activeSessions=projectSessions.filter(s=>s.status==='in-progress'||s.status==='paused').length;
   const formatActivity=(value:string)=>new Date(value).toLocaleDateString(undefined,{month:'short',day:'numeric',year:new Date(value).getFullYear()===new Date().getFullYear()?undefined:'numeric'});
 
   function persist(next: ReadingSession[]): boolean {
@@ -334,7 +332,7 @@ export function App() {
     </main>) : <section className="workspace">
       <div className="reader-header">
         <div className="reader-header-identity">
-          <button className="reader-back" onClick={openProject} aria-label="Back to Hatcher dashboard" title="Back to dashboard">←</button>
+          <button className="reader-back" onClick={()=>openProject(active?.projectId??activeProjectId)} aria-label="Back to project dashboard" title="Back to dashboard">←</button>
           <span className="reader-session-name" title={active.title}>{active.title}</span><span className="reader-session-dot" aria-hidden="true">·</span><span className="reader-session-section" title={active.target}>{active.target}</span>
 
         </div>
