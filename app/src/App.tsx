@@ -19,6 +19,7 @@ export function App() {
     const value = window.location.hash;
     return value.startsWith('#session-') ? decodeURIComponent(value.slice(9)) : null;
   });
+  const [surface,setSurface]=useState<'library'|'project'>(()=>window.location.hash==='#project-hatcher'?'project':'library');
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [form, setForm] = useState<SessionFormState>(initialForm);
   const [newPdf, setNewPdf] = useState<File | null>(null);
@@ -60,6 +61,10 @@ export function App() {
 
   const active = sessions.find(s => s.id === activeId) ?? null;
   const pendingDelete = sessions.find(s => s.id === deleteId);
+  const latestSession=[...sessions].sort((x,y)=>new Date(y.updatedAt).getTime()-new Date(x.updatedAt).getTime())[0];
+  const completedSessions=sessions.filter(s=>s.status==='complete').length;
+  const activeSessions=sessions.filter(s=>s.status==='in-progress'||s.status==='paused').length;
+  const formatActivity=(value:string)=>new Date(value).toLocaleDateString(undefined,{month:'short',day:'numeric',year:new Date(value).getFullYear()===new Date().getFullYear()?undefined:'numeric'});
 
   function persist(next: ReadingSession[]): boolean {
     try { saveSessions(next); setSessions(next); setStorageError(''); return true; }
@@ -67,7 +72,16 @@ export function App() {
   }
   function navigate(id: string | null) {
     setActiveId(id);
-    window.history.replaceState(null, '', id ? '#session-' + encodeURIComponent(id) : window.location.pathname + window.location.search);
+    setSurface('project');
+    window.history.replaceState(null, '', id ? '#session-' + encodeURIComponent(id) : '#project-hatcher');
+  }
+  function openLibrary(){
+    setActiveId(null);setSurface('library');
+    window.history.replaceState(null,'',window.location.pathname+window.location.search);
+  }
+  function openProject(){
+    setActiveId(null);setSurface('project');
+    window.history.replaceState(null,'','#project-hatcher');
   }
   async function choosePdf(file:File|null){
     setNewPdf(file);setPdfPageCount(null);setFormError('');
@@ -145,10 +159,42 @@ export function App() {
   return <div className="app-shell">
     {!active && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button></header>}
     {storageError && <div role="alert" className="alert">{storageError}</div>}
-    {!active ? <main className="dashboard">
-      <div className="breadcrumb">← Library / Projects / Hatcher</div>
+    {!active ? (surface==='library' ? <main className="library-page">
+      <div className="library-heading-row">
+        <div><div className="eyebrow">Your workspace</div><h1>Library</h1><p>Continue a mathematical project or return to where you left off.</p></div>
+      </div>
+      <section className="library-projects">
+        <article className="library-project-card">
+          <div className="library-project-top">
+            <div><div className="eyebrow">Book project</div><h2>Algebraic Topology</h2><p>Allen Hatcher</p></div>
+            <span className="library-status">Active</span>
+          </div>
+          <div className="library-current">
+            <span className="library-current-label">Current reading</span>
+            {latestSession ? <>
+              <strong>{latestSession.title}</strong>
+              <span>{latestSession.target}</span>
+              <small>Last activity {formatActivity(latestSession.updatedAt)}</small>
+            </> : <>
+              <strong>No reading session yet</strong>
+              <span>Start with a section or reading target from Hatcher.</span>
+            </>}
+          </div>
+          <div className="library-project-meta">
+            <span><strong>{sessions.length}</strong> sessions</span>
+            <span><strong>{activeSessions}</strong> active</span>
+            <span><strong>{completedSessions}</strong> completed</span>
+          </div>
+          <div className="library-project-actions">
+            {latestSession && <button className="primary" onClick={()=>navigate(latestSession.id)}>Resume reading</button>}
+            <button className="secondary" onClick={openProject}>Open project →</button>
+          </div>
+        </article>
+      </section>
+    </main> : <main className="dashboard">
+      <button className="breadcrumb breadcrumb-button" onClick={openLibrary}>← Library</button>
       <div className="hero"><div><div className="eyebrow">Book project</div><h1>Algebraic Topology <a className="project-build-id" href={'https://github.com/minhpham2003/math-reading-agent/commit/'+buildCommit} target="_blank" rel="noreferrer" title={'Open GitHub commit '+buildCommit}>GitHub {buildCommit}</a></h1><p>Allen Hatcher · Your reading workspace</p></div>
-        <button className="primary" onClick={() => setNewSessionOpen(true)}>+ New Session</button>
+        <div className="project-hero-actions">{latestSession && <button className="secondary" onClick={()=>navigate(latestSession.id)}>Continue reading</button>}<button className="primary" onClick={() => setNewSessionOpen(true)}>+ New Session</button></div>
       </div>
       <div className="dashboard-grid">
         <section className="card"><h2>Reading sessions</h2>
@@ -160,13 +206,13 @@ export function App() {
             </div>)}
         </section>
         <div className="side-stack"><section className="card"><div className="eyebrow">Your progress</div><div className="stat">{sessions.length}</div><p>sessions created in this browser</p><div className="progress"><div style={{width: Math.min(sessions.length * 12, 100) + '%'}} /></div><div className="muted">Local activity · not book completion</div></section>
-          <section className="card"><h2>Project sources</h2><div className="source"><strong>Algebraic Topology — Hatcher</strong><span className="muted">Primary text · PDF integration next milestone</span></div></section></div>
+          <section className="card"><h2>Project sources</h2><div className="source"><strong>Algebraic Topology — Hatcher</strong><span className="muted">Primary text · Primary text · used by your reading sessions</span></div></section></div>
       </div>
-      <p className="notice">Application foundation: sessions and printed-page position are saved in this browser. AI analysis, reading plans, PDF rendering, and cloud sync are not connected.</p>
-    </main> : <section className="workspace">
+      <p className="notice">Project data, PDFs, reading plans, branches, and conversations are currently stored in this browser. Cloud sync is not yet connected.</p>
+    </main>) : <section className="workspace">
       <div className="reader-header">
         <div className="reader-header-identity">
-          <button className="reader-back" onClick={() => navigate(null)} aria-label="Back to Hatcher dashboard" title="Back to dashboard">←</button>
+          <button className="reader-back" onClick={openProject} aria-label="Back to Hatcher dashboard" title="Back to dashboard">←</button>
           <span className="reader-session-name" title={active.title}>{active.title}</span><span className="reader-session-dot" aria-hidden="true">·</span><span className="reader-session-section" title={active.target}>{active.target}</span>
 
         </div>
