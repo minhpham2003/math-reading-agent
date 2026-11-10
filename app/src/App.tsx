@@ -147,7 +147,7 @@ export function App() {
     {storageError && <div role="alert" className="alert">{storageError}</div>}
     {!active ? <main className="dashboard">
       <div className="breadcrumb">← Library / Projects / Hatcher</div>
-      <div className="hero"><div><div className="eyebrow">Book project</div><h1>Algebraic Topology <span className="project-build-id" title="GitHub build commit">{buildCommit}</span></h1><p>Allen Hatcher · Your reading workspace</p></div>
+      <div className="hero"><div><div className="eyebrow">Book project</div><h1>Algebraic Topology <a className="project-build-id" href={'https://github.com/minhpham2003/math-reading-agent/commit/'+buildCommit} target="_blank" rel="noreferrer" title={'Open GitHub commit '+buildCommit}>GitHub {buildCommit}</a></h1><p>Allen Hatcher · Your reading workspace</p></div>
         <button className="primary" onClick={() => setNewSessionOpen(true)}>+ New Session</button>
       </div>
       <div className="dashboard-grid">
