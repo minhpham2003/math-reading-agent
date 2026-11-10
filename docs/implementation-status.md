@@ -43,3 +43,11 @@ Updated: 2026-11-08. This branch was cut from the S02 prototype branch, which di
 - **Visual improvement:** Nested branch tree with parent-child connector lines and elbow guides in `TangentWorkspace.tsx` and `style.css`. The existing toggle, select, and branch status behavior is preserved in source.
 - **Preview:** Isolated GitHub Pages workflow defined in `.github/workflows/ai-chat-preview.yml`, targeting `previews/ai-chat/`; publishing status not yet confirmed.
 - **Verification:** GitHub source readback for tree markup, CSS, and workflow passed. Local build/browser visual test and real AI response not yet executed. Public hosting requires authentication and abuse controls before turning on API access.
+
+
+## Proactive linked citations — 2026-11-10
+
+- **Agent behavior:** Source-specific references are now expected to carry linked PDF citations proactively, including numbered sections, theorems, definitions, lemmas, propositions, corollaries, examples, remarks and exercises, plus named results/passages when supported by retrieved PDF excerpts.
+- **Frontend safety net:** Bare numbered source labels are automatically linked only when the retrieved excerpts uniquely locate the label on one PDF page; ambiguous or unsupported labels remain plain text.
+- **Commits:** [4c8cb06](https://github.com/minhpham2003/math-reading-agent/commit/4c8cb06743cbf2bb148f13f1e836ae79d78273f1), [cd86f13](https://github.com/minhpham2003/math-reading-agent/commit/cd86f1348f292b2fa5fc7330d0e557eaf842d116), [d41d6ba](https://github.com/minhpham2003/math-reading-agent/commit/d41d6ba9952595450c9507451e2a7686d8eb57d8).
+- **Verification:** New citation helper tests were exercised locally against the intended implementation and passed 14/14. GitHub Actions/deployment and live browser behavior for the branch head remain unverified at this checkpoint.
