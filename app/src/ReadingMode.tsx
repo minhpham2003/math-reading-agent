@@ -10,7 +10,7 @@ function location(unit:ReadingUnit){
 }
 export function ReadingMode({sessionId,units,onNavigate,onToggle,currentPdfPage}:
  {sessionId:string;units:ReadingUnit[];currentPdfPage?:number;onNavigate:(page:number,quote?:string)=>void;onToggle:(id:string)=>void}) {
- const [listOpen,setListOpen]=useState(true);
+ const [listOpen,setListOpen]=useState(false);
  const [selectedId,setSelectedId]=useState<string|null>(null);
  const [detailsId,setDetailsId]=useState<string|null>(null);
  const selected=units.find(u=>u.id===selectedId)??units.find(u=>!u.done)??units[0];
