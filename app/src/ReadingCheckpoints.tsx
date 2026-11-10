@@ -72,7 +72,7 @@ export function ReadingCheckpoints({ checkpoints, sessions, projectId, onChange,
       {deleteId === editingId && <div className="checkpoint-confirm">
         <span>Delete this checkpoint?</span>
         <button type="button" className="secondary" onClick={() => setDeleteId(null)}>Cancel</button>
-        <button type="button" className="danger" onClick={() => remove(deleteId)}>Delete</button>
+        <button type="button" className="danger" onClick={() => { if (deleteId) remove(deleteId); }}>Delete</button>
       </div>}
     </form>;
   }
