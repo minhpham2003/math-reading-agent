@@ -1480,3 +1480,6 @@ html[data-theme="light"] .library-project-card .library-current-link:hover:not(:
   .workspace .reader-header .pdf-filename{display:none}
   .workspace .reader-agent-toggle{padding:7px;font-size:12px}
 }
+
+/* Match Reading plan label typography to the adjacent Citations control. */
+.workspace .reader-header .reader-plan-toggle{font-size:13px;font-weight:400}
