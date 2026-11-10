@@ -668,7 +668,6 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
 
   </div>;
   const controls = <div className="pdf-toolbar">
-    {filename && <span className="pdf-filename" title={filename}>{filename}</span>}
     {pdf && <>
       <div className="pdf-control-group pdf-navigation-group">
       <button className="secondary" onClick={() => jump(pageNumber - 1)} disabled={pageNumber <= 1} aria-label="Previous PDF page">←</button>
