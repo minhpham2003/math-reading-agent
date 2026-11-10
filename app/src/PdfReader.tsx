@@ -59,6 +59,12 @@ export async function importSessionPdf(id: string, file: File): Promise<void> {
   }
 }
 
+export async function copySavedPdf(fromId:string,toId:string):Promise<void>{
+  const stored=await getSavedPdf(fromId);
+  if(!stored)throw new Error('Saved PDF source is unavailable in this browser.');
+  await savePdf(toId,stored.name,stored.bytes.slice(0));
+}
+
 export async function deleteSavedPdf(id: string): Promise<void> {
   const db = await openDatabase();
   try {
@@ -166,8 +172,8 @@ function ContinuousPage({ pdf, number, scale, root, citations, tangentAnchors, o
 // approximate reserved height with its actual ratio when it becomes visible.
 let pdfPageWidth = 612;
 
-type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void; toolbarHostId?: string; actionsHostId?:string; pageJump?: {page:number;seq:number;quote?:string}|null };
-export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId, actionsHostId, pageJump }: Props) {
+type Props = { sessionId: string; initialPage: number; onPageChange: (page: number) => void; toolbarHostId?: string; actionsHostId?:string; pageJump?: {page:number;seq:number;quote?:string}|null; readOnly?:boolean };
+export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId, actionsHostId, pageJump, readOnly=false }: Props) {
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [pdfLoading,setPdfLoading]=useState(true);
   const [filename, setFilename] = useState('');
@@ -686,9 +692,9 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
 
   return <div className={"pdf-reader"+(visualSelection?" has-visual-selection":"")+(pdfDark?" pdf-dark-mode":"")}>
     {toolbarHost ? createPortal(controls, toolbarHost) : (!toolbarHostId ? controls : null)}
-    {actionsHost ? createPortal(actions,actionsHost) : (!actionsHostId ? actions : null)}
+    {!readOnly && (actionsHost ? createPortal(actions,actionsHost) : (!actionsHostId ? actions : null))}
     {message && <p role="alert" className="pdf-error">{message}</p>}
-    {showCitations && <aside ref={sourcesRef} className="sources-drawer" aria-label="Saved source references">
+    {!readOnly && showCitations && <aside ref={sourcesRef} className="sources-drawer" aria-label="Saved source references">
       
       {citations.length+chatCitations.length===0 && <p>Select text in your PDF or agent chat to create a citation.</p>}
       {chatCitations.map(ref=><div className="source-entry" key={ref.id}>
@@ -714,19 +720,19 @@ export function PdfReader({ sessionId, initialPage, onPageChange, toolbarHostId,
       </div>)}
     </aside>}
     {pdf ?
-      <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseDown={onPdfMouseDown} onMouseUp={onPdfMouseUp} onKeyUp={() => window.setTimeout(captureSelection,0)}>
-    {tangentMenu?.visible&&<div ref={tangentMenuRef} className="t2-pdf-tangent-preview" style={{left:tangentMenu.x,top:tangentMenu.y}}>{tangentMenu.ids.map(id=>{
+      <div className="pdf-canvas-scroll continuous-scroll" ref={setScrollRoot} onScroll={onScroll} onMouseDown={readOnly?undefined:onPdfMouseDown} onMouseUp={readOnly?undefined:onPdfMouseUp} onKeyUp={readOnly?undefined:() => window.setTimeout(captureSelection,0)}>
+    {!readOnly&&tangentMenu?.visible&&<div ref={tangentMenuRef} className="t2-pdf-tangent-preview" style={{left:tangentMenu.x,top:tangentMenu.y}}>{tangentMenu.ids.map(id=>{
       const a=tangentAnchors.find(x=>x.id===id);
       const state=readTangents(sessionId);
       const t=state.threads.find(t=>t.id===a?.branchId);
       return t?<button key={id} className="t2-pdf-preview-entry" type="button" onClick={()=>{setTangentMenu(null);writeActive(state,t.id);}}><span>{t.title}</span><small>{t.status==='completed'?'✓ Completed':'● In progress'} · {t.messages.length} messages</small></button>:null;
     })}</div>}
 
-    {pending && selectionPoint && <div ref={citationActionRef} className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
+    {!readOnly&&pending && selectionPoint && <div ref={citationActionRef} className="floating-citation-action" style={{left:selectionPoint.x,top:selectionPoint.y}}>
       <button type="button" className="primary" onClick={saveCitation}>Cite</button><button type="button" className="primary" onClick={createPdfTangent}>Branch</button>
     </div>}
         {Array.from({ length: pdf.numPages }, (_, i) =>
-          <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={citations.filter(c=>c.page===i+1 && c.filename===filename)} tangentAnchors={tangentAnchors.filter(a=>a.page===i+1 && a.filename===filename)} onTangentClick={openTangentAnchor} selectionBoxes={visualSelection?.page===i+1 ? visualSelection.boxes : undefined} />)}
+          <ContinuousPage key={i + 1} pdf={pdf} number={i + 1} scale={scale} root={scrollRoot} citations={readOnly?[]:citations.filter(c=>c.page===i+1 && c.filename===filename)} tangentAnchors={readOnly?[]:tangentAnchors.filter(a=>a.page===i+1 && a.filename===filename)} onTangentClick={openTangentAnchor} selectionBoxes={!readOnly&&visualSelection?.page===i+1 ? visualSelection.boxes : undefined} />)}
       </div> :
       <div className="pdf-loading-state" role="status">{pdfLoading ? "Loading PDF…" : "PDF unavailable for this session."}</div>}
   </div>;
