@@ -1321,3 +1321,9 @@ html[data-theme="light"] .project-source-row{border-color:#c8d5e5}
 html[data-theme="light"] .session-source-divider{color:#60758b}
 html[data-theme="light"] .session-source-divider::before,
 html[data-theme="light"] .session-source-divider::after{background:#b6c5d4}
+
+/* Entire current reading panel navigates to the session. */
+.library-current-link{width:100%;border:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.library-current-link:hover:not(:disabled){filter:brightness(1.045)}
+.library-current-link:focus-visible{outline:3px solid #528de5;outline-offset:3px}
+.library-current-link:disabled{cursor:default;opacity:1}
