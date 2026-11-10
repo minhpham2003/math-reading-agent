@@ -1399,3 +1399,25 @@ html[data-theme="light"] .project-edit-button{color:#315d8c}
 :root[data-theme="light"] .checkpoint-editor input,:root[data-theme="light"] .checkpoint-editor select{background:#eef3f8;color:#20354a;border-color:#a5b9ce}
 :root[data-theme="light"] .checkpoint-delete{color:#914156}
 @media(max-width:580px){.checkpoints-heading{flex-wrap:wrap}}
+
+/* Direct editing of project heading and metadata. */
+.project-heading-editable{min-width:0}
+.project-heading-editable h1{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.project-inline-field{border:0;background:transparent;color:inherit;padding:0;border-radius:4px;text-align:left;font:inherit;line-height:inherit;letter-spacing:inherit;cursor:text}
+.project-inline-field:hover{background:rgba(107,151,201,.13);box-shadow:0 0 0 5px rgba(107,151,201,.13)}
+.project-inline-field:focus-visible{outline:2px solid #568cce;outline-offset:5px}
+.project-inline-title{font-size:inherit;font-weight:inherit;letter-spacing:inherit;max-width:100%;min-width:160px}
+.project-heading-editable h1 .project-inline-title{font-size:inherit;font-weight:inherit}
+.project-inline-details{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;color:#a6b4c9;font-size:20px;margin-top:10px}
+.project-inline-details .project-inline-field{font-size:inherit;color:inherit}
+.project-inline-input{background:#192b40;border:1px solid #7a9ac1;border-radius:7px;padding:3px 8px;font:inherit;color:inherit;max-width:100%;min-width:160px}
+.project-heading-editable h1 .project-inline-input{font-size:inherit;font-weight:inherit;letter-spacing:inherit;width:min(100%,650px)}
+.project-inline-details .project-inline-input{font-size:inherit;width:min(100%,330px)}
+.project-inline-description{opacity:.7}
+.project-inline-description:hover{opacity:1}
+html[data-theme="light"] .project-inline-details{color:#566b85}
+html[data-theme="light"] .project-inline-input{background:#f1f5f9;color:#22364c;border-color:#8cabc7}
+.project-source-delete{border:1px solid #825667;border-radius:8px;background:transparent;color:#efaab8;font:inherit;font-size:13px;padding:7px 11px;cursor:pointer;flex-shrink:0}
+.project-source-delete:hover{background:#643241;color:#fff}
+html[data-theme="light"] .project-source-delete{color:#8d3e54;border-color:#bc99a6}
+html[data-theme="light"] .project-source-delete:hover{background:#f1dbe3}
