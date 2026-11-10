@@ -1298,3 +1298,26 @@ html[data-theme="dark"] .library-status.is-active{background:#173d2c;color:#8fe0
 .project-hero-actions .secondary{
   font-weight:400;
 }
+
+
+/* Shared Project Sources and source-only PDF reader. */
+.project-sources-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.project-sources-heading h2{margin:0}
+.project-source-row{display:flex;align-items:center;gap:10px;padding:13px 0;border-top:1px solid #2a3b52}
+.project-source-row:first-of-type{border-top:0}
+.project-source-open{flex:1;min-width:0;border:0;background:transparent;color:inherit;text-align:left;padding:0;display:flex;flex-direction:column;gap:4px}
+.project-source-open strong{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.project-source-open:hover strong{text-decoration:underline;text-underline-offset:3px}
+.project-source-row>.secondary,.project-sources-heading>.secondary{font-weight:400;white-space:nowrap}
+.source-workspace .source-reader-grid{grid-template-columns:minmax(0,1fr)!important;height:auto;flex:1;min-height:0;gap:0}
+.source-workspace .pdf-panel{height:100%}
+.session-source-choice-title{font-size:17px;font-weight:600;margin-bottom:8px}
+.session-source-divider{display:flex;align-items:center;gap:10px;margin:12px 0;color:#8fa3ba;font-size:14px}
+.session-source-divider::before,.session-source-divider::after{content:"";height:1px;background:#40536c;flex:1}
+.new-session-pdf-field>input[type="file"],.add-source-dialog input[type="file"]{width:100%}
+.add-source-dialog .primary,.add-source-dialog .secondary,
+.new-project-dialog .primary,.new-project-dialog .secondary{font-weight:400}
+html[data-theme="light"] .project-source-row{border-color:#c8d5e5}
+html[data-theme="light"] .session-source-divider{color:#60758b}
+html[data-theme="light"] .session-source-divider::before,
+html[data-theme="light"] .session-source-divider::after{background:#b6c5d4}
