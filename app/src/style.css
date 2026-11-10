@@ -1243,7 +1243,7 @@ html[data-theme="light"] .plan-generation-panel{border-color:#b3c3d3;background:
 .breadcrumb-button{background:none;border:0;padding:0}
 .breadcrumb-button:hover{text-decoration:underline;text-underline-offset:4px}
 .project-hero-actions{display:flex;gap:10px;align-items:center}
-html[data-theme="light"] .library-project-card{background:#d9e1e9;border-color:#bccbda;box-shadow:0 12px 30px rgba(35,56,78,.08)}
+html[data-theme="light"] .library-project-card{background:#e4edf6;border-color:#bccbda;box-shadow:0 12px 30px rgba(35,56,78,.08)}
 html[data-theme="light"] .library-current{background:#cdd8e3}
 html[data-theme="light"] .library-current strong,
 html[data-theme="light"] .library-project-meta strong{color:#1b3148}
@@ -1337,7 +1337,7 @@ html[data-theme="light"] .session-source-divider::after{background:#b6c5d4}
 .library-project-card{display:flex;flex-direction:column;cursor:pointer;transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
 .library-project-card:hover{background:#1b2b40;border-color:#527293;box-shadow:0 14px 34px rgba(0,0,0,.14)}
 .library-project-card:focus-visible{outline:3px solid #5895e8;outline-offset:3px}
-html[data-theme="light"] .library-project-card:hover{background:#e4edf6;border-color:#92b2d1;box-shadow:0 14px 34px rgba(35,56,78,.12)}
+html[data-theme="light"] .library-project-card:hover{background:#d3dfeb;border-color:#92b2d1;box-shadow:0 14px 34px rgba(35,56,78,.12)}
 .library-project-controls{display:flex;gap:12px;align-items:center;flex-shrink:0}
 .library-project-delete{background:transparent;border:1px solid #6f5160;color:#f2b1bc;border-radius:9px;padding:6px 10px;font:inherit;font-size:12px;cursor:pointer}
 .library-project-delete:hover{background:#643241;color:#fff}
