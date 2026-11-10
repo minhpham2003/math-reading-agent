@@ -1268,3 +1268,20 @@ html[data-theme="light"] .library-status{background:#c2cfdd;color:#2a4661}
 html[data-theme="light"] .new-project-dialog textarea{background:#eef2f6;color:#1f3348;border-color:#aebfd0}
 html[data-theme="light"] .new-project-dialog textarea::placeholder{color:#72879b}
 @media(max-width:580px){.new-project-dialog textarea{font-size:16px}}
+
+
+/* Library card refinements: active state and resume action placement. */
+.library-status.is-active{background:#d9f0e2;color:#216d46;border:1px solid #a9d6ba}
+.library-current{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.library-current-copy{display:grid;gap:4px;min-width:0}
+.library-resume{flex:none;align-self:center}
+.library-project-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:20px}
+.library-project-footer .library-project-actions{margin-top:0}
+html[data-theme="dark"] .library-status.is-active{background:#173d2c;color:#8fe0b3;border-color:#2f7251}
+@media(max-width:700px){
+ .library-current{align-items:flex-start;flex-direction:column}
+ .library-resume{width:100%}
+ .library-project-footer{align-items:flex-start;flex-direction:column}
+ .library-project-footer .library-project-actions{width:100%}
+ .library-project-footer .library-project-actions .secondary{width:100%}
+}
