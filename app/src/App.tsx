@@ -21,6 +21,7 @@ export function App() {
   });
   const [surface,setSurface]=useState<'library'|'project'>(()=>window.location.hash==='#project-hatcher'?'project':'library');
   const [newSessionOpen, setNewSessionOpen] = useState(false);
+  const [newProjectOpen,setNewProjectOpen]=useState(false);
   const [form, setForm] = useState<SessionFormState>(initialForm);
   const [newPdf, setNewPdf] = useState<File | null>(null);
   const [creating, setCreating] = useState(false);
@@ -162,6 +163,7 @@ export function App() {
     {!active ? (surface==='library' ? <main className="library-page">
       <div className="library-heading-row">
         <div><div className="eyebrow">Your workspace</div><h1>Library</h1><p>Continue a mathematical project or return to where you left off.</p></div>
+        <button className="primary" onClick={()=>setNewProjectOpen(true)}>+ New Project</button>
       </div>
       <section className="library-projects">
         <article className="library-project-card">
@@ -230,6 +232,13 @@ export function App() {
         </article>
       </div>
     </section>}
+    {newProjectOpen && <div className="overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setNewProjectOpen(false);}}>
+      <div className="dialog new-project-dialog" role="dialog" aria-modal="true" aria-labelledby="new-project-title">
+        <h2 id="new-project-title">New project</h2>
+        <p className="muted">Project creation is the next library workflow to design. For now, this draft shows where the action belongs without changing the current single-project data model.</p>
+        <div className="dialog-actions"><button className="secondary" onClick={()=>setNewProjectOpen(false)}>Close</button></div>
+      </div>
+    </div>}
     {newSessionOpen && <div className="overlay" role="presentation" onMouseDown={e => {if (e.target === e.currentTarget && !creating) setNewSessionOpen(false);}}>
       <form className="dialog new-session-dialog" onSubmit={createSession} role="dialog" aria-modal="true" aria-labelledby="new-session-title"><h2 id="new-session-title">New reading session</h2>
         <label className="new-session-pdf-field">PDF document <span className="required-marker">Required</span>
