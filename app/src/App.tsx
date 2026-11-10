@@ -292,46 +292,7 @@ export function App() {
           </article>;
         })}
       </section>
-    </main> : <main className="dashboard">
-      <button className="breadcrumb breadcrumb-button" onClick={openLibrary}>← Library</button>
-      <div className="hero"><div><div className="eyebrow">Book project</div><h1>{activeProject?.title??'Untitled project'} <a className="project-build-id" href={'https://github.com/minhpham2003/math-reading-agent/commit/'+buildCommit} target="_blank" rel="noreferrer" title={'Open GitHub commit '+buildCommit}>GitHub {buildCommit}</a></h1><p>{activeProject?.author ? activeProject.author+' · ' : ''}{activeProject?.description||'Your reading workspace'}</p></div>
-        <div className="project-hero-actions">{latestSession && <button className="secondary" onClick={()=>navigate(latestSession.id)}>Continue reading</button>}<button className="primary" onClick={() => setNewSessionOpen(true)}>+ New Session</button></div>
-      </div>
-      <div className="dashboard-grid">
-        <section className="card"><h2>Reading sessions</h2>
-          {!projectSessions.length ? <p className="muted">No reading sessions yet. Create your first one to get started.</p> :
-            [...projectSessions].reverse().map(s => <div className="session-row" key={s.id}>
-              <div><strong>{s.title}</strong><div className="muted">{s.target} · pp. {s.firstPage}–{s.lastPage} · {s.durationMinutes} min</div>
-                <button className="text-button" onClick={() => navigate(s.id)}>Open →</button></div>
-              <div className="session-actions"><span className="badge">{s.status.replace('-', ' ')}</span><button className="menu-button" aria-label={'Delete ' + s.title} title="Delete session" onClick={() => setDeleteId(s.id)}>⋯</button></div>
-            </div>)}
-        </section>
-        <div className="side-stack"><section className="card"><div className="eyebrow">Your progress</div><div className="stat">{projectSessions.length}</div><p>sessions created in this browser</p><div className="progress"><div style={{width: Math.min(projectSessions.length * 12, 100) + '%'}} /></div><div className="muted">Local activity · not book completion</div></section>
-          <section className="card project-sources-card">
-            <div className="project-sources-heading"><h2>Project sources</h2><button className="secondary" onClick={()=>setAddSourceOpen(true)}>+ Add source</button></div>
-            {!projectSources.length?<p className="muted">Upload the main PDFs for this project. They can be reused across reading sessions.</p>:
-              projectSources.map(source=><div className="project-source-row" key={source.id}>
-                <button className="project-source-open" onClick={()=>openSource(source)}><strong>{source.name}</strong><span className="muted">{source.role.replace('-',' ')} · {source.pageCount} pages</span></button>
-                <button className="secondary" onClick={()=>openSource(source)}>Open PDF →</button>
-              </div>)}
-          </section></div>
-      </div>
-      <p className="notice">Project data, PDFs, reading plans, branches, and conversations are currently stored in this browser. Cloud sync is not yet connected.</p>
-    </main> : surface==='source'&&activeSource ? <section className="workspace source-workspace">
-      <div className="reader-header">
-        <div className="reader-header-identity">
-          <button className="reader-back" onClick={()=>openProject(activeSource.projectId)} aria-label="Back to project" title="Back to project">←</button>
-          <span className="reader-session-name" title={activeSource.name}>{activeSource.name}</span>
-        </div>
-        <div id="source-reader-toolbar-slot" className="reader-toolbar-slot" aria-label="PDF controls"></div>
-        <div className="reader-header-right"><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button></div>
-      </div>
-      <div className="work-grid agent-collapsed source-reader-grid">
-        <article className="work-panel pdf-panel">
-          <PdfReader key={activeSource.pdfKey} sessionId={activeSource.pdfKey} initialPage={1} onPageChange={()=>undefined} toolbarHostId="source-reader-toolbar-slot" readOnly />
-        </article>
-      </div>
-    </section>) : <section className="workspace">
+    </main>) : <section className="workspace">
       <div className="reader-header">
         <div className="reader-header-identity">
           <button className="reader-back" onClick={openProject} aria-label="Back to Hatcher dashboard" title="Back to dashboard">←</button>
