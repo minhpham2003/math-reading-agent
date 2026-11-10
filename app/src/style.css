@@ -1435,3 +1435,48 @@ html[data-theme="light"] .project-source-delete:hover{background:#f1dbe3}
 /* Keep the project title close to the Library breadcrumb. */
 .dashboard > .hero{margin-top:4px}
 .dashboard > .hero .project-heading-editable h1{margin-top:0}
+
+/* Keep Current Reading distinct from its parent project card in both themes. */
+.library-project-card .library-current-link{
+  background:#152439;
+  border:1px solid #344d69;
+  transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.library-project-card:hover .library-current-link{background:#17283d;border-color:#45617c}
+.library-project-card .library-current-link:hover:not(:disabled){
+  background:#264969;border-color:#7095bd;
+  box-shadow:0 0 0 2px rgba(110,156,203,.20);
+  filter:none;
+}
+html[data-theme="light"] .library-project-card .library-current-link{
+  background:#c4d4e3;border-color:#b5cadc;
+}
+html[data-theme="light"] .library-project-card:hover .library-current-link{
+  background:#bdd0e1;border-color:#a4bcd1;
+}
+html[data-theme="light"] .library-project-card .library-current-link:hover:not(:disabled){
+  background:#a4c0dc;border-color:#6e9cc5;
+  box-shadow:0 0 0 2px rgba(92,141,193,.20);
+  filter:none;
+}
+
+/* Give the reading-workspace toolbar approximately 10% more height and control size. */
+.workspace .reader-header{height:56px;min-height:56px;padding:5px 11px;gap:11px}
+.workspace .reader-header-identity{gap:9px}
+.workspace .reader-back{font-size:26px;padding:4px 8px}
+.workspace .reader-session-name,.workspace .reader-session-section{font-size:14px}
+.workspace .reader-header .pdf-toolbar{gap:8px}
+.workspace .reader-header .pdf-toolbar .secondary{font-size:13px;padding:6px 9px}
+.workspace .reader-header .page-indicator{font-size:13px}
+.workspace .reader-header .pdf-header-actions .secondary{font-size:13px;padding:6px 9px}
+.workspace .reader-agent-toggle{font-size:13px;padding:9px 13px}
+.workspace .reader-plan-toggle,.workspace .reader-theme-toggle{padding:9px 13px}
+.workspace .reader-theme-toggle{font-size:18px;min-width:41px}
+.workspace .reader-header-right{gap:10px}
+@media(max-width:760px){
+  .workspace .reader-header{gap:6px;padding:4px 5px}
+  .workspace .reader-header .pdf-toolbar{gap:3px}
+  .workspace .reader-header .pdf-toolbar .secondary{padding:5px}
+  .workspace .reader-header .pdf-filename{display:none}
+  .workspace .reader-agent-toggle{padding:7px;font-size:12px}
+}
