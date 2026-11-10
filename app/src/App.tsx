@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef, type PointerEvent as ReactPointerEvent, type FormEvent } from 'react';
-import { HATCHER_PROJECT_ID, loadProjectSources, loadProjects, loadSessions, saveProjectSources, saveProjects, saveSessions, type Project, type ProjectSource, type ReadingSession } from './storage';
+import { HATCHER_PROJECT_ID, loadCheckpoints, loadProjectSources, loadProjects, loadSessions, saveCheckpoints, saveProjectSources, saveProjects, saveSessions, type Project, type ProjectSource, type ReadingCheckpoint, type ReadingSession } from './storage';
 import { PdfReader, copySavedPdf, deleteSavedPdf, importSessionPdf } from './PdfReader';
 import { ReadingFlow } from './ReadingFlow';
+import { ReadingCheckpoints } from './ReadingCheckpoints';
 import {deletePdfIndex} from './pdfIndex';
 import {buildCommit} from './tangentStore';
 import {getDocument,GlobalWorkerOptions,type PDFDocumentProxy} from 'pdfjs-dist';
@@ -26,6 +27,7 @@ const sourceRoleLabels: Record<ProjectSource['role'],string> = {
 export function App() {
   const [projects,setProjects]=useState<Project[]>(loadProjects);
   const [sources,setSources]=useState<ProjectSource[]>(loadProjectSources);
+  const [checkpoints,setCheckpoints]=useState<ReadingCheckpoint[]>(loadCheckpoints);
   const [sessions, setSessions] = useState<ReadingSession[]>(loadSessions);
   const [activeId, setActiveId] = useState<string | null>(() => {
     const value = window.location.hash;
@@ -109,6 +111,7 @@ export function App() {
   const activeSource=sources.find(source=>source.id===activeSourceId)??null;
   const projectSources=sources.filter(source=>source.projectId===activeProject?.id);
   const projectSessions=sessions.filter(session=>session.projectId===activeProject?.id);
+  const projectCheckpoints=checkpoints.filter(checkpoint=>checkpoint.projectId===activeProject?.id);
   const formatActivity=(value:string)=>new Date(value).toLocaleDateString(undefined,{month:'short',day:'numeric',year:new Date(value).getFullYear()===new Date().getFullYear()?undefined:'numeric'});
 
   function persist(next: ReadingSession[]): boolean {
@@ -118,6 +121,10 @@ export function App() {
   function persistProjects(next:Project[]):boolean{
     try{saveProjects(next);setProjects(next);setStorageError('');return true;}
     catch{setStorageError('Could not save project changes to this browser. Check storage permissions.');return false;}
+  }
+  function persistCheckpoints(next:ReadingCheckpoint[]):boolean{
+    try{saveCheckpoints(next);setCheckpoints(next);setStorageError('');return true;}
+    catch{setStorageError('Could not save reading checkpoints to this browser.');return false;}
   }
   function persistSources(next:ProjectSource[]):boolean{
     try{saveProjectSources(next);setSources(next);setStorageError('');return true;}
@@ -254,6 +261,8 @@ export function App() {
       saveProjects(remainingProjects);
       saveSessions(remainingSessions);
       saveProjectSources(remainingSources);
+      saveCheckpoints(checkpoints.filter(c=>c.projectId!==deleteProjectId));
+      setCheckpoints(checkpoints.filter(c=>c.projectId!==deleteProjectId));
       setProjects(remainingProjects);
       setSessions(remainingSessions);
       setSources(remainingSources);
@@ -285,6 +294,7 @@ export function App() {
       localStorage.removeItem('higher-math:tangents:v2:' + deleteId);
       void deleteSavedPdf(deleteId).catch(() => setStorageError('Session deleted, but its cached PDF could not be cleared.'));
       void deletePdfIndex(deleteId).catch(()=>undefined);
+      persistCheckpoints(checkpoints.map(c=>c.sessionId===deleteId?{...c,sessionId:undefined}:c));
     }
   }
   function updatePage(page: number) {
@@ -374,7 +384,7 @@ export function App() {
               <div className="session-actions"><span className="badge">{s.status.replace('-', ' ')}</span><button className="menu-button" aria-label={'Delete ' + s.title} title="Delete session" onClick={e=>{e.stopPropagation();setDeleteId(s.id);}}>⋯</button></div>
             </div>)}
         </section>
-        <div className="side-stack"><section className="card"><div className="eyebrow">Your progress</div><div className="stat">{projectSessions.length}</div><p>sessions created in this browser</p><div className="progress"><div style={{width: Math.min(projectSessions.length * 12, 100) + '%'}} /></div><div className="muted">Local activity · not book completion</div></section>
+        <div className="side-stack"><ReadingCheckpoints key={activeProject?.id} projectId={activeProject?.id??''} checkpoints={projectCheckpoints} sessions={projectSessions} onChange={next=>persistCheckpoints([...checkpoints.filter(c=>c.projectId!==activeProject?.id),...next])} onOpenSession={navigate} />
           <section className="card project-sources-card">
             <div className="project-sources-heading"><h2>Project sources</h2><button className="secondary" onClick={()=>setAddSourceOpen(true)}>+ Add source</button></div>
             {!projectSources.length?<p className="muted">Upload the main PDFs for this project. They can be reused across reading sessions.</p>:
