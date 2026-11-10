@@ -42,7 +42,7 @@ const hatcherProject: Project = {
   id: HATCHER_PROJECT_ID,
   title: 'Algebraic Topology',
   author: 'Allen Hatcher',
-  description: 'Your reading workspace',
+  description: undefined,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
   status: 'active'
