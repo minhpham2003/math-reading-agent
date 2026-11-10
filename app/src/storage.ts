@@ -8,6 +8,16 @@ export type Project = {
   status: 'active' | 'paused' | 'completed' | 'archived';
 };
 
+export type ProjectSource = {
+  id: string;
+  projectId: string;
+  name: string;
+  role: 'primary' | 'lecture-notes' | 'reference' | 'paper' | 'supplement';
+  pageCount: number;
+  pdfKey: string;
+  createdAt: string;
+};
+
 export type ReadingSession = {
   id: string;
   projectId: string;
@@ -25,6 +35,7 @@ export type ReadingSession = {
 
 export const STORAGE_KEY = 'math-reading-agent:app:sessions:v1';
 export const PROJECTS_KEY = 'math-reading-agent:app:projects:v1';
+export const SOURCES_KEY = 'math-reading-agent:app:sources:v1';
 export const HATCHER_PROJECT_ID = 'hatcher';
 
 const hatcherProject: Project = {
@@ -71,4 +82,22 @@ export function loadSessions(): ReadingSession[] {
 
 export function saveSessions(sessions: ReadingSession[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+}
+
+
+export function loadProjectSources(): ProjectSource[] {
+  try {
+    const raw=JSON.parse(localStorage.getItem(SOURCES_KEY)??'[]') as unknown;
+    if(!Array.isArray(raw))return [];
+    return raw.filter((item):item is ProjectSource =>
+      typeof item==='object'&&item!==null&&
+      typeof item.id==='string'&&typeof item.projectId==='string'&&
+      typeof item.name==='string'&&typeof item.role==='string'&&
+      Number.isInteger(item.pageCount)&&typeof item.pdfKey==='string'&&
+      typeof item.createdAt==='string'
+    );
+  } catch { return []; }
+}
+export function saveProjectSources(sources:ProjectSource[]):void {
+  localStorage.setItem(SOURCES_KEY,JSON.stringify(sources));
 }
