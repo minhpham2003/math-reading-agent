@@ -57,7 +57,8 @@ export function loadProjects(): Project[] {
       typeof item.createdAt === 'string' && typeof item.updatedAt === 'string' &&
       typeof item.status === 'string'
     ) : [];
-    if (!stored.some(project => project.id === HATCHER_PROJECT_ID)) return [hatcherProject, ...stored];
+    // Seed the original Hatcher project only on first use. Do not resurrect deleted projects.
+    if (localStorage.getItem(PROJECTS_KEY) === null) return [hatcherProject, ...stored];
     return stored;
   } catch { return [hatcherProject]; }
 }
