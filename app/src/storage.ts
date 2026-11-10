@@ -18,6 +18,17 @@ export type ProjectSource = {
   createdAt: string;
 };
 
+export type ReadingCheckpoint = {
+  id: string;
+  projectId: string;
+  title: string;
+  completed: boolean;
+  sessionId?: string;
+  order: number;
+  createdAt: string;
+  completedAt?: string;
+};
+
 export type ReadingSession = {
   id: string;
   projectId: string;
@@ -36,6 +47,7 @@ export type ReadingSession = {
 export const STORAGE_KEY = 'math-reading-agent:app:sessions:v1';
 export const PROJECTS_KEY = 'math-reading-agent:app:projects:v1';
 export const SOURCES_KEY = 'math-reading-agent:app:sources:v1';
+export const CHECKPOINTS_KEY = 'math-reading-agent:app:checkpoints:v1';
 export const HATCHER_PROJECT_ID = 'hatcher';
 
 const hatcherProject: Project = {
@@ -101,4 +113,24 @@ export function loadProjectSources(): ProjectSource[] {
 }
 export function saveProjectSources(sources:ProjectSource[]):void {
   localStorage.setItem(SOURCES_KEY,JSON.stringify(sources));
+}
+
+export function loadCheckpoints(): ReadingCheckpoint[] {
+  try {
+    const value=JSON.parse(localStorage.getItem(CHECKPOINTS_KEY)??'[]') as unknown;
+    if(!Array.isArray(value))return [];
+    return value.filter((item):item is ReadingCheckpoint =>
+      typeof item==='object'&&item!==null&&
+      typeof item.id==='string'&&typeof item.projectId==='string'&&
+      typeof item.title==='string'&&typeof item.completed==='boolean'&&
+      (item.sessionId===undefined||typeof item.sessionId==='string')&&
+      typeof item.order==='number'&&Number.isFinite(item.order)&&
+      typeof item.createdAt==='string'&&
+      (item.completedAt===undefined||typeof item.completedAt==='string')
+    );
+  }catch{return [];}
+}
+
+export function saveCheckpoints(checkpoints:ReadingCheckpoint[]):void{
+  localStorage.setItem(CHECKPOINTS_KEY,JSON.stringify(checkpoints));
 }
