@@ -369,10 +369,9 @@ export function App() {
       <div className="dashboard-grid">
         <section className="card"><h2>Reading sessions</h2>
           {!projectSessions.length ? <p className="muted">No reading sessions yet. Create your first one to get started.</p> :
-            [...projectSessions].reverse().map(s => <div className="session-row" key={s.id}>
-              <div><strong>{s.title}</strong><div className="muted">{s.target} · pp. {s.firstPage}–{s.lastPage} · {s.durationMinutes} min</div>
-                <button className="text-button" onClick={() => navigate(s.id)}>Open →</button></div>
-              <div className="session-actions"><span className="badge">{s.status.replace('-', ' ')}</span><button className="menu-button" aria-label={'Delete ' + s.title} title="Delete session" onClick={() => setDeleteId(s.id)}>⋯</button></div>
+            [...projectSessions].reverse().map(s => <div className="session-row session-row-link" key={s.id} role="button" tabIndex={0} aria-label={'Open reading session ' + s.title} onClick={()=>navigate(s.id)} onKeyDown={e=>{if(e.target===e.currentTarget&&(e.key==='Enter'||e.key===' ')){e.preventDefault();navigate(s.id);}}}>
+              <div><strong>{s.title}</strong><div className="muted">{s.target} · pp. {s.firstPage}–{s.lastPage} · {s.durationMinutes} min</div></div>
+              <div className="session-actions"><span className="badge">{s.status.replace('-', ' ')}</span><button className="menu-button" aria-label={'Delete ' + s.title} title="Delete session" onClick={e=>{e.stopPropagation();setDeleteId(s.id);}}>⋯</button></div>
             </div>)}
         </section>
         <div className="side-stack"><section className="card"><div className="eyebrow">Your progress</div><div className="stat">{projectSessions.length}</div><p>sessions created in this browser</p><div className="progress"><div style={{width: Math.min(projectSessions.length * 12, 100) + '%'}} /></div><div className="muted">Local activity · not book completion</div></section>
