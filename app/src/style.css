@@ -1431,3 +1431,7 @@ html[data-theme="light"] .project-source-delete:hover{background:#f1dbe3}
 .project-inline-text:empty:focus::before{content:""}
 .project-heading-editable h1 .project-inline-text.project-inline-title{font-size:inherit;font-weight:inherit;letter-spacing:inherit}
 .project-inline-details .project-inline-text{font-size:inherit;color:inherit}
+
+/* Keep the project title close to the Library breadcrumb. */
+.dashboard > .hero{margin-top:4px}
+.dashboard > .hero .project-heading-editable h1{margin-top:0}
