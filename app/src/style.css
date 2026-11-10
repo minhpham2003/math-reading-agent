@@ -1421,3 +1421,13 @@ html[data-theme="light"] .project-inline-input{background:#f1f5f9;color:#22364c;
 .project-source-delete:hover{background:#643241;color:#fff}
 html[data-theme="light"] .project-source-delete{color:#8d3e54;border-color:#bc99a6}
 html[data-theme="light"] .project-source-delete:hover{background:#f1dbe3}
+
+/* Contenteditable project metadata: same typography and positioning in view/edit modes. */
+.project-inline-text{display:inline;white-space:pre-wrap;overflow-wrap:anywhere;min-width:0;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;padding:0!important;margin:0;cursor:text;border-radius:0;caret-color:currentColor}
+.project-inline-text:focus,.project-inline-text:focus-visible{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important}
+.project-inline-text:hover{text-decoration:underline;text-decoration-style:dotted;text-decoration-color:currentColor;text-decoration-thickness:1px;text-underline-offset:5px}
+.project-inline-text:focus{text-decoration:none}
+.project-inline-text:empty::before{content:attr(data-placeholder);opacity:.52;pointer-events:none}
+.project-inline-text:empty:focus::before{content:""}
+.project-heading-editable h1 .project-inline-text.project-inline-title{font-size:inherit;font-weight:inherit;letter-spacing:inherit}
+.project-inline-details .project-inline-text{font-size:inherit;color:inherit}
