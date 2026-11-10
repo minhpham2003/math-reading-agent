@@ -1360,3 +1360,42 @@ html[data-theme="light"] .project-edit-button{color:#315d8c}
 .dashboard .session-row-link:focus-visible{outline:3px solid #5895e8;outline-offset:2px}
 :root[data-theme="light"] .dashboard .session-row-link{background:#dfe5eb}
 :root[data-theme="light"] .dashboard .session-row-link:hover{background:#ccd8e4}
+
+/* Project-level reading checkpoints. */
+.checkpoints-card{min-width:0}
+.checkpoints-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.checkpoints-heading h2{margin:0;font-size:22px}
+.checkpoints-heading .secondary{font-weight:400;white-space:nowrap}
+.checkpoints-summary{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px;color:#9daec3}
+.checkpoints-summary strong{font-size:14px;color:inherit}
+.checkpoints-progress{height:7px;border-radius:100px;background:#40546d;overflow:hidden;margin:10px 0 18px}
+.checkpoints-progress>div{height:100%;background:#5eaf8e;border-radius:inherit;transition:width .2s ease}
+.checkpoint-empty{line-height:1.5}
+.checkpoint-list{display:grid;gap:1px}
+.checkpoint-item{min-width:0}
+.checkpoint-item-main{display:flex;align-items:center;gap:10px;padding:8px 0;min-width:0}
+.checkpoint-item-main input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:#3c9470;cursor:pointer}
+.checkpoint-item-title{flex:1;min-width:0;overflow-wrap:anywhere;font-size:15px;line-height:1.4}
+.checkpoint-item-title .is-complete{color:#7e91a6;text-decoration:line-through}
+.checkpoint-session-link{display:inline;text-align:left;border:0;padding:0;background:transparent;font:inherit;line-height:inherit;color:#80b9ff;text-decoration:underline;text-underline-offset:3px;cursor:pointer;overflow-wrap:anywhere}
+.checkpoint-session-link:hover{color:#b6d8ff}
+.checkpoint-edit{border:0;background:transparent;color:#9fb1c8;cursor:pointer;border-radius:7px;padding:5px 8px;font-size:19px;flex-shrink:0}
+.checkpoint-edit:hover{background:#273b54;color:#fff}
+.checkpoint-editor{display:grid;gap:12px;padding:15px;margin:7px 0 14px;border:1px solid #425873;border-radius:11px;background:#1a2b3f}
+.checkpoint-editor label{display:block;font-size:14px}
+.checkpoint-editor input,.checkpoint-editor select{display:block;box-sizing:border-box;margin-top:6px;width:100%;padding:9px 11px;border-radius:7px;border:1px solid #526682;background:#111d2d;color:#f0f5ff;font:inherit;font-size:15px}
+.checkpoint-editor-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.checkpoint-editor-actions .primary,.checkpoint-editor-actions .secondary,.checkpoint-confirm button{font-weight:400}
+.checkpoint-delete{margin-right:auto;border:0;background:transparent;color:#f2a1a8;cursor:pointer}
+.checkpoint-confirm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}
+:root[data-theme="light"] .checkpoints-summary{color:#536982}
+:root[data-theme="light"] .checkpoints-progress{background:#b7c9d9}
+:root[data-theme="light"] .checkpoint-item-title .is-complete{color:#728396}
+:root[data-theme="light"] .checkpoint-session-link{color:#245c9d}
+:root[data-theme="light"] .checkpoint-session-link:hover{color:#153e73}
+:root[data-theme="light"] .checkpoint-edit{color:#45617e}
+:root[data-theme="light"] .checkpoint-edit:hover{background:#c5d4e4;color:#243d59}
+:root[data-theme="light"] .checkpoint-editor{background:#d5e0eb;border-color:#aabed0}
+:root[data-theme="light"] .checkpoint-editor input,:root[data-theme="light"] .checkpoint-editor select{background:#eef3f8;color:#20354a;border-color:#a5b9ce}
+:root[data-theme="light"] .checkpoint-delete{color:#914156}
+@media(max-width:580px){.checkpoints-heading{flex-wrap:wrap}}
