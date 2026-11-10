@@ -161,7 +161,7 @@ export function App() {
       await importSessionPdf(pdfKey,sourceFile);
       const source:ProjectSource={id:sourceId,projectId:activeProject.id,name:sourceFile.name.replace(/\.pdf$/i,''),role:sourceRole,pageCount,pdfKey,createdAt:new Date().toISOString()};
       if(!persistSources([...sources,source])){await deleteSavedPdf(pdfKey).catch(()=>undefined);return;}
-      setSourceFile(null);setSourceRole('primary');setAddSourceOpen(false);openSource(source);
+      setSourceFile(null);setSourceRole('primary');setAddSourceOpen(false);
     }catch(error){setSourceError(error instanceof Error?error.message:'Could not add this PDF source.');}
     finally{if(doc)await doc.destroy();setAddingSource(false);}
   }
