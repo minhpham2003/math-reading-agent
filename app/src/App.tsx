@@ -3,6 +3,7 @@ import { HATCHER_PROJECT_ID, loadCheckpoints, loadProjectSources, loadProjects, 
 import { PdfReader, copySavedPdf, deleteSavedPdf, importSessionPdf } from './PdfReader';
 import { ReadingFlow } from './ReadingFlow';
 import { ReadingCheckpoints } from './ReadingCheckpoints';
+import { InlineProjectField } from './InlineProjectField';
 import {deletePdfIndex} from './pdfIndex';
 import {buildCommit} from './tangentStore';
 import {getDocument,GlobalWorkerOptions,type PDFDocumentProxy} from 'pdfjs-dist';
@@ -54,9 +55,6 @@ export function App() {
   });
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [newProjectOpen,setNewProjectOpen]=useState(false);
-  const [editProjectOpen,setEditProjectOpen]=useState(false);
-  const [editProjectForm,setEditProjectForm]=useState<ProjectFormState>(initialProjectForm);
-  const [editProjectError,setEditProjectError]=useState('');
   const [addSourceOpen,setAddSourceOpen]=useState(false);
   const [sourceRole,setSourceRole]=useState<ProjectSource['role']>('primary');
   const [sourceFile,setSourceFile]=useState<File|null>(null);
@@ -74,6 +72,7 @@ export function App() {
   const [storageError, setStorageError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteProjectId,setDeleteProjectId] = useState<string|null>(null);
+  const [deleteSourceId,setDeleteSourceId] = useState<string|null>(null);
   const [pageJump, setPageJump] = useState<{page:number;seq:number;quote?:string}|null>(null);
   const [agentOpen, setAgentOpen] = useState(true);
   const [theme,setTheme]=useState<'dark'|'light'>(()=>localStorage.getItem('higher-math:theme')==='light'?'light':'dark');
@@ -109,6 +108,7 @@ export function App() {
   const pendingProjectDelete = projects.find(p=>p.id===deleteProjectId);
   const activeProject=projects.find(project=>project.id===activeProjectId)??projects[0];
   const activeSource=sources.find(source=>source.id===activeSourceId)??null;
+  const pendingSourceDelete=sources.find(source=>source.id===deleteSourceId);
   const projectSources=sources.filter(source=>source.projectId===activeProject?.id);
   const projectSessions=sessions.filter(session=>session.projectId===activeProject?.id);
   const projectCheckpoints=checkpoints.filter(checkpoint=>checkpoint.projectId===activeProject?.id);
@@ -165,21 +165,20 @@ export function App() {
     }catch(error){setSourceError(error instanceof Error?error.message:'Could not add this PDF source.');}
     finally{if(doc)await doc.destroy();setAddingSource(false);}
   }
-  function startEditingProject(){
-    if(!activeProject)return;
-    setEditProjectForm({title:activeProject.title,author:activeProject.author??'',description:activeProject.description==='Your reading workspace'?'':activeProject.description??''});
-    setEditProjectError('');
-    setEditProjectOpen(true);
+  function updateProjectField(field:'title'|'author'|'description',value:string):boolean{
+    if(!activeProject)return false;
+    if(field==='title'&&!value.trim())return false;
+    return persistProjects(projects.map(project=>project.id===activeProject.id
+      ? {...project,[field]:value.trim()||undefined,updatedAt:new Date().toISOString()}
+      : project));
   }
-  function updateProject(event:FormEvent<HTMLFormElement>){
-    event.preventDefault();
-    if(!activeProject)return;
-    const title=editProjectForm.title.trim();
-    if(!title){setEditProjectError('Enter a project title.');return;}
-    if(persistProjects(projects.map(p=>p.id===activeProject.id?{...p,title,author:editProjectForm.author.trim()||undefined,description:editProjectForm.description.trim()||undefined,updatedAt:new Date().toISOString()}:p))){
-      setEditProjectOpen(false);
-      setEditProjectError('');
-    }
+  function deleteProjectSource(){
+    if(!pendingSourceDelete)return;
+    const source=pendingSourceDelete;
+    if(!persistSources(sources.filter(item=>item.id!==source.id)))return;
+    setDeleteSourceId(null);
+    if(activeSourceId===source.id)openProject(source.projectId);
+    void deleteSavedPdf(source.pdfKey).catch(()=>setStorageError('Source removed, but the cached PDF could not be cleared.'));
   }
   function createProject(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
@@ -307,13 +306,14 @@ export function App() {
   useEffect(() => {
     function handleKeys(event: KeyboardEvent) {
       if (event.key !== 'Escape') return;
-      if (deleteProjectId) setDeleteProjectId(null);
+      if (deleteSourceId) setDeleteSourceId(null);
+      else if (deleteProjectId) setDeleteProjectId(null);
       else if (deleteId) setDeleteId(null);
       else if (newSessionOpen && !creating) { setNewSessionOpen(false); setFormError(''); }
     }
     document.addEventListener('keydown', handleKeys);
     return () => document.removeEventListener('keydown', handleKeys);
-  }, [deleteId, deleteProjectId, newSessionOpen, creating]);
+  }, [deleteId, deleteProjectId, deleteSourceId, newSessionOpen, creating]);
 
   return <div className="app-shell">
     {!active && surface!=='source' && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button></header>}
@@ -373,7 +373,7 @@ export function App() {
       </div>
     </section> : <main className="dashboard">
       <button className="breadcrumb breadcrumb-button" onClick={openLibrary}>← Library</button>
-      <div className="hero"><div><div className="eyebrow">Book project</div><h1>{activeProject?.title??'Untitled project'} <a className="project-build-id" href={'https://github.com/minhpham2003/math-reading-agent/commit/'+buildCommit} target="_blank" rel="noreferrer" title={'Open GitHub commit '+buildCommit}>GitHub {buildCommit}</a></h1>{(activeProject?.author || (activeProject?.description && activeProject.description!=='Your reading workspace'))&&<p>{[activeProject?.author,activeProject?.description==='Your reading workspace'?'':activeProject?.description].filter(Boolean).join(' · ')}</p>}<button type="button" className="project-edit-button" onClick={startEditingProject}>Edit project</button></div>
+      <div className="hero"><div className="project-heading-editable"><h1><InlineProjectField className="project-inline-title" value={activeProject?.title??''} label="project title" placeholder="Untitled project" required maxLength={140} onSave={value=>updateProjectField('title',value)}/> <a className="project-build-id" href={'https://github.com/minhpham2003/math-reading-agent/commit/'+buildCommit} target="_blank" rel="noreferrer" title={'Open GitHub commit '+buildCommit}>GitHub {buildCommit}</a></h1><div className="project-inline-details"><InlineProjectField className="project-inline-author" value={activeProject?.author??''} label="author or course" placeholder="Add author or course" maxLength={140} onSave={value=>updateProjectField('author',value)}/>{(activeProject?.description && activeProject.description!=='Your reading workspace')&&<span className="project-details-separator">·</span>}<InlineProjectField className="project-inline-description" value={activeProject?.description==='Your reading workspace'?'':activeProject?.description??''} label="description" placeholder="Add description" onSave={value=>updateProjectField('description',value)}/></div></div>
         <div className="project-hero-actions"><button className="primary" onClick={() => setNewSessionOpen(true)}>+ New Session</button></div>
       </div>
       <div className="dashboard-grid">
@@ -390,7 +390,7 @@ export function App() {
             {!projectSources.length?<p className="muted">Upload the main PDFs for this project. They can be reused across reading sessions.</p>:
               projectSources.map(source=><div className="project-source-row" key={source.id}>
                 <button className="project-source-open" onClick={()=>openSource(source)} title={source.name}><strong title={source.name}>{shortSourceName(source.name)}</strong><span className="muted">{sourceRoleLabels[source.role]} · {source.pageCount} pages</span></button>
-                <button className="secondary" onClick={()=>openSource(source)}>Open PDF →</button>
+                <button type="button" className="project-source-delete" onClick={()=>setDeleteSourceId(source.id)} aria-label={"Delete source "+source.name} title={"Delete source "+source.name}>Delete</button>
               </div>)}
           </section></div>
       </div>
@@ -416,16 +416,6 @@ export function App() {
         </article>
       </div>
     </section>}
-    {editProjectOpen && <div className="overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setEditProjectOpen(false);}}>
-      <form className="dialog new-project-dialog" role="dialog" aria-modal="true" aria-labelledby="edit-project-title" onSubmit={updateProject}>
-        <h2 id="edit-project-title">Edit project</h2>
-        <label>Project title<input autoFocus required maxLength={140} value={editProjectForm.title} onChange={e=>setEditProjectForm({...editProjectForm,title:e.target.value})}/></label>
-        <label>Author or course <span className="muted">(optional)</span><input maxLength={140} value={editProjectForm.author} onChange={e=>setEditProjectForm({...editProjectForm,author:e.target.value})}/></label>
-        <label>Description <span className="muted">(optional)</span><textarea rows={3} maxLength={300} value={editProjectForm.description} onChange={e=>setEditProjectForm({...editProjectForm,description:e.target.value})}/></label>
-        {editProjectError&&<p role="alert" className="form-error">{editProjectError}</p>}
-        <div className="dialog-actions"><button type="button" className="secondary" onClick={()=>setEditProjectOpen(false)}>Cancel</button><button type="submit" className="primary">Save changes</button></div>
-      </form>
-    </div>}
     {newProjectOpen && <div className="overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget){setNewProjectOpen(false);setProjectFormError('');}}}>
       <form className="dialog new-project-dialog" onSubmit={createProject} role="dialog" aria-modal="true" aria-labelledby="new-project-title">
         <h2 id="new-project-title">New project</h2>
@@ -463,6 +453,7 @@ export function App() {
         {formError && <p role="alert" className="form-error">{formError}</p>}
         <div className="dialog-actions"><button className="secondary" type="button" disabled={creating} onClick={() => {setNewSessionOpen(false);setFormError('');setNewPdf(null);setSelectedSourceId('');setPdfPageCount(null);}}>Cancel</button><button className="primary" type="submit" disabled={creating||checkingPdf||!pdfPageCount}>{creating ? 'Importing PDF…' : 'Create session'}</button></div>
       </form></div>}
+    {pendingSourceDelete && <div className="overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setDeleteSourceId(null);}}><div className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-source-title"><h2 id="delete-source-title">Delete PDF source?</h2><p>Delete “{pendingSourceDelete.name}” from Project sources? The PDF will be removed from this browser, but existing reading sessions that copied it will remain available. This cannot be undone.</p><div className="dialog-actions"><button className="secondary" onClick={()=>setDeleteSourceId(null)}>Cancel</button><button className="danger" onClick={deleteProjectSource}>Delete source</button></div></div></div>}
     {pendingProjectDelete && <div className="overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setDeleteProjectId(null);}}><div className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-project-title"><h2 id="delete-project-title">Delete project?</h2><p>Delete “{pendingProjectDelete.title}” and its {sessions.filter(s=>s.projectId===pendingProjectDelete.id).length} reading sessions and {sources.filter(s=>s.projectId===pendingProjectDelete.id).length} sources from this browser? This cannot be undone.</p><div className="dialog-actions"><button className="secondary" onClick={()=>setDeleteProjectId(null)}>Cancel</button><button className="danger" onClick={deleteProject}>Delete project</button></div></div></div>}
     {pendingDelete && <div className="overlay" onMouseDown={e => {if (e.target === e.currentTarget) setDeleteId(null);}}><div className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title"><h2 id="delete-title">Delete session?</h2><p>Delete “{pendingDelete.title}” from this browser? This cannot be undone.</p><div className="dialog-actions"><button className="secondary" onClick={() => setDeleteId(null)}>Cancel</button><button className="danger" onClick={deleteSession}>Delete session</button></div></div></div>}
   </div>;
