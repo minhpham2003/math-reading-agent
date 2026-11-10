@@ -320,7 +320,7 @@ export function App() {
     {storageError && <div role="alert" className="alert">{storageError}</div>}
     {!active ? (surface==='library' ? <main className="library-page">
       <div className="library-heading-row">
-        <div><div className="eyebrow">Your workspace</div><h1>Library</h1></div>
+        <div><h1>Library</h1></div>
         <button className="primary" onClick={()=>setNewProjectOpen(true)}>+ New Project</button>
       </div>
       <section className="library-projects">
@@ -331,7 +331,7 @@ export function App() {
           const completedCount=related.filter(s=>s.status==='complete').length;
           return <article className="library-project-card" key={project.id} role="button" tabIndex={0} aria-label={"Open project "+project.title} onClick={()=>openProject(project.id)} onKeyDown={e=>{if(e.target===e.currentTarget&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openProject(project.id);}}}>
             <div className="library-project-top">
-              <div><div className="eyebrow">Book project</div><h2>{project.title}</h2>{project.author&&<p>{project.author}</p>}</div>
+              <div><h2>{project.title}</h2>{project.author&&<p>{project.author}</p>}</div>
               <div className="library-project-controls"><span className={"library-status "+(project.status==='active'?'is-active':'')}>{project.status}</span><button type="button" className="library-project-delete" title={"Delete "+project.title} aria-label={"Delete project "+project.title} onClick={e=>{e.stopPropagation();setDeleteProjectId(project.id);}}>Delete</button></div>
             </div>
             <button type="button" className="library-current library-current-link" onClick={e=>{e.stopPropagation();if(recent)navigate(recent.id);}} disabled={!recent}>
