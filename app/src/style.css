@@ -1271,7 +1271,8 @@ html[data-theme="light"] .new-project-dialog textarea::placeholder{color:#72879b
 
 
 /* Library card refinements: active state and resume action placement. */
-.library-status.is-active{background:#d9f0e2;color:#216d46;border:1px solid #a9d6ba}
+.library-status.is-active,
+html[data-theme="light"] .library-status.is-active{background:#a8e3bb;color:#135c31;border:1px solid #60bd7d}
 .library-current{display:flex;align-items:center;justify-content:space-between;gap:20px}
 .library-current-copy{display:grid;gap:4px;min-width:0}
 .library-resume{flex:none;align-self:center}
