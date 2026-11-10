@@ -59,3 +59,30 @@ test('a page-only Definition link acquires a real passage anchor',()=>{
  assert.ok(answer.startsWith('[Definition 1.1](pdf-page:7?quote=Definition%201.1'));
  assert.ok(answer.includes('spectral'));
 });
+
+
+test('bare numbered source objects are proactively linked when uniquely located',()=>{
+ const source='Document: Notes.pdf.\nRetrieved excerpts:\n[PDF page 4] Definition 3.7 A multiplicative spectral sequence is a spectral sequence with products.\n\n[PDF page 5] Theorem 3.8 Let F to Y to X be a fiber sequence.';
+ const answer=preparePdfCitations('By Definition 3.7, the product is part of the structure. Theorem 3.8 then describes the Serre page.',source);
+ assert.match(answer,/\[Definition 3\.7\]\(pdf-page:4\?quote=/);
+ assert.match(answer,/\[Theorem 3\.8\]\(pdf-page:5\?quote=/);
+});
+
+test('bare section references and section symbols are proactively linked',()=>{
+ const source='Document: Notes.pdf.\nRetrieved excerpts:\n[PDF page 11] Section 3.2 Multiplicative structure. We now add products to the spectral sequence.';
+ const answer=preparePdfCitations('This is developed in Section 3.2; later I will refer back to §3.2.',source);
+ assert.match(answer,/\[Section 3\.2\]\(pdf-page:11\?quote=/);
+ assert.match(answer,/\[§3\.2\]\(pdf-page:11\?quote=/);
+});
+
+test('ambiguous source labels are not auto-linked',()=>{
+ const source='Document: Notes.pdf.\nRetrieved excerpts:\n[PDF page 4] Definition 3.7 is recalled here.\n\n[PDF page 8] We use Definition 3.7 again.';
+ assert.equal(preparePdfCitations('Definition 3.7 is important.',source),'Definition 3.7 is important.');
+});
+
+test('proactive linking does not alter source labels inside code or existing links',()=>{
+ const source='Document: Notes.pdf.\nRetrieved excerpts:\n[PDF page 4] Definition 3.7 A multiplicative spectral sequence.';
+ const answer=preparePdfCitations('`Definition 3.7` and [Definition 3.7](pdf-page:4) and Definition 3.7',source);
+ assert.match(answer,/`Definition 3\.7`/);
+ assert.equal((answer.match(/\[Definition 3\.7\]\(pdf-page:4/g)||[]).length,2);
+});
