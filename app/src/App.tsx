@@ -14,6 +14,13 @@ type SessionFormState = {
 const initialForm: SessionFormState = { title: '', target: '', firstPage: '', lastPage: '', durationMinutes: '60' };
 type ProjectFormState = { title:string; author:string; description:string };
 const initialProjectForm:ProjectFormState={title:'',author:'',description:''};
+const sourceRoleLabels: Record<ProjectSource['role'],string> = {
+  primary:'Primary text',
+  'lecture-notes':'Lecture notes',
+  reference:'Reference',
+  paper:'Paper',
+  supplement:'Supplement',
+};
 
 export function App() {
   const [projects,setProjects]=useState<Project[]>(loadProjects);
@@ -321,7 +328,7 @@ export function App() {
             <div className="project-sources-heading"><h2>Project sources</h2><button className="secondary" onClick={()=>setAddSourceOpen(true)}>+ Add source</button></div>
             {!projectSources.length?<p className="muted">Upload the main PDFs for this project. They can be reused across reading sessions.</p>:
               projectSources.map(source=><div className="project-source-row" key={source.id}>
-                <button className="project-source-open" onClick={()=>openSource(source)}><strong>{source.name}</strong><span className="muted">{source.role.replace('-',' ')} · {source.pageCount} pages</span></button>
+                <button className="project-source-open" onClick={()=>openSource(source)} title={source.name}><strong title={source.name}>{source.name}</strong><span className="muted">{sourceRoleLabels[source.role]} · {source.pageCount} pages</span></button>
                 <button className="secondary" onClick={()=>openSource(source)}>Open PDF →</button>
               </div>)}
           </section></div>
