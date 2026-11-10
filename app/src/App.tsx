@@ -205,27 +205,31 @@ export function App() {
           return <article className="library-project-card" key={project.id}>
             <div className="library-project-top">
               <div><div className="eyebrow">Book project</div><h2>{project.title}</h2>{project.author&&<p>{project.author}</p>}</div>
-              <span className="library-status">{project.status}</span>
+              <span className={"library-status "+(project.status==='active'?'is-active':'')}>{project.status}</span>
             </div>
             <div className="library-current">
-              <span className="library-current-label">Current reading</span>
-              {recent ? <>
-                <strong>{recent.title}</strong>
-                <span>{recent.target}</span>
-                <small>Last activity {formatActivity(recent.updatedAt)}</small>
-              </> : <>
-                <strong>No reading session yet</strong>
-                <span>Create a reading session to begin this project.</span>
-              </>}
+              <div className="library-current-copy">
+                <span className="library-current-label">Current reading</span>
+                {recent ? <>
+                  <strong>{recent.title}</strong>
+                  <span>{recent.target}</span>
+                  <small>Last activity {formatActivity(recent.updatedAt)}</small>
+                </> : <>
+                  <strong>No reading session yet</strong>
+                  <span>Create a reading session to begin this project.</span>
+                </>}
+              </div>
+              {recent&&<button className="primary library-resume" onClick={()=>navigate(recent.id)}>Resume reading</button>}
             </div>
-            <div className="library-project-meta">
-              <span><strong>{related.length}</strong> sessions</span>
-              <span><strong>{activeCount}</strong> active</span>
-              <span><strong>{completedCount}</strong> completed</span>
-            </div>
-            <div className="library-project-actions">
-              {recent&&<button className="primary" onClick={()=>navigate(recent.id)}>Resume reading</button>}
-              <button className="secondary" onClick={()=>openProject(project.id)}>Open project →</button>
+            <div className="library-project-footer">
+              <div className="library-project-meta">
+                <span><strong>{related.length}</strong> sessions</span>
+                <span><strong>{activeCount}</strong> active</span>
+                <span><strong>{completedCount}</strong> completed</span>
+              </div>
+              <div className="library-project-actions">
+                <button className="secondary" onClick={()=>openProject(project.id)}>Open project →</button>
+              </div>
             </div>
           </article>;
         })}
