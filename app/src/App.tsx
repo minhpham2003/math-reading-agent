@@ -96,7 +96,6 @@ export function App() {
   const activeSource=sources.find(source=>source.id===activeSourceId)??null;
   const projectSources=sources.filter(source=>source.projectId===activeProject?.id);
   const projectSessions=sessions.filter(session=>session.projectId===activeProject?.id);
-  const latestSession=[...projectSessions].sort((x,y)=>new Date(y.updatedAt).getTime()-new Date(x.updatedAt).getTime())[0];
   const formatActivity=(value:string)=>new Date(value).toLocaleDateString(undefined,{month:'short',day:'numeric',year:new Date(value).getFullYear()===new Date().getFullYear()?undefined:'numeric'});
 
   function persist(next: ReadingSession[]): boolean {
@@ -263,7 +262,7 @@ export function App() {
               <div><div className="eyebrow">Book project</div><h2>{project.title}</h2>{project.author&&<p>{project.author}</p>}</div>
               <span className={"library-status "+(project.status==='active'?'is-active':'')}>{project.status}</span>
             </div>
-            <div className="library-current">
+            <button type="button" className="library-current library-current-link" onClick={()=>recent&&navigate(recent.id)} disabled={!recent}>
               <div className="library-current-copy">
                 <span className="library-current-label">Current reading</span>
                 {recent ? <>
@@ -275,8 +274,7 @@ export function App() {
                   <span>Create a reading session to begin this project.</span>
                 </>}
               </div>
-              {recent&&<button className="primary library-resume" onClick={()=>navigate(recent.id)}>Resume reading</button>}
-            </div>
+            </button>
             <div className="library-project-footer">
               <div className="library-project-meta">
                 <span><strong>{related.length}</strong> sessions</span>
