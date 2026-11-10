@@ -307,7 +307,7 @@ export function App() {
     </section> : <main className="dashboard">
       <button className="breadcrumb breadcrumb-button" onClick={openLibrary}>← Library</button>
       <div className="hero"><div><div className="eyebrow">Book project</div><h1>{activeProject?.title??'Untitled project'} <a className="project-build-id" href={'https://github.com/minhpham2003/math-reading-agent/commit/'+buildCommit} target="_blank" rel="noreferrer" title={'Open GitHub commit '+buildCommit}>GitHub {buildCommit}</a></h1><p>{activeProject?.author ? activeProject.author+' · ' : ''}{activeProject?.description||'Your reading workspace'}</p></div>
-        <div className="project-hero-actions">{latestSession && <button className="secondary" onClick={()=>navigate(latestSession.id)}>Continue reading</button>}<button className="primary" onClick={() => setNewSessionOpen(true)}>+ New Session</button></div>
+        <div className="project-hero-actions"><button className="primary" onClick={() => setNewSessionOpen(true)}>+ New Session</button></div>
       </div>
       <div className="dashboard-grid">
         <section className="card"><h2>Reading sessions</h2>
