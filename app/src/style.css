@@ -1353,3 +1353,10 @@ html[data-theme="light"] .library-project-delete:hover{background:#f4dfe4}
 .project-edit-button:hover{text-decoration:underline;text-underline-offset:3px}
 .project-edit-button:focus-visible{outline:2px solid #528de5;outline-offset:3px}
 html[data-theme="light"] .project-edit-button{color:#315d8c}
+
+/* Clickable reading-session rows (excluding the independent overflow menu). */
+.dashboard .session-row-link{cursor:pointer;border-radius:10px;padding:16px 12px;transition:background-color .16s ease}
+.dashboard .session-row-link:hover{background:#21354c}
+.dashboard .session-row-link:focus-visible{outline:3px solid #5895e8;outline-offset:2px}
+:root[data-theme="light"] .dashboard .session-row-link{background:#dfe5eb}
+:root[data-theme="light"] .dashboard .session-row-link:hover{background:#ccd8e4}
