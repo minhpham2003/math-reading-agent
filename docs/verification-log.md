@@ -113,3 +113,11 @@
 - **Not tested:** TypeScript production build, Node runtime response, secured backend deployment, AI roundtrip, nested tree rendered screenshot, mobile behavior, and existing branch controls. The Implementation 1 preview is not being overwritten by this branch's workflow.
 - **Expected manual browser check:** Open Branches dropdown, expand main and a child branch, verify lines and elbow connectors across two levels; collapse/re-expand, navigate through branch rows, and verify status indicators remain correct.
 - **Status:** Implemented/committed; not browser-verified. No claim of running AI until backend is configured.
+
+
+## V-Proactive-linked-citations — 2026-11-10
+- **Branch/head:** `implementation/02-ai-chat` at [d41d6ba](https://github.com/minhpham2003/math-reading-agent/commit/d41d6ba9952595450c9507451e2a7686d8eb57d8).
+- **Change under test:** Mandatory/proactive source-link instruction plus deterministic auto-linking for uniquely located numbered source labels.
+- **Local helper tests:** 14/14 passed, including Definition/Theorem auto-linking, Section/§ auto-linking, ambiguity refusal, code preservation and existing-link preservation.
+- **Repository status check:** Branch head confirmed at d41d6ba. Commit status was still pending with no reported check runs when inspected.
+- **Browser/deployment verification:** Not yet performed for this head. Do not describe the feature as browser-verified until the preview workflow and live interaction are checked.
