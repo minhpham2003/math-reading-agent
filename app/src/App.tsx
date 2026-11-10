@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, type PointerEvent as ReactPointerEvent, type FormEvent } from 'react';
-import { HATCHER_PROJECT_ID, loadProjects, loadSessions, saveProjects, saveSessions, type Project, type ReadingSession } from './storage';
-import { PdfReader, deleteSavedPdf, importSessionPdf } from './PdfReader';
+import { HATCHER_PROJECT_ID, loadProjectSources, loadProjects, loadSessions, saveProjectSources, saveProjects, saveSessions, type Project, type ProjectSource, type ReadingSession } from './storage';
+import { PdfReader, copySavedPdf, deleteSavedPdf, importSessionPdf } from './PdfReader';
 import { ReadingFlow } from './ReadingFlow';
 import {deletePdfIndex} from './pdfIndex';
 import {buildCommit} from './tangentStore';
@@ -17,15 +17,25 @@ const initialProjectForm:ProjectFormState={title:'',author:'',description:''};
 
 export function App() {
   const [projects,setProjects]=useState<Project[]>(loadProjects);
+  const [sources,setSources]=useState<ProjectSource[]>(loadProjectSources);
   const [sessions, setSessions] = useState<ReadingSession[]>(loadSessions);
   const [activeId, setActiveId] = useState<string | null>(() => {
     const value = window.location.hash;
     return value.startsWith('#session-') ? decodeURIComponent(value.slice(9)) : null;
   });
-  const [surface,setSurface]=useState<'library'|'project'>(()=>window.location.hash.startsWith('#project-')?'project':'library');
+  const [surface,setSurface]=useState<'library'|'project'|'source'>(()=>{
+    const hash=window.location.hash;
+    if(hash.startsWith('#source-'))return 'source';
+    return hash.startsWith('#project-')?'project':'library';
+  });
+  const [activeSourceId,setActiveSourceId]=useState<string|null>(()=>{
+    const hash=window.location.hash;
+    return hash.startsWith('#source-')?decodeURIComponent(hash.slice(8)):null;
+  });
   const [activeProjectId,setActiveProjectId]=useState(()=>{
     const hash=window.location.hash;
     if(hash.startsWith('#project-'))return decodeURIComponent(hash.slice(9));
+    if(hash.startsWith('#source-'))return loadProjectSources().find(source=>source.id===decodeURIComponent(hash.slice(8)))?.projectId??HATCHER_PROJECT_ID;
     if(hash.startsWith('#session-')){
       const sessionId=decodeURIComponent(hash.slice(9));
       return loadSessions().find(s=>s.id===sessionId)?.projectId??HATCHER_PROJECT_ID;
@@ -34,6 +44,12 @@ export function App() {
   });
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [newProjectOpen,setNewProjectOpen]=useState(false);
+  const [addSourceOpen,setAddSourceOpen]=useState(false);
+  const [sourceRole,setSourceRole]=useState<ProjectSource['role']>('primary');
+  const [sourceFile,setSourceFile]=useState<File|null>(null);
+  const [sourceError,setSourceError]=useState('');
+  const [addingSource,setAddingSource]=useState(false);
+  const [selectedSourceId,setSelectedSourceId]=useState('');
   const [projectForm,setProjectForm]=useState<ProjectFormState>(initialProjectForm);
   const [projectFormError,setProjectFormError]=useState('');
   const [form, setForm] = useState<SessionFormState>(initialForm);
@@ -77,6 +93,8 @@ export function App() {
   const active = sessions.find(s => s.id === activeId) ?? null;
   const pendingDelete = sessions.find(s => s.id === deleteId);
   const activeProject=projects.find(project=>project.id===activeProjectId)??projects[0];
+  const activeSource=sources.find(source=>source.id===activeSourceId)??null;
+  const projectSources=sources.filter(source=>source.projectId===activeProject?.id);
   const projectSessions=sessions.filter(session=>session.projectId===activeProject?.id);
   const latestSession=[...projectSessions].sort((x,y)=>new Date(y.updatedAt).getTime()-new Date(x.updatedAt).getTime())[0];
   const completedSessions=projectSessions.filter(s=>s.status==='complete').length;
@@ -91,6 +109,10 @@ export function App() {
     try{saveProjects(next);setProjects(next);setStorageError('');return true;}
     catch{setStorageError('Could not save project changes to this browser. Check storage permissions.');return false;}
   }
+  function persistSources(next:ProjectSource[]):boolean{
+    try{saveProjectSources(next);setSources(next);setStorageError('');return true;}
+    catch{setStorageError('Could not save project sources to this browser. Check storage permissions.');return false;}
+  }
   function navigate(id: string | null) {
     const session=id?sessions.find(s=>s.id===id):null;
     if(session)setActiveProjectId(session.projectId);
@@ -99,12 +121,32 @@ export function App() {
     window.history.replaceState(null, '', id ? '#session-' + encodeURIComponent(id) : '#project-' + encodeURIComponent(activeProjectId));
   }
   function openLibrary(){
-    setActiveId(null);setSurface('library');
+    setActiveId(null);setActiveSourceId(null);setSurface('library');
     window.history.replaceState(null,'',window.location.pathname+window.location.search);
   }
   function openProject(projectId=activeProjectId){
-    setActiveId(null);setActiveProjectId(projectId);setSurface('project');
+    setActiveId(null);setActiveSourceId(null);setActiveProjectId(projectId);setSurface('project');
     window.history.replaceState(null,'','#project-'+encodeURIComponent(projectId));
+  }
+  function openSource(source:ProjectSource){
+    setActiveId(null);setActiveProjectId(source.projectId);setActiveSourceId(source.id);setSurface('source');
+    window.history.replaceState(null,'','#source-'+encodeURIComponent(source.id));
+  }
+  async function addProjectSource(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();
+    if(!sourceFile||!activeProject){setSourceError('Choose a PDF file.');return;}
+    setAddingSource(true);setSourceError('');
+    let doc:PDFDocumentProxy|undefined;
+    const sourceId=crypto.randomUUID(),pdfKey='source:'+sourceId;
+    try{
+      const task=getDocument({data:new Uint8Array(await sourceFile.arrayBuffer())});doc=await task.promise;
+      const pageCount=doc.numPages;
+      await importSessionPdf(pdfKey,sourceFile);
+      const source:ProjectSource={id:sourceId,projectId:activeProject.id,name:sourceFile.name.replace(/\.pdf$/i,''),role:sourceRole,pageCount,pdfKey,createdAt:new Date().toISOString()};
+      if(!persistSources([...sources,source])){await deleteSavedPdf(pdfKey).catch(()=>undefined);return;}
+      setSourceFile(null);setSourceRole('primary');setAddSourceOpen(false);openSource(source);
+    }catch(error){setSourceError(error instanceof Error?error.message:'Could not add this PDF source.');}
+    finally{if(doc)await doc.destroy();setAddingSource(false);}
   }
   function createProject(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
@@ -116,7 +158,7 @@ export function App() {
     setProjectForm(initialProjectForm);setProjectFormError('');setNewProjectOpen(false);openProject(project.id);
   }
   async function choosePdf(file:File|null){
-    setNewPdf(file);setPdfPageCount(null);setFormError('');
+    setSelectedSourceId('');setNewPdf(file);setPdfPageCount(null);setFormError('');
     if(!file)return;
     setCheckingPdf(true);
     let doc:PDFDocumentProxy|undefined;
@@ -128,13 +170,19 @@ export function App() {
     }catch{setFormError('Could not read the PDF page count. Please choose a valid PDF.');}
     finally{if(doc)await doc.destroy();setCheckingPdf(false);}
   }
+  function chooseProjectSource(sourceId:string){
+    setSelectedSourceId(sourceId);setNewPdf(null);setFormError('');
+    const source=sources.find(item=>item.id===sourceId);
+    setPdfPageCount(source?.pageCount??null);
+    if(source)setForm(prev=>({...prev,firstPage:'1',lastPage:String(source.pageCount)}));
+  }
   async function createSession(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const first = Number(form.firstPage), last = Number(form.lastPage);
     if (!form.title.trim() || !form.target.trim() || !Number.isInteger(first) || first < 1 || !Number.isInteger(last) || last < first) {
       setFormError('Enter a title, reading target, and a valid printed-page range.'); return;
     }
-    if (!newPdf) { setFormError('Choose the PDF for this reading session.'); return; }
+    if (!newPdf && !selectedSourceId) { setFormError('Choose a project source or upload a PDF.'); return; }
     if(checkingPdf||!pdfPageCount){setFormError('The PDF page count must be verified before creating the session.');return;}
     if(first>pdfPageCount||last>pdfPageCount){setFormError('Select a page range between 1 and '+pdfPageCount+'.');return;}
     setCreating(true);
@@ -146,12 +194,22 @@ export function App() {
       createdAt: now, updatedAt: now, status: 'not-started', currentPrintedPage: first
     };
     try {
-      await importSessionPdf(session.id, newPdf);
+      if(selectedSourceId){
+        const source=sources.find(item=>item.id===selectedSourceId);
+        if(!source)throw new Error('The selected project source is unavailable.');
+        await copySavedPdf(source.pdfKey,session.id);
+      }else if(newPdf){
+        await importSessionPdf(session.id,newPdf);
+        const sourceId=crypto.randomUUID(),pdfKey='source:'+sourceId;
+        await importSessionPdf(pdfKey,newPdf);
+        const source:ProjectSource={id:sourceId,projectId:session.projectId,name:newPdf.name.replace(/\.pdf$/i,''),role:'primary',pageCount:pdfPageCount!,pdfKey,createdAt:now};
+        if(!persistSources([...sources,source]))await deleteSavedPdf(pdfKey).catch(()=>undefined);
+      }
       if (!persist([...sessions, session])) {
         await deleteSavedPdf(session.id).catch(() => undefined);
         return;
       }
-      setNewSessionOpen(false); setForm(initialForm); setNewPdf(null); setFormError(''); navigate(session.id);
+      setNewSessionOpen(false); setForm(initialForm); setNewPdf(null); setSelectedSourceId(''); setPdfPageCount(null); setFormError(''); navigate(session.id);
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Could not import this PDF. Try another file.');
     } finally {
@@ -189,7 +247,7 @@ export function App() {
   }, [deleteId, newSessionOpen, creating]);
 
   return <div className="app-shell">
-    {!active && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button></header>}
+    {!active && surface!=='source' && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button></header>}
     {storageError && <div role="alert" className="alert">{storageError}</div>}
     {!active ? (surface==='library' ? <main className="library-page">
       <div className="library-heading-row">
@@ -249,10 +307,31 @@ export function App() {
             </div>)}
         </section>
         <div className="side-stack"><section className="card"><div className="eyebrow">Your progress</div><div className="stat">{projectSessions.length}</div><p>sessions created in this browser</p><div className="progress"><div style={{width: Math.min(projectSessions.length * 12, 100) + '%'}} /></div><div className="muted">Local activity · not book completion</div></section>
-          <section className="card"><h2>Project sources</h2><div className="source"><strong>{activeProject?.title??'Project source'}</strong><span className="muted">{activeProject?.author ? activeProject.author+' · ' : ''}PDF sources are attached through reading sessions</span></div></section></div>
+          <section className="card project-sources-card">
+            <div className="project-sources-heading"><h2>Project sources</h2><button className="secondary" onClick={()=>setAddSourceOpen(true)}>+ Add source</button></div>
+            {!projectSources.length?<p className="muted">Upload the main PDFs for this project. They can be reused across reading sessions.</p>:
+              projectSources.map(source=><div className="project-source-row" key={source.id}>
+                <button className="project-source-open" onClick={()=>openSource(source)}><strong>{source.name}</strong><span className="muted">{source.role.replace('-',' ')} · {source.pageCount} pages</span></button>
+                <button className="secondary" onClick={()=>openSource(source)}>Open PDF →</button>
+              </div>)}
+          </section></div>
       </div>
       <p className="notice">Project data, PDFs, reading plans, branches, and conversations are currently stored in this browser. Cloud sync is not yet connected.</p>
-    </main>) : <section className="workspace">
+    </main> : surface==='source'&&activeSource ? <section className="workspace source-workspace">
+      <div className="reader-header">
+        <div className="reader-header-identity">
+          <button className="reader-back" onClick={()=>openProject(activeSource.projectId)} aria-label="Back to project" title="Back to project">←</button>
+          <span className="reader-session-name" title={activeSource.name}>{activeSource.name}</span>
+        </div>
+        <div id="source-reader-toolbar-slot" className="reader-toolbar-slot" aria-label="PDF controls"></div>
+        <div className="reader-header-right"><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button></div>
+      </div>
+      <div className="work-grid agent-collapsed source-reader-grid">
+        <article className="work-panel pdf-panel">
+          <PdfReader key={activeSource.pdfKey} sessionId={activeSource.pdfKey} initialPage={1} onPageChange={()=>undefined} toolbarHostId="source-reader-toolbar-slot" readOnly />
+        </article>
+      </div>
+    </section>) : <section className="workspace">
       <div className="reader-header">
         <div className="reader-header-identity">
           <button className="reader-back" onClick={openProject} aria-label="Back to Hatcher dashboard" title="Back to dashboard">←</button>
@@ -284,19 +363,31 @@ export function App() {
         <div className="dialog-actions"><button className="secondary" type="button" onClick={()=>{setNewProjectOpen(false);setProjectFormError('');}}>Cancel</button><button className="primary" type="submit">Create project</button></div>
       </form>
     </div>}
+    {addSourceOpen && <div className="overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget&&!addingSource){setAddSourceOpen(false);setSourceError('');}}}>
+      <form className="dialog add-source-dialog" onSubmit={addProjectSource} role="dialog" aria-modal="true" aria-labelledby="add-source-title">
+        <h2 id="add-source-title">Add project source</h2>
+        <p className="muted">Add a PDF that can be opened directly and reused in future reading sessions.</p>
+        <label>PDF document<input type="file" accept=".pdf,application/pdf" required disabled={addingSource} onChange={e=>setSourceFile(e.target.files?.[0]??null)}/></label>
+        <label>Source role<select value={sourceRole} onChange={e=>setSourceRole(e.target.value as ProjectSource['role'])}><option value="primary">Primary text</option><option value="lecture-notes">Lecture notes</option><option value="reference">Reference</option><option value="paper">Paper</option><option value="supplement">Supplement</option></select></label>
+        {sourceError&&<p role="alert" className="form-error">{sourceError}</p>}
+        <div className="dialog-actions"><button type="button" className="secondary" disabled={addingSource} onClick={()=>{setAddSourceOpen(false);setSourceError('');setSourceFile(null);}}>Cancel</button><button type="submit" className="primary" disabled={addingSource||!sourceFile}>{addingSource?'Adding PDF…':'Add source'}</button></div>
+      </form>
+    </div>}
     {newSessionOpen && <div className="overlay" role="presentation" onMouseDown={e => {if (e.target === e.currentTarget && !creating) setNewSessionOpen(false);}}>
       <form className="dialog new-session-dialog" onSubmit={createSession} role="dialog" aria-modal="true" aria-labelledby="new-session-title"><h2 id="new-session-title">New reading session</h2>
-        <label className="new-session-pdf-field">PDF document <span className="required-marker">Required</span>
-          <input type="file" accept=".pdf,application/pdf" required disabled={creating}
-            onChange={e => void choosePdf(e.target.files?.[0] ?? null)}/>
-          <small>{newPdf ? newPdf.name+(pdfPageCount?' · '+pdfPageCount+' PDF pages':checkingPdf?' · Checking pages…':'') : 'Choose the document you want to read. The file stays in this browser.'}</small>
-        </label>
+        <div className="new-session-pdf-field">
+          <div className="session-source-choice-title">PDF source <span className="required-marker">Required</span></div>
+          {projectSources.length>0&&<label>Choose from Project Sources<select value={selectedSourceId} disabled={creating} onChange={e=>chooseProjectSource(e.target.value)}><option value="">Select a project source…</option>{projectSources.map(source=><option key={source.id} value={source.id}>{source.name} · {source.pageCount} pages</option>)}</select></label>}
+          <div className="session-source-divider"><span>or upload a new PDF</span></div>
+          <input type="file" accept=".pdf,application/pdf" disabled={creating} onChange={e => void choosePdf(e.target.files?.[0] ?? null)}/>
+          <small>{newPdf ? newPdf.name+(pdfPageCount?' · '+pdfPageCount+' PDF pages':checkingPdf?' · Checking pages…':'') : selectedSourceId ? 'Using the selected Project Source.' : 'Uploaded PDFs are automatically added to Project Sources.'}</small>
+        </div>
         <label>Session title<input autoFocus required maxLength={120} placeholder="e.g. Homotopy equivalence" value={form.title} onChange={e => setForm({...form,title:e.target.value})}/></label>
         <label>Section or reading target<input required placeholder="e.g. Chapter 3, §3.1" value={form.target} onChange={e => setForm({...form,target:e.target.value})}/></label>
         <div className="form-row"><label>First PDF page<input type="number" min="1" max={pdfPageCount??undefined} required value={form.firstPage} onChange={e => setForm({...form,firstPage:e.target.value})}/></label><label>Last PDF page<input type="number" min={form.firstPage||"1"} max={pdfPageCount??undefined} required value={form.lastPage} onChange={e => setForm({...form,lastPage:e.target.value})}/></label></div>
         <label>Session duration<select value={form.durationMinutes} onChange={e => setForm({...form,durationMinutes:e.target.value})}><option value="30">30 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option><option value="120">120 minutes</option></select></label>
         {formError && <p role="alert" className="form-error">{formError}</p>}
-        <div className="dialog-actions"><button className="secondary" type="button" disabled={creating} onClick={() => {setNewSessionOpen(false);setFormError('');setNewPdf(null);}}>Cancel</button><button className="primary" type="submit" disabled={creating||checkingPdf||!pdfPageCount}>{creating ? 'Importing PDF…' : 'Create session'}</button></div>
+        <div className="dialog-actions"><button className="secondary" type="button" disabled={creating} onClick={() => {setNewSessionOpen(false);setFormError('');setNewPdf(null);setSelectedSourceId('');setPdfPageCount(null);}}>Cancel</button><button className="primary" type="submit" disabled={creating||checkingPdf||!pdfPageCount}>{creating ? 'Importing PDF…' : 'Create session'}</button></div>
       </form></div>}
     {pendingDelete && <div className="overlay" onMouseDown={e => {if (e.target === e.currentTarget) setDeleteId(null);}}><div className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title"><h2 id="delete-title">Delete session?</h2><p>Delete “{pendingDelete.title}” from this browser? This cannot be undone.</p><div className="dialog-actions"><button className="secondary" onClick={() => setDeleteId(null)}>Cancel</button><button className="danger" onClick={deleteSession}>Delete session</button></div></div></div>}
   </div>;
