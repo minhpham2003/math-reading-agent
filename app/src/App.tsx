@@ -51,6 +51,9 @@ export function App() {
   });
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [newProjectOpen,setNewProjectOpen]=useState(false);
+  const [editProjectOpen,setEditProjectOpen]=useState(false);
+  const [editProjectForm,setEditProjectForm]=useState<ProjectFormState>(initialProjectForm);
+  const [editProjectError,setEditProjectError]=useState('');
   const [addSourceOpen,setAddSourceOpen]=useState(false);
   const [sourceRole,setSourceRole]=useState<ProjectSource['role']>('primary');
   const [sourceFile,setSourceFile]=useState<File|null>(null);
@@ -153,6 +156,22 @@ export function App() {
       setSourceFile(null);setSourceRole('primary');setAddSourceOpen(false);openSource(source);
     }catch(error){setSourceError(error instanceof Error?error.message:'Could not add this PDF source.');}
     finally{if(doc)await doc.destroy();setAddingSource(false);}
+  }
+  function startEditingProject(){
+    if(!activeProject)return;
+    setEditProjectForm({title:activeProject.title,author:activeProject.author??'',description:activeProject.description==='Your reading workspace'?'':activeProject.description??''});
+    setEditProjectError('');
+    setEditProjectOpen(true);
+  }
+  function updateProject(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();
+    if(!activeProject)return;
+    const title=editProjectForm.title.trim();
+    if(!title){setEditProjectError('Enter a project title.');return;}
+    if(persistProjects(projects.map(p=>p.id===activeProject.id?{...p,title,author:editProjectForm.author.trim()||undefined,description:editProjectForm.description.trim()||undefined,updatedAt:new Date().toISOString()}:p))){
+      setEditProjectOpen(false);
+      setEditProjectError('');
+    }
   }
   function createProject(event:FormEvent<HTMLFormElement>){
     event.preventDefault();
@@ -343,7 +362,7 @@ export function App() {
       </div>
     </section> : <main className="dashboard">
       <button className="breadcrumb breadcrumb-button" onClick={openLibrary}>← Library</button>
-      <div className="hero"><div><div className="eyebrow">Book project</div><h1>{activeProject?.title??'Untitled project'} <a className="project-build-id" href={'https://github.com/minhpham2003/math-reading-agent/commit/'+buildCommit} target="_blank" rel="noreferrer" title={'Open GitHub commit '+buildCommit}>GitHub {buildCommit}</a></h1><p>{activeProject?.author ? activeProject.author+' · ' : ''}{activeProject?.description||'Your reading workspace'}</p></div>
+      <div className="hero"><div><div className="eyebrow">Book project</div><h1>{activeProject?.title??'Untitled project'} <a className="project-build-id" href={'https://github.com/minhpham2003/math-reading-agent/commit/'+buildCommit} target="_blank" rel="noreferrer" title={'Open GitHub commit '+buildCommit}>GitHub {buildCommit}</a></h1>{(activeProject?.author || (activeProject?.description && activeProject.description!=='Your reading workspace'))&&<p>{[activeProject?.author,activeProject?.description==='Your reading workspace'?'':activeProject?.description].filter(Boolean).join(' · ')}</p>}<button type="button" className="project-edit-button" onClick={startEditingProject}>Edit project</button></div>
         <div className="project-hero-actions"><button className="primary" onClick={() => setNewSessionOpen(true)}>+ New Session</button></div>
       </div>
       <div className="dashboard-grid">
@@ -387,6 +406,16 @@ export function App() {
         </article>
       </div>
     </section>}
+    {editProjectOpen && <div className="overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setEditProjectOpen(false);}}>
+      <form className="dialog new-project-dialog" role="dialog" aria-modal="true" aria-labelledby="edit-project-title" onSubmit={updateProject}>
+        <h2 id="edit-project-title">Edit project</h2>
+        <label>Project title<input autoFocus required maxLength={140} value={editProjectForm.title} onChange={e=>setEditProjectForm({...editProjectForm,title:e.target.value})}/></label>
+        <label>Author or course <span className="muted">(optional)</span><input maxLength={140} value={editProjectForm.author} onChange={e=>setEditProjectForm({...editProjectForm,author:e.target.value})}/></label>
+        <label>Description <span className="muted">(optional)</span><textarea rows={3} maxLength={300} value={editProjectForm.description} onChange={e=>setEditProjectForm({...editProjectForm,description:e.target.value})}/></label>
+        {editProjectError&&<p role="alert" className="form-error">{editProjectError}</p>}
+        <div className="dialog-actions"><button type="button" className="secondary" onClick={()=>setEditProjectOpen(false)}>Cancel</button><button type="submit" className="primary">Save changes</button></div>
+      </form>
+    </div>}
     {newProjectOpen && <div className="overlay" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget){setNewProjectOpen(false);setProjectFormError('');}}}>
       <form className="dialog new-project-dialog" onSubmit={createProject} role="dialog" aria-modal="true" aria-labelledby="new-project-title">
         <h2 id="new-project-title">New project</h2>
