@@ -1285,3 +1285,16 @@ html[data-theme="dark"] .library-status.is-active{background:#173d2c;color:#8fe0
  .library-project-footer .library-project-actions{width:100%}
  .library-project-footer .library-project-actions .secondary{width:100%}
 }
+
+
+/* Library and project landing controls use regular-weight labels. */
+.library-page .primary,
+.library-page .secondary,
+.dashboard .primary,
+.dashboard .secondary,
+.library-project-actions .primary,
+.library-project-actions .secondary,
+.project-hero-actions .primary,
+.project-hero-actions .secondary{
+  font-weight:400;
+}
