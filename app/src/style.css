@@ -1259,3 +1259,12 @@ html[data-theme="light"] .library-status{background:#c2cfdd;color:#2a4661}
  .library-project-actions .primary,.library-project-actions .secondary{flex:1}
  .hero{align-items:flex-start;flex-direction:column}
 }
+
+
+/* Multi-project creation and library refinements. */
+.library-projects{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.new-project-dialog textarea{display:block;margin-top:7px;width:100%;padding:13px 12px;border:1px solid #40536c;border-radius:8px;background:#18263a;color:#eef4ff;font:inherit;font-size:18px;line-height:1.4;resize:vertical}
+.new-project-dialog textarea::placeholder{color:#7f91a8}
+html[data-theme="light"] .new-project-dialog textarea{background:#eef2f6;color:#1f3348;border-color:#aebfd0}
+html[data-theme="light"] .new-project-dialog textarea::placeholder{color:#72879b}
+@media(max-width:580px){.new-project-dialog textarea{font-size:16px}}
