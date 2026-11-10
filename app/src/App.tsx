@@ -67,6 +67,7 @@ export function App() {
   const [formError, setFormError] = useState('');
   const [storageError, setStorageError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteProjectId,setDeleteProjectId] = useState<string|null>(null);
   const [pageJump, setPageJump] = useState<{page:number;seq:number;quote?:string}|null>(null);
   const [agentOpen, setAgentOpen] = useState(true);
   const [theme,setTheme]=useState<'dark'|'light'>(()=>localStorage.getItem('higher-math:theme')==='light'?'light':'dark');
@@ -99,6 +100,7 @@ export function App() {
 
   const active = sessions.find(s => s.id === activeId) ?? null;
   const pendingDelete = sessions.find(s => s.id === deleteId);
+  const pendingProjectDelete = projects.find(p=>p.id===deleteProjectId);
   const activeProject=projects.find(project=>project.id===activeProjectId)??projects[0];
   const activeSource=sources.find(source=>source.id===activeSourceId)??null;
   const projectSources=sources.filter(source=>source.projectId===activeProject?.id);
@@ -220,6 +222,38 @@ export function App() {
       setCreating(false);
     }
   }
+  function deleteProject() {
+    if (!deleteProjectId) return;
+    const removedSessions=sessions.filter(s=>s.projectId===deleteProjectId);
+    const removedSources=sources.filter(s=>s.projectId===deleteProjectId);
+    const remainingProjects=projects.filter(p=>p.id!==deleteProjectId);
+    const remainingSessions=sessions.filter(s=>s.projectId!==deleteProjectId);
+    const remainingSources=sources.filter(s=>s.projectId!==deleteProjectId);
+    try {
+      // Persist all three collections before updating the UI.
+      saveProjects(remainingProjects);
+      saveSessions(remainingSessions);
+      saveProjectSources(remainingSources);
+      setProjects(remainingProjects);
+      setSessions(remainingSessions);
+      setSources(remainingSources);
+      setDeleteProjectId(null);
+      setStorageError('');
+      if (activeProjectId===deleteProjectId) setActiveProjectId(remainingProjects[0]?.id??'');
+      openLibrary();
+      for (const session of removedSessions) {
+        localStorage.removeItem('higher-math:citations:'+session.id);
+        localStorage.removeItem('higher-math:reading-flow:v1:'+session.id);
+        localStorage.removeItem('higher-math:reading-notes:v1:'+session.id);
+        localStorage.removeItem('higher-math:tangents:v2:'+session.id);
+        void deleteSavedPdf(session.id).catch(()=>undefined);
+        void deletePdfIndex(session.id).catch(()=>undefined);
+      }
+      for (const source of removedSources) void deleteSavedPdf(source.pdfKey).catch(()=>undefined);
+    } catch {
+      setStorageError('Could not fully delete the project. Please refresh to check saved data.');
+    }
+  }
   function deleteSession() {
     if (!deleteId) return;
     if (persist(sessions.filter(s => s.id !== deleteId))) {
@@ -243,19 +277,20 @@ export function App() {
   useEffect(() => {
     function handleKeys(event: KeyboardEvent) {
       if (event.key !== 'Escape') return;
-      if (deleteId) setDeleteId(null);
+      if (deleteProjectId) setDeleteProjectId(null);
+      else if (deleteId) setDeleteId(null);
       else if (newSessionOpen && !creating) { setNewSessionOpen(false); setFormError(''); }
     }
     document.addEventListener('keydown', handleKeys);
     return () => document.removeEventListener('keydown', handleKeys);
-  }, [deleteId, newSessionOpen, creating]);
+  }, [deleteId, deleteProjectId, newSessionOpen, creating]);
 
   return <div className="app-shell">
     {!active && surface!=='source' && <header className="topbar"><span className="brand">∑ &nbsp; Mathematical Reading Agent</span><button className="reader-theme-toggle" type="button" onClick={()=>setTheme(v=>v==='dark'?'light':'dark')} aria-label={theme==='dark'?'Switch to light mode':'Switch to dark mode'} title={theme==='dark'?'Light mode':'Dark mode'}>{theme==='dark'?'☀':'☾'}</button></header>}
     {storageError && <div role="alert" className="alert">{storageError}</div>}
     {!active ? (surface==='library' ? <main className="library-page">
       <div className="library-heading-row">
-        <div><div className="eyebrow">Your workspace</div><h1>Library</h1><p>Continue a mathematical project or return to where you left off.</p></div>
+        <div><div className="eyebrow">Your workspace</div><h1>Library</h1></div>
         <button className="primary" onClick={()=>setNewProjectOpen(true)}>+ New Project</button>
       </div>
       <section className="library-projects">
@@ -264,12 +299,12 @@ export function App() {
           const recent=[...related].sort((a,b)=>new Date(b.updatedAt).getTime()-new Date(a.updatedAt).getTime())[0];
           const activeCount=related.filter(s=>s.status==='in-progress'||s.status==='paused').length;
           const completedCount=related.filter(s=>s.status==='complete').length;
-          return <article className="library-project-card" key={project.id}>
+          return <article className="library-project-card" key={project.id} role="button" tabIndex={0} aria-label={"Open project "+project.title} onClick={()=>openProject(project.id)} onKeyDown={e=>{if(e.target===e.currentTarget&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openProject(project.id);}}}>
             <div className="library-project-top">
               <div><div className="eyebrow">Book project</div><h2>{project.title}</h2>{project.author&&<p>{project.author}</p>}</div>
-              <span className={"library-status "+(project.status==='active'?'is-active':'')}>{project.status}</span>
+              <div className="library-project-controls"><span className={"library-status "+(project.status==='active'?'is-active':'')}>{project.status}</span><button type="button" className="library-project-delete" title={"Delete "+project.title} aria-label={"Delete project "+project.title} onClick={e=>{e.stopPropagation();setDeleteProjectId(project.id);}}>Delete</button></div>
             </div>
-            <button type="button" className="library-current library-current-link" onClick={()=>recent&&navigate(recent.id)} disabled={!recent}>
+            <button type="button" className="library-current library-current-link" onClick={e=>{e.stopPropagation();if(recent)navigate(recent.id);}} disabled={!recent}>
               <div className="library-current-copy">
                 <span className="library-current-label">Current reading</span>
                 {recent ? <>
@@ -287,9 +322,6 @@ export function App() {
                 <span><strong>{related.length}</strong> sessions</span>
                 <span><strong>{activeCount}</strong> active</span>
                 <span><strong>{completedCount}</strong> completed</span>
-              </div>
-              <div className="library-project-actions">
-                <button className="secondary" onClick={()=>openProject(project.id)}>Open project →</button>
               </div>
             </div>
           </article>;
@@ -392,6 +424,7 @@ export function App() {
         {formError && <p role="alert" className="form-error">{formError}</p>}
         <div className="dialog-actions"><button className="secondary" type="button" disabled={creating} onClick={() => {setNewSessionOpen(false);setFormError('');setNewPdf(null);setSelectedSourceId('');setPdfPageCount(null);}}>Cancel</button><button className="primary" type="submit" disabled={creating||checkingPdf||!pdfPageCount}>{creating ? 'Importing PDF…' : 'Create session'}</button></div>
       </form></div>}
+    {pendingProjectDelete && <div className="overlay" onMouseDown={e=>{if(e.target===e.currentTarget)setDeleteProjectId(null);}}><div className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-project-title"><h2 id="delete-project-title">Delete project?</h2><p>Delete “{pendingProjectDelete.title}” and its {sessions.filter(s=>s.projectId===pendingProjectDelete.id).length} reading sessions and {sources.filter(s=>s.projectId===pendingProjectDelete.id).length} sources from this browser? This cannot be undone.</p><div className="dialog-actions"><button className="secondary" onClick={()=>setDeleteProjectId(null)}>Cancel</button><button className="danger" onClick={deleteProject}>Delete project</button></div></div></div>}
     {pendingDelete && <div className="overlay" onMouseDown={e => {if (e.target === e.currentTarget) setDeleteId(null);}}><div className="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title"><h2 id="delete-title">Delete session?</h2><p>Delete “{pendingDelete.title}” from this browser? This cannot be undone.</p><div className="dialog-actions"><button className="secondary" onClick={() => setDeleteId(null)}>Cancel</button><button className="danger" onClick={deleteSession}>Delete session</button></div></div></div>}
   </div>;
 }
